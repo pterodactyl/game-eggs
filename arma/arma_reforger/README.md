@@ -71,35 +71,38 @@ ___
 
 ### How to Add Mods
 
-Currently, adding mods to your server is tricky because there is very little documentation and it is difficult to find mod IDs. Hopefully this will change in the future, but following these steps will get it to work:
+- Reference the official [Arma Reforger Wiki](https://community.bistudio.com/wiki/Arma_Reforger:Server_Config#mods) for steps to utilize the in-game Mod Manager or Workshop pages to locate and/or extract Mod IDs as properly formatted JSON. If copying the provided JSON, it can be inserted between the brackets `[]` on the line: `"mods": []`
 
-1. Open up a client copy of Arma Reforger and subscribe/download any mods you want to add to the server (at this time, I do not know of a way to find mod IDs without requiring use of the game).
-2. Once done, close the game and navigate to this folder on your computer: `My Documents\My Games\ArmaReforger\addons\`
-3. Aimlessly open each folder to find which mods you want to add and open each of their `ServerData.json` files in a text editor.
-4. Then, on your server panel, open the `config.json` file for editing.
-5. Find `"mods": []` and replace it with the following:
+- Alternatively, to perform tasks manually, follow these steps:
 
-```json
-"mods": [
-	{
-		"modId": "591AF5BDA9F7CE8B",
-		"name": "Capture & Hold",
-		"version": "1.0.0"
-	},
-	{
-		"modId": "9A51598BACFBFDE7",
-		"name": "Explosive Goats Beta",
-		"version": "0.5.42"
-	}
-]
-```
+	1. Choose your desired mods using one of the following methods:
+	
+ 		- Browse the official [Arma Reforger Workshop](https://reforger.armaplatform.com/workshop), click on a mod, and locate its unique ID from the table.
+		- If you have downloaded mods via Workshop, navigate to `My Documents\My Games\ArmaReforger\addons\`, open each folder to find which mods you want to add and open each of their `ServerData.json` files in a text editor to locate the values you need.
+	2. Then, on your server panel, open the `config.json` file for editing.
+	3. Find `"mods": []` and replace it with the following:
+	
+	```json
+	"mods": [
+		{
+			"modId": "591AF5BDA9F7CE8B",
+			"name": "Capture & Hold",
+			"version": "1.0.0"
+		},
+		{
+			"modId": "9A51598BACFBFDE7",
+			"name": "Explosive Goats Beta",
+			"version": "0.5.42"
+		}
+	]
+	```
+	
+	4. Change `modId` to equal the `id` value from the Workshop or `ServerData.json` file you found.
+	5. Change `name` to equal the `name` value from the Workshop or `ServerData.json` file you found.
+	6. Change `version` to equal the `version` value from the Workshop or `ServerData.json` file you found.
+	7. Repeat for each mod you want to add by copy/pasting the `{}` sections like shown above. Make sure each `{}` section has a `,` after it, **except** for the last item.
 
-6. Change `modId` to equal the `id` value found at the top of the `ServerData.json` file you found.
-7. Change `name` to equal the `name` value found at the **top** of the `ServerData.json` file you found.
-8. Change `version` to equal the `version` value found at the top of the `ServerData.json` file you found.
-9. Repeat for each mod you want to add by copy/pasting the `{}` sections like shown above. Make sure each `{}` section has a `,` after it, **except** for the last item.
-
-The server will automatically download and run the mods you specify on startup. For mods that add scenarios, you can find the Scenario IDs listed as `gameId` in the `ServerData.json` file. Lastly, if a mod updates, you will likely have to change the `version` value to match it's new version. You may also have to delete the mod folder in the `addons/` directory to have it re-download (reports on this have been mixed).
+The server will automatically download and run the mods you specify on startup. For mods that add scenarios, you can also find the Scenario ID on its Workshop listing or listed as `gameId` in the `ServerData.json` file. Lastly, if a mod updates, you will likely have to change the `version` value to match its new version. You may also have to delete the mod folder in the `addons/` directory to have it re-download (reports on this have been mixed).
 
 ___
 
@@ -113,7 +116,7 @@ Due to a current behavior of the Panel, `SERVER_IP` will not return the node's p
 
 1. As a panel admin, find and open the egg within your Nests tab.
 2. On the first tab "Configuration", find the "Configuration Files" box under the "Process Management" section.
-3. Carefully (as to not touch anything else), find `{{server.build.default.ip}}` and replace it with your node's public IP address. If done correctly, the line should now look something like this:
+3. Carefully (as to not touch anything else), find `{{server.build.default.ip}}` and replace it with your node's public IP address (IPv4 only) [ShowMyIP.com](https://www.showmyip.com/). If done correctly, the line should now look something like this:
 
 ```json
 "publicAddress": "123.4.56.789",
