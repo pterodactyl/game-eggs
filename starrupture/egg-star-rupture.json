@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-01-07T19:07:29+00:00",
+    "exported_at": "2026-01-08T16:04:55+00:00",
     "name": "StarRupture",
     "author": "talk@savagecore.uk",
     "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters.",
@@ -13,7 +13,7 @@
         "ghcr.io\/ptero-eggs\/steamcmd:proton": "ghcr.io\/ptero-eggs\/steamcmd:proton"
     },
     "file_denylist": [],
-    "startup": "cd \/home\/container\/StarRupture\/Binaries\/Win64; proton run .\/StarRuptureServerEOS-Win64-Shipping.exe -Log -Port=${SERVER_PORT} & SR_PID=$!; tail -c0 -F \/home\/container\/StarRupture\/Saved\/Logs\/StarRupture.log --pid=$SR_PID",
+    "startup": "cd \/home\/container\/StarRupture\/Binaries\/Win64; proton run .\/StarRuptureServerEOS-Win64-Shipping.exe -Log -Port=${SERVER_PORT} & SR_PID=$!; tail -c0 -F \/home\/container\/StarRupture\/Saved\/Logs\/StarRupture.log --pid=$SR_PID | grep -v -E \"LogCore: Warning|LogUObjectBase: Error\"",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"LogCommonSession: OnUpdateSessionComplete(SessionName: GameSession, bWasSuccessful: true\"\r\n}",
