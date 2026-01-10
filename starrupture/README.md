@@ -53,6 +53,14 @@ This method uses the Pterodactyl Panel and `DSSettings.txt` for all configuratio
 
 > ⚠️ **Warning:** Anyone who knows your IP and port can join your server if no password is set!
 
+#### Automatic Setup (Recommended)
+
+If you set the `[SERVER] Admin Password` and `[SERVER] Player Password` variables in the **Startup** tab before installing the server, the password files will be created automatically during installation.
+
+#### Manual Setup
+
+If you didn't set passwords during installation, you can create them manually:
+
 1. Visit https://starrupture-utilities.com/passwords
 2. Generate both an Admin password and a Player password
 3. Create `Password.json` in the root of the container (`/home/container/`) and paste the generated content
