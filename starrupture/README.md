@@ -79,11 +79,14 @@ The egg manages `DSSettings.txt` automatically via the Panel's **Startup** tab.
 2. Go to the **Startup** tab in the Panel
 3. Set `[SERVER] Load saved Game` to `false`
 4. Set `[SERVER] Start new Savegame` to `true`
-5. Start the server and join to verify it works
+5. Start the server and wait for it to finish loading
+    1. Join using the server's IP and port
+    2. Press ESC to open the menu and then select Save. This will instruct the server to save the file to `StarRupture\Saved\SaveGames\SessionName`
+    3. Disconnect from the server
 6. Stop the server
 7. Set `[SERVER] Load saved Game` to `true`
 8. Set `[SERVER] Start new Savegame` to `false`
-9. Start the server - it will now load your new world on each restart
+9. Start the server - your world will now load automatically on every startup
 
 ### Loading an Existing Save
 
