@@ -17,6 +17,8 @@ StarRupture is a first-person open-world base-building game with advanced combat
 |------|---------|
 | Game | 7777    |
 
+> ⚠️ **Important:** You must connect to the server using the **WAN IP** and port, even if running locally.
+
 ## System Requirements
 
 | Type        | Memory | Storage |
@@ -88,7 +90,7 @@ The egg manages `DSSettings.txt` automatically via the Panel's **Startup** tab.
 3. Set `[SERVER] Load saved Game` to `false`
 4. Set `[SERVER] Start new Savegame` to `true`
 5. Start the server and wait for it to finish loading
-    1. Join using the server's IP and port
+    1. Join using the server's WAN IP and port
     2. Press ESC to open the menu and then select Save. This will instruct the server to save the file to `StarRupture\Saved\SaveGames\SessionName`
     3. Disconnect from the server
 6. Stop the server
