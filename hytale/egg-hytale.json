@@ -74,7 +74,7 @@
             "name": "Use Ahead-of-Time Cache",
             "description": "Hytale provides a pre-trained AOT Java cache which can significantly improve boot times.",
             "env_variable": "USE_AOT_CACHE",
-            "default_value": "0",
+            "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
@@ -88,6 +88,26 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Install Source Query plugin",
+            "description": "Installs the Soruce Query plugin, so that your server responds to Source Query A2S requests (player count, server name, etc.)",
+            "env_variable": "INSTALL_SOURCEQUERY_PLUGIN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Source Query Port",
+            "description": "The port that the Source Query plugin will use to respond to A2S requests. This should be different from the main server port. Defaults to the game port + 1.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer|between:1,65535",
             "field_type": "text"
         }
     ]
