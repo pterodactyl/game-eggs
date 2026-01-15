@@ -4,13 +4,13 @@
         "version": "PTDL_v2",
         "update_url": "https:\/\/pterodactyleggs.com\/egg\/6735ff6b4924a4e9bbcc1f23\/download"
     },
-    "exported_at": "2025-04-18T22:29:49+01:00",
+    "exported_at": "2025-12-30T12:11:58+03:00",
     "name": "Spacestation 14",
     "author": "josdekurk@gmail.com",
     "description": "Space Station 14 tells the story of an ordinary shift on a space station gone wrong. Immerse yourself into your role, tinker with detailed systems, and survive the chaos in this round-based multiplayer role playing game.",
     "features": null,
     "docker_images": {
-        "Dotnet 9": "ghcr.io\/ptero-eggs\/yolks:dotnet_9"
+        "Dotnet 10": "ghcr.io\/ptero-eggs\/yolks:dotnet_10"
     },
     "file_denylist": [],
     "startup": ".\/Robust.Server",
