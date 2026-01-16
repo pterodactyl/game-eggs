@@ -1,0 +1,222 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-01-04T01:34:02+02:00",
+    "name": "TMF + XASECO",
+    "author": "pterodactyl@noreply.get-good.net",
+    "description": "Combined server running TMF and XASECO. Still requires a separate MySQL\/MariaDB database instance.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/rallymen007\/yolks:php_5.6": "ghcr.io\/rallymen007\/yolks:php_5.6"
+    },
+    "file_denylist": [],
+    "startup": ".\/TrackmaniaServer \/dedicated_cfg=dedicated_cfg.txt \/game_settings={{GAME_CONFIG}} > tmserver.log 2>&1 && cd xaseco && php aseco.php TMF <\/dev\/null",
+    "config": {
+        "files": "{\r\n    \"GameData\/Config\/dedicated_cfg.txt\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"dedicated.masterserver_account.login\": \"{{server.build.env.MASTERSERVER_LOGIN}}\",\r\n            \"dedicated.masterserver_account.password\": \"{{server.build.env.MASTERSERVER_PASSWORD}}\",\r\n            \"dedicated.masterserver_account.validation_key\": \"{{server.build.env.MASTERSERVER_KEY}}\",\r\n            \"dedicated.server_options.name\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"dedicated.server_options.comment\": \"{{server.build.env.SERVER_COMMENT}}\",\r\n            \"dedicated.server_options.password\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"dedicated.system_config.server_port\": \"{{server.build.default.port}}\",\r\n            \"dedicated.system_config.server_p2p_port\": \"{{server.build.env.SERVER_P2P_PORT}}\",\r\n            \"dedicated.system_config.packmask\": \"{{server.build.env.PACKMASK}}\"\r\n        }\r\n    },\r\n    \"xaseco\/localdatabase.xml\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"settings.mysql_server\": \"{{server.build.env.SQL_HOST}}\",\r\n            \"settings.mysql_login\": \"{{server.build.env.SQL_USER}}\",\r\n            \"settings.mysql_password\": \"{{server.build.env.SQL_PW}}\"\r\n        }\r\n    },\r\n    \"xaseco\/config.xml\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"settings.tmserver.ip\": \"{{server.build.env.TM_SRV_IP}}\",\r\n            \"settings.tmserver.port\": \"{{server.build.env.TM_SRV_PORT}}\",\r\n            \"settings.tmserver.password\": \"{{server.build.env.TM_SA_PW}}\",\r\n            \"settings.aseco.masteradmins.tmlogin\": \"{{server.build.env.X_MA_LOGIN}}\"\r\n        }\r\n    },\r\n    \"xaseco\/dedimania.xml\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"dedimania.masterserver_account.login\": \"{{server.build.env.DM_LOGIN}}\",\r\n            \"dedimania.masterserver_account.password\": \"{{server.build.env.DM_PW}}\",\r\n            \"dedimania.masterserver_account.nation\": \"{{server.build.env.DM_NATION}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"XASECO v1.16 running\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "cd \/mnt\/server || exit 1\r\n\r\necho \"Downloading Trackmania Server.\"\r\nwget http:\/\/files2.trackmaniaforever.com\/TrackmaniaServer_2011-02-21.zip -O TrackmaniaServer.zip\r\n\r\necho \"Extracting Trackmania Server.\"\r\nunzip -o TrackmaniaServer.zip\r\nrm TrackmaniaServer.zip\r\n\r\necho \"Setting file permissions.\"\r\nchmod 755 TrackmaniaServer\r\n\r\necho \"Downloading XASECO\"\r\nwget https:\/\/github.com\/mpoc\/docker-xaseco\/raw\/refs\/heads\/main\/xaseco_116.zip -O xaseco.zip\r\nunzip -o xaseco.zip\r\nrm xaseco.zip\r\n\r\necho \"Setting up XASECO\"\r\ncp xaseco\/newinstall\/*.xml xaseco\/\r\ncp xaseco\/newinstall\/*.php xaseco\/includes\/",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Master Server Login",
+            "description": "Master Server username. Obtained from https:\/\/players.trackmaniaforever.com\/main.php?view=dedicated-servers",
+            "env_variable": "MASTERSERVER_LOGIN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Master Server Password",
+            "description": "Password for the servers master server account. Obtained from Obtained from https:\/\/players.trackmaniaforever.com\/main.php?view=dedicated-servers",
+            "env_variable": "MASTERSERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Config FIle",
+            "description": "Location of the game config file",
+            "env_variable": "GAME_CONFIG",
+            "default_value": "MatchSettings\\Nations\\NationsWhite.txt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Comment",
+            "description": "",
+            "env_variable": "SERVER_COMMENT",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:1024",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Master Server Validation Key",
+            "description": "The 3 last characters of your player key, required for servers to run United features.",
+            "env_variable": "MASTERSERVER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:3",
+            "field_type": "text"
+        },
+        {
+            "name": "Packmask",
+            "description": "Packmask, set it to nations or stadium for Nations, united for full United, or any subset (original, sunrise, desert, island, coast, etc)",
+            "env_variable": "PACKMASK",
+            "default_value": "stadium",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server P2P Port",
+            "description": "Server port for P2P transfers (like skins)",
+            "env_variable": "SERVER_P2P_PORT",
+            "default_value": "3450",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+        },
+        {
+            "name": "Trackmania SuperAdmin Password",
+            "description": "SuperAdmin password from the TM server, heavily recommended to not use defaults and update the password in trackmania's config file.",
+            "env_variable": "TM_SA_PW",
+            "default_value": "SuperAdmin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "SQL User",
+            "description": "SQL user for DB",
+            "env_variable": "SQL_USER",
+            "default_value": "tmf",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "SQL Password",
+            "description": "Password for the SQL server",
+            "env_variable": "SQL_PW",
+            "default_value": "password",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "XASECO MasterAdmin Login",
+            "description": "The TM login of your main server admin, must be set properly for XASECO to start",
+            "env_variable": "X_MA_LOGIN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "SQL server",
+            "description": "Address of SQL server host",
+            "env_variable": "SQL_HOST",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Trackmania Server IP",
+            "description": "Trackmania Server IP, generally you should set it to 127.0.0.1",
+            "env_variable": "TM_SRV_IP",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Trackmania Server Port",
+            "description": "",
+            "env_variable": "TM_SRV_PORT",
+            "default_value": "5000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+        },
+        {
+            "name": "Dedimania MasterServer Account",
+            "description": "The server login for Dedimania, this can be copied from the Trackmania server config",
+            "env_variable": "DM_LOGIN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+        },
+        {
+            "name": "Dedimania MasterServer password",
+            "description": "Password for your login used by Dedimania, can also be copied from Trackmania servet config",
+            "env_variable": "DM_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+        },
+        {
+            "name": "Dedimania Nation",
+            "description": "3 letter IOC code for the nation you want your server to appear in",
+            "env_variable": "DM_NATION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:3",
+            "field_type": "text"
+        }
+    ]
+}
