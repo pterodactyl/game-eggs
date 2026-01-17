@@ -114,7 +114,7 @@ The egg manages `DSSettings.txt` automatically via the Panel's **Startup** tab.
 
 This method uses the game's built-in **Manage Server** feature. Only use this method if you have issues with DSSettings.txt and are aware of the vulnerabilities mentioned above.
 
-> ⚠️ **Important:** For this method to work, `DSSettings.txt` must **not** exist. Shutdown the server and delete it if present. You'll be stuck on a loading spinner when trying to connect if it exists. You must also remove `-RCWebControlDisable` from the startup parameters in the **Startup** tab.
+> ⚠️ **Important:** For this method to work, `DSSettings.txt` must **not** exist. Shutdown the server and delete it if present. You'll be stuck on a loading spinner when trying to connect if it exists. You must also remove `-RCWebControlDisable` and `-RCWebInterfaceDisable` from the startup parameters in the **Startup** tab.
 
 ### Password Setup
 
