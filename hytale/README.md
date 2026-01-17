@@ -4,8 +4,10 @@ Set out on an adventure built for both creation and play. Hytale blends the free
 
 ## Server Ports
 
-Hytale uses one UDP port with the QUIC transport protocol.
+Hytale uses a single **UDP** port for gameplay, operating over the **QUIC** transport protocol.
+An optional **query port** is available for server discovery using the **Source Query Protocol**.
 
-| Port    | default       |
-|---------|---------------|
-| Game    |  5520	      |
+| Port Type        | Default |
+| ---------------- | ------- |
+| Game             | 5520    |
+| Query (Optional) | 5521    |

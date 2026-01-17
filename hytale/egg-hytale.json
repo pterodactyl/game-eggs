@@ -15,7 +15,7 @@
         "ghcr.io/pterodactyl/games:hytale": "ghcr.io/pterodactyl/games:hytale"
     },
     "file_denylist": [],
-    "startup": "java -XX:AOTCache=Server\/HytaleServer.aot -Xms128M $( ((SERVER_MEMORY)) && printf %s \"-Xmx${SERVER_MEMORY}M\" ) -jar Server\/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) --assets Assets.zip --bind 0.0.0.0:${SERVER_PORT}",
+    "startup": "java $( ((USE_AOT_CACHE)) && printf %s \"-XX:AOTCache=Server\/HytaleServer.aot\" ) -Xms128M $( ((SERVER_MEMORY)) && printf %s \"-Xmx${SERVER_MEMORY}M\" ) -jar Server\/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) $( ((HYTALE_ACCEPT_EARLY_PLUGINS)) && printf %s \"--accept-early-plugins\" ) $( ((DISABLE_SENTRY)) && printf %s \"--disable-sentry\" ) --auth-mode ${HYTALE_AUTH_MODE} --assets Assets.zip --bind 0.0.0.0:${SERVER_PORT}",
     "config": {
         "files": "{}",
         "startup": "{\n    \"done\": \"Hytale Server Booted\"\n}",
@@ -74,7 +74,7 @@
             "name": "Use Ahead-of-Time Cache",
             "description": "Hytale provides a pre-trained AOT Java cache which can significantly improve boot times.",
             "env_variable": "USE_AOT_CACHE",
-            "default_value": "0",
+            "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
@@ -88,6 +88,26 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Install Source Query plugin",
+            "description": "Installs the Soruce Query plugin, so that your server responds to Source Query A2S requests (player count, server name, etc.)",
+            "env_variable": "INSTALL_SOURCEQUERY_PLUGIN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Source Query Port",
+            "description": "The port that the Source Query plugin will use to respond to A2S requests. This should be different from the main server port. Defaults to the game port + 1.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer|between:1,65535",
             "field_type": "text"
         }
     ]
