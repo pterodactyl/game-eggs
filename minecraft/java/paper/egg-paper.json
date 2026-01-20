@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-01-05T18:02:31+00:00",
+    "exported_at": "2026-01-17T21:09:57-05:00",
     "name": "Paper",
     "author": "parker@pterodactyl.io",
     "description": "High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.",
@@ -19,7 +19,8 @@
         "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
         "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
         "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
-        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22"
+        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
+        "Java 25": "ghcr.io\/pterodactyl\/yolks:java_25"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
