@@ -4,6 +4,24 @@ StarRupture is a first-person open-world base-building game with advanced combat
 
 > ⚠️ **Note:** Server software is still in an experimental phase. Expect some issues in future updates!
 
+---
+
+## Running with Proton or WINE
+
+You can run the StarRupture server using either **Proton** or **WINE**. When installing, select the appropriate image under **Docker Configuration**:
+
+- For Proton: choose `steamcmd:proton` (default)
+- For WINE: choose `yolks:wine_latest`
+
+After installation, you must set the `[SERVER] Launcher` variable in the **Startup** tab:
+
+- For Proton: use `proton run` (default)
+- For WINE: use `wine`
+
+**Note:** The default configuration uses Proton (`proton run`) and the Proton egg. WINE is provided as an alternative for users who may have compatibility issues with Proton.
+
+---
+
 ## Contributors
 
 | Name       | GitHub Profile                          |

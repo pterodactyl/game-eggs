@@ -4,16 +4,17 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-01-17T02:55:26+00:00",
+    "exported_at": "2026-01-20T20:25:47+00:00",
     "name": "StarRupture",
     "author": "talk@savagecore.uk",
     "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters.",
     "features": [],
     "docker_images": {
-        "ghcr.io\/ptero-eggs\/steamcmd:proton": "ghcr.io\/ptero-eggs\/steamcmd:proton"
+        "ghcr.io\/ptero-eggs\/steamcmd:proton": "ghcr.io\/ptero-eggs\/steamcmd:proton",
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
     },
     "file_denylist": [],
-    "startup": "proton run \/home\/container\/StarRupture\/Binaries\/Win64\/StarRuptureServerEOS-Win64-Shipping.exe -Log -Port=${SERVER_PORT} -RCWebControlDisable -RCWebInterfaceDisable & SR_PID=$!; tail -c0 -F \/home\/container\/StarRupture\/Saved\/Logs\/StarRupture.log --pid=$SR_PID | grep -v -E \"LogCore: Warning|LogUObjectBase: Error\"",
+    "startup": "${LAUNCHER} \/home\/container\/StarRupture\/Binaries\/Win64\/StarRuptureServerEOS-Win64-Shipping.exe -Log -Port=${SERVER_PORT} -RCWebControlDisable -RCWebInterfaceDisable & SR_PID=$!; tail -c0 -F \/home\/container\/StarRupture\/Saved\/Logs\/StarRupture.log --pid=$SR_PID | grep -v -E \"LogCore: Warning|LogUObjectBase: Error\"",
     "config": {
         "files": "{\r\n    \"DSSettings.txt\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"SessionName\": \"{{server.build.env.SESSION_NAME}}\",\r\n            \"SaveGameInterval\": \"{{server.build.env.SAVE_INTERVAL}}\",\r\n            \"StartNewGame\": \"{{server.build.env.START_NEW}}\",\r\n            \"LoadSavedGame\": \"{{server.build.env.LOAD_SAVE}}\",\r\n            \"SaveGameName\": \"{{server.build.env.SAVEGAME_NAME}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"LogCommonSession: OnUpdateSessionComplete(SessionName: GameSession, bWasSuccessful: true\"\r\n}",
@@ -126,6 +127,66 @@
             "user_viewable": false,
             "user_editable": false,
             "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Launcher",
+            "description": "The command used to launch the server executable. Use 'proton run' for Proton or 'wine' for WINE.",
+            "env_variable": "LAUNCHER",
+            "default_value": "proton run",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:\"proton run\",wine",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINEPREFIX",
+            "description": "Wine root directory for the container",
+            "env_variable": "WINEPREFIX",
+            "default_value": "\/home\/container\/.wine",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINEDLLOVERRIDES",
+            "description": "",
+            "env_variable": "WINEDLLOVERRIDES",
+            "default_value": "mscoree,mshtml=",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
             "field_type": "text"
         }
     ]
