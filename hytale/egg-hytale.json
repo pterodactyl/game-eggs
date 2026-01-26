@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-01-13T05:17:28+00:00",
+    "exported_at": "2026-01-26T22:01:27+01:00",
     "name": "Hytale",
     "author": "hello@pterodactyl.io",
     "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox with the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a variety of creatures, then shape it block by block.",
@@ -12,20 +12,20 @@
         "java_version"
     ],
     "docker_images": {
-        "ghcr.io/pterodactyl/games:hytale": "ghcr.io/pterodactyl/games:hytale"
+        "ghcr.io\/pterodactyl\/games:hytale": "ghcr.io\/pterodactyl\/games:hytale"
     },
     "file_denylist": [],
-    "startup": "java $( ((USE_AOT_CACHE)) && printf %s \"-XX:AOTCache=Server\/HytaleServer.aot\" ) -Xms128M $( ((SERVER_MEMORY)) && printf %s \"-Xmx${SERVER_MEMORY}M\" ) -jar Server\/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) $( ((HYTALE_ACCEPT_EARLY_PLUGINS)) && printf %s \"--accept-early-plugins\" ) $( ((DISABLE_SENTRY)) && printf %s \"--disable-sentry\" ) --auth-mode ${HYTALE_AUTH_MODE} --assets Assets.zip --bind 0.0.0.0:${SERVER_PORT}",
+    "startup": "java $( ((USE_AOT_CACHE)) && printf %s \"-XX:AOTCache=Server\/HytaleServer.aot\" ) -Xms128M $( ((SERVER_MEMORY)) && printf %s \"-Xmx${SERVER_MEMORY}M\" ) -jar Server\/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) $( ((HYTALE_ACCEPT_EARLY_PLUGINS)) && printf %s \"--accept-early-plugins\" ) $( ((DISABLE_SENTRY)) && printf %s \"--disable-sentry\" ) --auth-mode ${HYTALE_AUTH_MODE} --assets Assets.zip $( ((HYTALE_BACKUPS)) && printf %s \"--backup --backup-dir .\/backups --backup-frequency \" $( ((BACKUP_FREQUENCY)) && printf %s \"${BACKUP_FREQUENCY}\" )) --bind 0.0.0.0:${SERVER_PORT}",
     "config": {
         "files": "{}",
-        "startup": "{\n    \"done\": \"Hytale Server Booted\"\n}",
+        "startup": "{\r\n    \"done\": \"Hytale Server Booted\"\r\n}",
         "logs": "{}",
-        "stop": "/stop"
+        "stop": "\/stop"
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/ash\nset -e\n\nmkdir -p \/mnt\/server\ncd \/mnt\/server\n\necho -e \"Downloading Hytale Downloader CLI...\"\n\nDOWNLOAD_URL=\"https:\/\/downloader.hytale.com\/hytale-downloader.zip\"\n\nrm -f hytale-downloader.zip\ncurl -o hytale-downloader.zip $DOWNLOAD_URL\nunzip -o hytale-downloader.zip -d hytale-downloader\nmv hytale-downloader\/hytale-downloader-linux-amd64 hytale-downloader\/hytale-downloader-linux\nchmod 555 hytale-downloader\/hytale-downloader-linux\n\necho -e \"Verifying Hytale Downloader installation...\"\n\necho -e \"Hytale Downloader version: `.\/hytale-downloader\/hytale-downloader-linux -version`\"\n\necho -e \"Hytale Downloader installed successfully.\"",
-            "container": "ghcr.io/pterodactyl/installers:alpine",
+            "script": "#!\/bin\/ash\r\nset -e\r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\nif [ \"$(uname -m)\" = \"aarch64\" ]; then\r\n  if ! command -v qemu-x86_64 &> \/dev\/null; then\r\n    apk update && apk add qemu-x86_64\r\n  fi\r\nfi\r\n\r\necho -e \"Downloading Hytale Downloader CLI...\"\r\n\r\nDOWNLOAD_URL=\"https:\/\/downloader.hytale.com\/hytale-downloader.zip\"\r\n\r\nrm -f hytale-downloader.zip\r\ncurl -o hytale-downloader.zip $DOWNLOAD_URL\r\nunzip -o hytale-downloader.zip -d hytale-downloader\r\nmv hytale-downloader\/hytale-downloader-linux-amd64 hytale-downloader\/hytale-downloader-linux\r\nchmod 555 hytale-downloader\/hytale-downloader-linux\r\n\r\necho -e \"Verifying Hytale Downloader installation...\"\r\n\r\nif [ \"$(uname -m)\" = \"aarch64\" ]; then\r\n  echo -e \"Hytale Downloader version: `qemu-x86_64 .\/hytale-downloader\/hytale-downloader-linux -version`\"\r\nelse\r\n  echo -e \"Hytale Downloader version: `.\/hytale-downloader\/hytale-downloader-linux -version`\"\r\nfi\r\n\r\necho -e \"Hytale Downloader installed successfully.\"",
+            "container": "ghcr.io\/pterodactyl\/installers:alpine",
             "entrypoint": "ash"
         }
     },
@@ -108,6 +108,36 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Maximum render distance",
+            "description": "The maximum render distance to allow the Hytale server to run at.",
+            "env_variable": "HYTALE_MAX_VIEW_RADIUS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Universe backups",
+            "description": "Hytale server attempts to make backups of the universe folder, where the world resides in.\r\nSupported since 2026.01.24-6e2d4fc36",
+            "env_variable": "HYTALE_BACKUPS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Universe backups frequency",
+            "description": "Frequency as to how often to create backups (in minutes).\r\nWill not be used if HYTALE_BACKUPS is not enabled.",
+            "env_variable": "BACKUP_FREQUENCY",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer|min:1",
             "field_type": "text"
         }
     ]
