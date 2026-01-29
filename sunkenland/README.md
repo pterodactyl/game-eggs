@@ -2,9 +2,9 @@
 
 
 ### Author & Contributers
-| Name        | Github Profile  | Buy me a Coffee |
-| ------------- |-------------|-------------|
-|   Brainshead  | https://github.com/brainshead
+| Name        | Github Profile  |
+| ------------- |-------------|
+|   Brainshead  | https://github.com/brainshead |
 
 ## [Documentation](https://www.sunkenlandgame.com/post/dedicated-server-user-manual)
 > [!NOTE]
@@ -39,7 +39,13 @@ Put in Steam ID line by line of users to be admins or to be banned.
 | Game Ownership | *Server can start without it* | *Game is needed for creating custom maps* |
 | RAM | 4 GB+ | 8 GB+ |
 | Storage | 5 GB+ | 20 GB+ |
+| CPU | 2 cores with high single-core performance (≥3.0 GHz, modern architecture)| 4 cores with high IPC and boost clocks (≥3.5–4.5 GHz; modern architecture preferred) |
 
+> [!Important]
+>  Sunkenland Dedicated Server is built on Unity and is primarily single-threaded and wine also have overhead.  
+> CPU clock speed and IPC matter far more than total core count.  
+> The server simulation (world, physics, AI) runs largely on one primary thread  
+> Additional cores provide limited benefit   
 ## Server Ports
 
 Ports required to run the server in a table format.
