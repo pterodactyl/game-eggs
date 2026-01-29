@@ -1,0 +1,152 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-12-28T17:10:03+01:00",
+    "name": "Just Cause 3 Multiplayer",
+    "author": "brainshead@gmail.com",
+    "description": "Dedicated server for Just Cause 3 Multiplayer (JC3:MP)  Using the Just Cause\u2122 3: Multiplayer Mod.",
+    "features": null,
+    "docker_images": {
+        "Ubuntu": "ghcr.io\/ptero-eggs\/yolks:ubuntu"
+    },
+    "file_denylist": [],
+    "startup": ".\/Server --maxPlayers={{MAX_PLAYER}} --password={{SERVER_PASSWORD}} --maxTickRate={{TICK_RATE}}",
+    "config": {
+        "files": "{\r\n    \"config.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"bind\": \"0.0.0.0\",\r\n            \"port\": \"{{server.build.default.port}}\",\r\n            \"queryPort\": \"{{server.build.env.QUERY_PORT}}\",\r\n            \"httpPort\": \"{{server.build.env.HTTP_PORT}}\",\r\n            \"steamPort\": \"{{server.build.env.STEAM_PORT}}\",\r\n            \"description\": \"{{server.build.env.SERVER_DESCRIPTION}}\",\r\n            \"name\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"maxPlayers\": \"{{server.build.env.MAX_PLAYER}}\",\r\n            \"maxTickRate\": \"{{server.build.env.TICK_RATE}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Server successfully started up\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# SteamCMD Base Installation Script for JC3:MP\r\n\r\n## Set default Steam user if empty\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"Steam user not set. Using anonymous.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"Steam user: ${STEAM_USER}\"\r\nfi\r\n\r\n## Download and install SteamCMD\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd_linux.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd_linux.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\nexport HOME=\/mnt\/server\r\n\r\n## Install JC3:MP server\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update 619960 validate +quit\r\n\r\n# Make server executable\r\nchmod +x \/mnt\/server\/Server\r\n\r\n#Make config.json \r\necho \"Generating config.json ...\"\r\ncat > \/mnt\/server\/config.json <<EOF\r\n{\r\n    \"announce\": true,\r\n    \"description\": \"${SERVER_DESCRIPTION}\",\r\n    \"host\": \"0.0.0.0\",\r\n    \"httpPort\": ${HTTP_PORT},\r\n    \"logLevel\": 7,\r\n    \"logo\": \"\",\r\n    \"maxPlayers\": ${MAX_PLAYER},\r\n    \"maxTickRate\": 60,\r\n    \"name\": \"${SERVER_NAME}\",\r\n    \"password\": \"${SERVER_PASSWORD}\",\r\n    \"port\": ${SERVER_PORT},\r\n    \"queryPort\": ${QUERY_PORT},\r\n    \"requiredDLC\": [],\r\n    \"steamPort\": ${STEAM_PORT}\r\n}\r\nEOF\r\n\r\necho \"-----------------------------------------\"\r\necho \"JC3:MP installation completed\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Auth",
+            "description": "Steam account auth code, required if 2FA is enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update Server",
+            "description": "Automatically update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Max players",
+            "description": "Maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYER",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Set server password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Port",
+            "description": "port used for Steam communication (default is 4202)",
+            "env_variable": "STEAM_PORT",
+            "default_value": "4202",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Tickrate",
+            "description": "maximum FPS for the server (default is 60)",
+            "env_variable": "TICK_RATE",
+            "default_value": "60",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "QUERY PORT",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "HTTP_PORT",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Server name shown in the browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Description",
+            "description": "Server Description.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
+}

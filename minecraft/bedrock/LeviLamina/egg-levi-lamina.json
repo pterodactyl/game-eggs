@@ -1,0 +1,112 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-04-12T17:43:18+00:00",
+    "name": "LeviLamina",
+    "author": "eggs@purpleflaghosting.com",
+    "description": "LeviLamina is an unofficial mod loader designed to offer indispensable API support for Minecraft Bedrock Edition. It boasts a comprehensive API, an array of utility interfaces, a robust event system, and comprehensive support for basic interfaces. LeviLamina provides an expansive API, a powerful event system, and a wealth of encapsulated development infrastructure interfaces, forming a solid foundation for augmenting the Minecraft Bedrock Edition with additional gameplay features and functionalities. By leveraging mods, the process of extending Bedrock functionality becomes effortless, with a user-friendly development process and an adaptable approach.",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "cat | wine bedrock_server_mod.exe",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"server-portv6\": \"{{server.build.default.port}}\",\r\n            \"server-name\": \"{{server.build.env.SERVERNAME}}\",\r\n            \"gamemode\": \"{{server.build.env.GAMEMODE}}\",\r\n            \"difficulty\": \"{{server.build.env.DIFFICULTY}}\",\r\n            \"max-players\": \"{{server.build.env.MAXPLAYERS}}\",\r\n            \"level-name\": \"{{server.build.env.WORLDNAME}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"IPv4 supported\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "# Install required packages\r\napt update\r\napt install -y lsb-release xvfb\r\n\r\n# Install wine\r\nwget -O \/etc\/apt\/keyrings\/winehq-archive.key https:\/\/dl.winehq.org\/wine-builds\/winehq.key\r\nwget -NP \/etc\/apt\/sources.list.d\/ https:\/\/dl.winehq.org\/wine-builds\/debian\/dists\/$(lsb_release -sc 2>\/dev\/null)\/winehq-$(lsb_release -sc 2>\/dev\/null).sources\r\napt update\r\napt install --no-install-recommends winehq-stable cabextract -y\r\n\r\nexport WINEPREFIX=\/root\/.wine\r\nmkdir -p $WINEPREFIX\r\n\r\n\r\n# Setup display\r\nexport DISPLAY=:0\r\nXvfb :0 -screen 0 1024x768x16 &\r\n\r\n\r\n\r\n\r\n# Install Winetricks\r\necho \"Installing winetricks\"\r\nwget -q -O \/usr\/sbin\/winetricks https:\/\/raw.githubusercontent.com\/Winetricks\/winetricks\/master\/src\/winetricks && chmod +x \/usr\/sbin\/winetricks\r\n\r\necho \"Installing mono\"\r\nwget -q -O $WINEPREFIX\/mono.msi https:\/\/dl.winehq.org\/wine\/wine-mono\/9.1.0\/wine-mono-9.1.0-x86.msi\r\nWINEDLLOVERRIDES=\"mscoree,mshtml=\" wine msiexec \/i $WINEPREFIX\/mono.msi \/qn \/quiet \/norestart \/log $WINEPREFIX\/mono_install.log\r\n\r\n# Install dotnet\r\necho \"Installing dotnet\"\r\nwinetricks -q dotnet9           \r\n\r\n\r\n# Setup tty width so wine console output doesn't prematurely wrap\r\nstty columns 250\r\n\r\n\r\ncd \/mnt\/server || { echo \"Failed to change directory\"; exit 1; }\r\n\r\n# Install lip\r\nLIP_URL=\"https:\/\/github.com\/futrime\/lip\/releases\/latest\/download\/lip-cli-win-x64.zip\"\r\nwget $LIP_URL -O lip.zip\r\nunzip -o lip.zip lip.exe\r\nrm lip.zip\r\n\r\n\r\nif [ -n \"$VERSION\" ] && [ \"$VERSION\" != \"latest\" ]; then\r\n    wine64 lip.exe install github.com\/LiteLDev\/LeviLamina@\"$VERSION\"\r\nelse\r\n    wine64 lip.exe install github.com\/LiteLDev\/LeviLamina\r\nfi\r\n\r\n\r\necho \"Server Installed\"\r\n\r\nif [ -f \"lip-install.txt\" ]; then\r\n    for package in $(cat \"lip-install.txt\" ); do\r\n        echo \"Installing ${package} from lip-install.txt\"\r\n        wine64 lip.exe install \"${package}\"\r\n    done\r\n    echo \"Packages installed\"\r\nfi",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Version",
+            "description": "Version of LeviLamina to install in x.y.z format. Blank or \"latest\" will install the latest release.",
+            "env_variable": "VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Maximum Players",
+            "description": "Maximum players to join on the server",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "World Name",
+            "description": "World\/Level name to use for the server",
+            "env_variable": "WORLDNAME",
+            "default_value": "Bedrock level",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}

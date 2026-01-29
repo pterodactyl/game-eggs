@@ -1,0 +1,143 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-10-25T18:35:30+02:00",
+    "name": "IW4x",
+    "author": "brainshead@gmail.com",
+    "description": "IW4x is a community-driven modification for Call of Duty Modern Warfare 2 (2009) that enhances the game with improved security, dedicated servers, and extensive modding capabilities.",
+    "features": null,
+    "docker_images": {
+        "Wine Latest ": " ghcr.io\/ptero-eggs\/yolks:wine_latest",
+        "Wine Staging ": " ghcr.io\/ptero-eggs\/yolks:wine_staging"
+    },
+    "file_denylist": [],
+    "startup": ".\/iw4x-launcher --update && wine iw4x.exe -dedicated -stdout +set fs_game $MOD_DIR +set sv_lanonly 0 +set net_port $SERVER_PORT +exec server.cfg +set party_enable \"0\" +map_rotate",
+    "config": {
+        "files": "{\r\n    \"userraw\/server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_NAME}}\\\"\",\r\n            \"set g_password\": \"set g_password \\\"{{server.build.env.SERVER_PASSWORD}}\\\"\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Sending heartbeat to master\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login anonymous +app_update 1628350 validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login anonymous  +app_update 1493710 validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n\r\n\r\n#Install IW4X launcher\r\ncd \/mnt\/server\r\nwget https:\/\/github.com\/iw4x\/launcher\/releases\/latest\/download\/iw4x-launcher-x86_64-unknown-linux-gnu.tar.gz\r\ntar xfv iw4x-launcher-x86_64-unknown-linux-gnu.tar.gz\r\nrm  iw4x-launcher-x86_64-unknown-linux-gnu.tar.gz\r\nchmod +x iw4x-launcher\r\n\r\n#Getting server configs\r\ncd \/mnt\/server\r\nwget -q https:\/\/github.com\/iw4x\/iw4-server-configs\/archive\/main.zip\r\nunzip main.zip\r\nmv -f iw4-server-configs-main\/* . \r\nrmdir iw4-server-configs-main\r\nrm main.zip\r\nrm LICENSE\r\nrm README.md\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "10190",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Mod Dir",
+            "description": "Name of the Dir where the mod are.",
+            "env_variable": "MOD_DIR",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Sets the server hostname. \r\n SERVER  COLORS \r\n^1 = Red, ^2 = Green, ^3 = Yellow, ^4 = Blue, ^5 = Cyan, ^6 = Pink, ^7 = White, ^8 = Depends on the team colors playing.,  ^9 = Grey, ^0 = Black, ^: = Rainbow colors.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl IW4X",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password Protected Server. Leave blank if you want players to join or set password if you want to keep public out.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+        }
+    ]
+}

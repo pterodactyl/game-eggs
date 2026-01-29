@@ -1,0 +1,52 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-01-25T22:40:58+00:00",
+    "name": "ClassiCube(MGC)",
+    "author": "panel@qoutsy.33mail.com",
+    "description": "Debian based MCGalaxy Egg.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:mono_latest": "ghcr.io\/ptero-eggs\/yolks:mono_latest"
+    },
+    "file_denylist": [],
+    "startup": "mono MCGalaxyCLI.exe",
+    "config": {
+        "files": "{\r\n    \"\/properties\/server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-name\": \"{{server.build.env.HOSTNAME}}\",\r\n            \"motd\": \"{{server.build.env.MOTD}}\",\r\n            \"public\": \"true\",\r\n            \"port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Finished setting up server\"\r\n}",
+        "logs": "{}",
+        "stop": "\/shutdown 3 SIGTERM Server shutting down..."
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\nDOWNLOAD_URL=\"https:\/\/cdn.classicube.net\/client\/mcg\/release\/MCGalaxy.zip\"\r\n\r\necho -e \"Downloading MCGalaxy from ${DOWNLOAD_URL}...\"\r\ncurl -ssL -o mcgalaxy.zip \"${DOWNLOAD_URL}\"\r\n\r\nif [ $? -ne 0 ]; then\r\n    echo \"Failed to download the file. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\necho \"Extracting MCGalaxy...\"\r\nunzip -j mcgalaxy.zip\r\nrm mcgalaxy.zip\r\nchmod +x *.dll *.exe\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "Specify the server name",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "MOTD",
+            "description": "Specify the message of the day",
+            "env_variable": "MOTD",
+            "default_value": "Welcome to the server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        }
+    ]
+}

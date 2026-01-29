@@ -1,0 +1,154 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2024-05-15T11:48:44-07:00",
+    "name": "SourceCoop",
+    "author": "red_thirten@yahoo.com",
+    "description": "SourceCoop is a cooperative server-side-only mod for multi-player Source Engine games (like Black Mesa), that enables players to play together on single-player campaigns or maps. This Egg currently supports official Black Mesa maps only, but can be easily modified to support more (see Egg README for details).",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/srcds_run -console -game bms -secure -ip 0.0.0.0 -port {{SERVER_PORT}} +maxplayers {{MAX_PLAYERS}} +mp_teamplay 1 +exec server.cfg +map {{STARTING_MAP}} -strictportbind -norestart",
+    "config": {
+        "files": "{\r\n    \"bms\/cfg\/server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"hostname\": \"hostname \\\"{{server.build.env.SERVER_NAME}}\\\"\",\r\n            \"sv_password\": \"sv_password {{server.build.env.SERVER_PASSWORD}}\",\r\n            \"mp_friendlyfire\": \"mp_friendlyfire {{server.build.env.FRIENDLY_FIRE}}\",\r\n            \"mod_forcetouchdata\": \"mod_forcetouchdata {{server.build.env.MOD_FORCETOUCHDATA}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"gameserver Steam ID\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\n## File: SourceCoop Egg - egg-source-coop.json\r\n## Authors: David Wolfe (Red-Thirten)\r\n## Date: 2024\/05\/14\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n# Download and install SteamCMD\r\nexport HOME=\/mnt\/server\r\ncd \/tmp\r\nmkdir -p $HOME\/steamcmd $HOME\/steamapps\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C $HOME\/steamcmd\r\ncd $HOME\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\n\r\n# Install\/Verify game server using SteamCMD\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"[SteamCMD] Steam user is not set. Using anonymous user.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nfi\r\n.\/steamcmd.sh +force_install_dir $HOME +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p $HOME\/.steam\/sdk{32,64}\r\ncp -v linux32\/steamclient.so $HOME\/.steam\/sdk32\/steamclient.so\r\ncp -v linux64\/steamclient.so $HOME\/.steam\/sdk64\/steamclient.so\r\n\r\n## Install Metamod:Source\r\necho -e \"Installing Metamod:Source (1.11.0-git${MMS_BUILD})...\"\r\ncd \/tmp\r\ncurl -L https:\/\/mms.alliedmods.net\/mmsdrop\/1.11\/mmsource-1.11.0-git${MMS_BUILD}-linux.tar.gz -o mmsource-1.11.0-git${MMS_BUILD}-linux.tar.gz\r\ntar -xzvf mmsource-1.11.0-git${MMS_BUILD}-linux.tar.gz -C $HOME\/bms\r\n\r\n## Install SourceMod\r\necho -e \"Installing SourceMod (1.11.0-git${SM_BUILD})...\"\r\ncd \/tmp\r\ncurl -L https:\/\/sm.alliedmods.net\/smdrop\/1.11\/sourcemod-1.11.0-git${SM_BUILD}-linux.tar.gz -o sourcemod-1.11.0-git${SM_BUILD}-linux.tar.gz\r\ntar -xzvf sourcemod-1.11.0-git${SM_BUILD}-linux.tar.gz -C $HOME\/bms\r\n\r\n## Install SourceCoop\r\necho -e \"Installing SourceCoop (${VERSION}-${MATCH})...\"\r\ncd \/tmp\r\n# this is a simple script to use the github API for release versions.\r\n# this requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (match is to match the filename in some way)\r\n# this supports using oauth\/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n# if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\nGITHUB_PACKAGE=\"ampreeT\/SourceCoop\"\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n# get release info and download links\r\nLATEST_JSON=$(curl --silent \"https:\/\/api.github.com\/repos\/${GITHUB_PACKAGE}\/releases\/latest\")\r\nRELEASES=$(curl --silent \"https:\/\/api.github.com\/repos\/${GITHUB_PACKAGE}\/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\ncurl -L ${DOWNLOAD_URL} -o sourcecoop.zip\r\nunzip sourcecoop.zip -d $HOME\/bms\r\n\r\n## Create custom server.cfg\r\necho -e 'Creating custom \"server.cfg\" configuration file...'\r\ncd $HOME\/bms\/cfg\r\nrm -f server.cfg\r\ncat > server.cfg << EOF\r\n\/\/ Black Mesa server.cfg file\r\nhostname \"Black Mesa: Coop\"\r\nsv_password 0\r\n\r\n\/\/ provides lag-free noblock, shows teammates as friendly\r\n\/\/ and puts an arrow above their head (srccoop handles team switching)\r\nmp_teamplay 1\r\n\r\n\/\/ set 1 if you hate your friends\r\nmp_friendlyfire 0\r\n\r\n\/\/ setting 1 disables sprinting\r\nsv_always_run 0\r\n\r\n\/\/ disables map timelimit\r\nmp_timelimit 0\r\n\r\n\/\/ changes maps in empty server\r\nmp_mapcycle_empty_timeout_seconds 3600\r\n\r\n\/\/ Uncomment to loop back to the first map after finishing a campaign\r\n\/\/ Leave commented to use nextmap (mapcycle) instead\r\nsourcecoop_homemap \"bm_c0a0a\"\r\n\r\n\/\/ Enables pre-caching of map data (eg. models, etc.)\r\n\/\/ Disabling this may resolve crashing\/hanging on certain maps (namely bm_c4a4a), but may cause performance issues on other maps.\r\nmod_forcetouchdata 1\r\n\r\nrcon_password \"\" \/\/ disable rcon\r\nsv_tags \"custom, coop, sourcecoop\"\r\nsv_cheats 0\r\nsv_alltalk 1\r\nEOF\r\n\r\n## Check for successful installation.\r\ncd $HOME\/bms\/addons\r\nif [ -d \"metamod\" ] && [ -d \"sourcemod\" ] && [ -f \"sourcemod\/plugins\/srccoop.smx\" ]; then\r\n    echo -e \"\\nSourceCoop Dedicated Server successfully installed!\\n\"\r\nelse\r\n    echo -e \"\\n\\n[Error] One or more SourceCoop dependancies failed to install!\"\r\n    echo -e \"\\tTry checking your [Advanced] startup settings and\/or reinstalling the server again.\\n\"\r\n    exit 1\r\nfi",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "\/bin\/bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "Server name to show in server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Black Mesa: Coop",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on your game server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password required to join the server. Set to 0 to have no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Starting Map",
+            "description": "Map name for the server to load when it starts. Please use the following link for a guide on Black Mesa's map names: https:\/\/steamcommunity.com\/sharedfiles\/filedetails\/?id=1920599249",
+            "env_variable": "STARTING_MAP",
+            "default_value": "bm_c0a0a",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:bm_c0a0a,bm_c0a0b,bm_c0a0c,bm_c1a0a,bm_c1a0b,bm_c1a1a,bm_c1a1b,bm_c1a1c,bm_c1a1d,bm_c1a1e,bm_c1a2a,bm_c1a2b,bm_c1a2c,bm_c1a3a,bm_c1a3b,bm_c1a3c,bm_c1a4a,bm_c1a4b,bm_c1a4c,bm_c1a4d,bm_c1a4e,bm_c2a1a,bm_c2a1b,bm_c2a2a,bm_c2a2b,bm_c2a2c,bm_c2a2a,bm_c2a2a1,bm_c2a2a2,bm_c2a2b,bm_c2a2b1,bm_c2a2b2,bm_c2a2c,bm_c2a3a,bm_c2a3b,bm_c2a3c,bm_c2a4a,bm_c2a4b,bm_c2a4c,bm_c2a4e,bm_c2a4f,bm_c2a4g,bm_c2a4h,bm_c2a5a,bm_c2a5b,bm_c2a5c,bm_c2a5d,bm_c2a5e,bm_c2a5f,bm_c2a5g,bm_c2a5h,bm_c2a5i,bm_c3a1a,bm_c3a1b,bm_c3a2a,bm_c3a2b,bm_c3a2c,bm_c3a2d,bm_c3a2e,bm_c3a2f,bm_c3a2g,bm_c3a2h,bm_c3a2i,bm_c4a1a,bm_c4a1a1,bm_c4a1b,bm_c4a1b1,bm_c4a1c,bm_c4a1c1,bm_c4a2a,bm_c4a2b,bm_c4a2c,bm_c4a3a,bm_c4a3a1,bm_c4a3b,bm_c4a3b1,bm_c4a3b2,bm_c4a3c,bm_c4a3c1,bm_c4a3c2,bm_c4a3d,bm_c4a3d1,bm_c4a4a,bm_c5a1,credits",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable Friendly Fire",
+            "description": "(1 Enable | 0 Disable)",
+            "env_variable": "FRIENDLY_FIRE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] Enable `mod_forcetouchdata`",
+            "description": "Enables pre-caching of map data (eg. models, etc.). Disabling this may resolve crashing\/hanging on certain maps (namely `bm_c4a4a` - Nihilanth), but may cause performance issues on other maps.",
+            "env_variable": "MOD_FORCETOUCHDATA",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] Black Mesa Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "346680",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:346680",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] Update Black Mesa Dedicated Server",
+            "description": "Checks for any Black Mesa dedicated server updates on startup, and updates if necessary. This is off by default, because an update of the Black Mesa server will typically require an update of SourceCoop as well (which requires re-installing the server). An update of SourceCoop may also require an update of Metamod and SourceMod (see these settings for more info). Note: Clients that have updated may not be able to join an outdated server. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] SourceCoop Release Version Tag",
+            "description": "Which SourceCoop release (based on tag) to download from https:\/\/github.com\/ampreeT\/SourceCoop\/releases during install\/re-install. Note: If using `latest`, ensure you have specified the recommended Metamod and SourceMod builds (see these settings for more details).",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] SourceCoop Release Build Tag",
+            "description": "Which SourceCoop build (based on keyword in release asset) to download from https:\/\/github.com\/ampreeT\/SourceCoop\/releases during install\/re-install. Note: Only Black Mesa is currently supported.",
+            "env_variable": "MATCH",
+            "default_value": "bms",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] Metamod:Source Build",
+            "description": "Which Metamod:Source 1.11 build number to download during install\/re-install. May need to be changed if SourceCoop updates, but otherwise rarely needs to be changed. Refer to the following link for the latest recommended build: https:\/\/github.com\/ampreeT\/SourceCoop?tab=readme-ov-file#installation-guide",
+            "env_variable": "MMS_BUILD",
+            "default_value": "1148",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1131",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] SourceMod Build",
+            "description": "Which SourceMod 1.11 build number to download during install\/re-install. May need to be changed if SourceCoop updates, but otherwise rarely needs to be changed. Refer to the following link for the latest recommended build: https:\/\/github.com\/ampreeT\/SourceCoop?tab=readme-ov-file#installation-guide",
+            "env_variable": "SM_BUILD",
+            "default_value": "6960",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:6940",
+            "field_type": "text"
+        }
+    ]
+}

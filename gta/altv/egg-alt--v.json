@@ -1,0 +1,72 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2023-06-18T11:34:24+02:00",
+    "name": "alt:V",
+    "author": "parker@parkervcp.com",
+    "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+    "features": null,
+    "docker_images": {
+        "ALT:V": "ghcr.io\/ptero-eggs\/games:altv"
+    },
+    "file_denylist": [],
+    "startup": ".\/altv-server",
+    "config": {
+        "files": "{\r\n    \"server.toml\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"host:\": \"host: 0.0.0.0\",\r\n            \"port:\": \"port: {{server.build.default.port}}\",\r\n            \"password:\": \"password: {{server.build.env.PASSWORD}}\",\r\n            \"description:\": \"description: {{server.build.env.SERVER_DESC}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Server started\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n#\r\n\r\napt update\r\napt install -y wget jq curl \r\n\r\ncd \/mnt\/server\r\nNEWVERSION=$(curl -sSL https:\/\/cdn.alt-mp.com\/server\/${BUILD}\/x64_linux\/update.json | jq -r .version)\r\n\r\n\r\nif [ -f \"\/mnt\/server\/altv-server\" ]; then\r\n    CURRENTVERSION=$(cat update.json | jq -r .version)\r\n    if [[ \"${CURRENTVERSION}\" == \"${NEWVERSION}\" ]]; then\r\n        echo \"No update found\"\r\n        exit 0\r\n    fi\r\n    echo \"Backing up version ${CURRENTVERSION}\"\r\n    mkdir -p \/mnt\/server\/backup\/${CURRENTVERSION}\/data\r\n    mv altv-server \/mnt\/server\/backup\/${CURRENTVERSION}\/\r\n    cd \/mnt\/server\/data\r\n    mv clothes.bin \/mnt\/server\/backup\/${CURRENTVERSION}\/data\r\n    mv vehmodels.bin \/mnt\/server\/backup\/${CURRENTVERSION}\/data\r\n    mv vehmods.bin \/mnt\/server\/backup\/${CURRENTVERSION}\/data\r\n    mv pedmodels.bin \/mnt\/server\/backup\/${CURRENTVERSION}\/data\r\n    mv weaponmodels.bin \/mnt\/server\/backup\/${CURRENTVERSION}\/data\r\n    mv rpfdata.bin \/mnt\/server\/backup\/${CURRENTVERSION}\/data\r\n    rm \/mnt\/server\/update.json\r\nfi\r\n\r\n\r\ncd \/mnt\/server\r\n\r\n\r\necho \"Installing version: ${NEWVERSION}\"\r\nwget -q https:\/\/cdn.alt-mp.com\/server\/${BUILD}\/x64_linux\/altv-server\r\nwget -q https:\/\/cdn.alt-mp.com\/server\/${BUILD}\/x64_linux\/update.json\r\nchmod +x .\/altv-server\r\n\r\n\r\nmkdir -p \/mnt\/server\/data\r\ncd \/mnt\/server\/data\r\n\r\nwget -q https:\/\/cdn.alt-mp.com\/data\/${BUILD}\/data\/vehmodels.bin\r\nwget -q https:\/\/cdn.alt-mp.com\/data\/${BUILD}\/data\/vehmods.bin\r\nwget -q https:\/\/cdn.alt-mp.com\/data\/${BUILD}\/data\/clothes.bin\r\nwget -q https:\/\/cdn.alt-mp.com\/data\/${BUILD}\/data\/pedmodels.bin\r\nwget -q https:\/\/cdn.alt-mp.com\/data\/${BUILD}\/data\/weaponmodels.bin\r\nwget -q https:\/\/cdn.alt-mp.com\/data\/${BUILD}\/data\/rpfdata.bin\r\n\r\n\r\n\r\n\r\ncd \/mnt\/server\r\nif [ ! -f \"\/mnt\/server\/server.toml\" ]; then\r\ncat << EOF >> server.toml\r\nname = 'alt:V Server'\r\nhost = '0.0.0.0'\r\nport = ${SERVER_PORT}\r\nplayers = 128\r\npassword = '${PASSWORD}'\r\nannounce = false\r\ntoken = 'YOUR_TOKEN'\r\ngamemode = 'Freeroam'\r\nwebsite = 'example.com'\r\nlanguage = 'en'\r\ndescription = '${SERVER_DESC}'\r\nmodules = []\r\nresources = []\r\nEOF\r\nfi\r\n\r\nmkdir -p resources\/\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "ld lib path",
+            "description": "Needed to load modules correctly. Best left at default.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Release Branch",
+            "description": "The supported versions are release, rc, dev (default: release).\r\nIf you don't know what you are doing leave it on release",
+            "env_variable": "BUILD",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:release,rc,dev",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "The password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:6",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Description",
+            "description": "Description for the server.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        }
+    ]
+}

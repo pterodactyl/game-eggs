@@ -1,0 +1,112 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https:\/\/pterodactyleggs.com\/egg\/6735ff624924a4e9bbcbfd8b\/download"
+    },
+    "exported_at": "2024-12-27T15:40:57+00:00",
+    "name": "OpenRA",
+    "author": "patz.michael@gmail.com",
+    "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:mono_latest": "ghcr.io\/ptero-eggs\/yolks:mono_latest"
+    },
+    "file_denylist": [],
+    "startup": ".\/squashfs-root\/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Starting dedicated server for mod\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n#\r\n# Server Files: \/mnt\/server\r\n\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\nMATCH=OpenRA-Red-Alert-x86_64.AppImage\r\n\r\ncd \/mnt\/server\/ || { echo \"Failed to change into server directory\"; exit 1; }\r\n\r\n\r\n\r\n# If latest version requested, determine version\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    # Fetch latest version from OpenRA API\r\n    echo \"Finding latest version of OpenRA\"\r\n    VERSION=$(curl -s https:\/\/www.openra.net\/versions.json | jq -r .release)\r\nfi\r\n\r\necho \"Installing version ${VERSION} of ${MATCH}\"\r\n\r\n# Configure GitHub authentication\r\nif [ -n \"${GITHUB_USER}\" ] && [ -n \"${GITHUB_OAUTH_TOKEN}\" ]; then\r\n    echo \"Using GitHub authentication\"\r\n    # shellcheck disable=SC2139\r\n    alias curl=\"curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN}\"\r\nelse\r\n    echo \"Using anonymous API calls\"\r\nfi\r\n\r\n\r\n# Fetch release information from GitHub\r\nRELEASE_JSON=$(curl --silent \"https:\/\/api.github.com\/repos\/OpenRA\/OpenRA\/releases\/tags\/${VERSION}\") || { echo \"Failed to get release info for ${VERSION}\"; exit 1; }\r\n\r\n# Find download link for requested artifact\r\nDOWNLOAD_LINK=$(echo \"${RELEASE_JSON}\" | jq -r --arg MATCH $MATCH '.assets[] | select(.name == $MATCH).browser_download_url')\r\nif [ -z \"${DOWNLOAD_LINK}\" ] || [ \"${DOWNLOAD_LINK}\" == \"null\" ] ; then\r\n    echo \"Failed to find download url for \"\r\n    exit 1\r\nfi\r\n\r\nwget \"${DOWNLOAD_LINK}\" || { echo \"Failed to download ${DOWNLOAD_LINK}\"; exit 1; }\r\n\r\nchmod +x $MATCH\r\n.\/$MATCH --appimage-extract\r\nrm -f $MATCH\r\nrm -f .\/*.zsync\r\ncd squashfs-root && chmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "field_type": "text"
+        },
+        {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}

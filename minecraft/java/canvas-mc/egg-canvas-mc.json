@@ -1,0 +1,56 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-04-25T21:40:46+02:00",
+    "name": "CanvasMC",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Supercharge your Minecraft server with multithreaded dimension ticking, improved chunk generation, optimized entity handling and many more powerful optimizations.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 --add-modules=jdk.incubator.vector -jar server.jar --nogui",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\ncd \/mnt\/server\r\n\r\napt-get update\r\napt-get install -y curl jq openjdk-17-jdk\r\n\r\n# Clean old install\r\nrm -f server.jar\r\n\r\nMC_VERSION=\"$(echo \"$MC_VERSION\" | tr -d ' ')\"\r\nCANVAS_BUILD=\"$(echo \"$CANVAS_BUILD\" | tr -d ' ')\"\r\n\r\n# Get version\r\nif [[ \"$MC_VERSION\" == \"latest\" ]]; then\r\n    echo \"[CanvasMC] Fetching latest Minecraft version...\"\r\n    MC_VERSION=$(curl -sSL \"https:\/\/canvasmc.io\/api\/v2\/builds\" | jq -r '.[].minecraftVersion' | sort -Vr | head -n1)\r\nfi\r\n\r\nif [[ -z \"$MC_VERSION\" ]]; then\r\n    echo \"[CanvasMC] Failed to resolve a valid Minecraft version.\"\r\n    exit 1\r\nfi\r\n\r\necho \"[CanvasMC] Using Minecraft version: $MC_VERSION\"\r\n\r\n# Get build\r\nif [[ \"$CANVAS_BUILD\" == \"latest\" ]]; then\r\n    echo \"[CanvasMC] Fetching latest build for Minecraft $MC_VERSION...\"\r\n    BUILD_NUMBER=$(curl -sSL \"https:\/\/canvasmc.io\/api\/v2\/builds?minecraft_version=$MC_VERSION\" | jq -r '.[].buildNumber' | sort -n | tail -n1)\r\nelse\r\n    BUILD_NUMBER=\"$CANVAS_BUILD\"\r\nfi\r\n\r\nif [[ -z \"$BUILD_NUMBER\" ]]; then\r\n    echo \"[CanvasMC] Could not determine build number.\"\r\n    exit 1\r\nfi\r\n\r\necho \"[CanvasMC] Using build number: $BUILD_NUMBER\"\r\n\r\n# Build URL\r\nJAR_URL=\"https:\/\/jenkins.canvasmc.io\/job\/Canvas\/${BUILD_NUMBER}\/artifact\/canvas-server\/build\/libs\/canvas-build.${BUILD_NUMBER}.jar\"\r\n\r\necho \"[CanvasMC] Downloading server.jar from:\"\r\necho \"$JAR_URL\"\r\ncurl -sSL -o server.jar \"$JAR_URL\"\r\n\r\nif [[ ! -f server.jar ]]; then\r\n    echo \"[CanvasMC] Download failed or file not found.\"\r\n    exit 1\r\nfi\r\n\r\necho \"Installation complete.\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Canvas MC Version",
+            "description": "CanvasMC-Minecraft version (example: 1.21.4). Set to 'latest' to use latest version",
+            "env_variable": "MC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:15",
+            "field_type": "text"
+        },
+        {
+            "name": "CanvasMC Build Number",
+            "description": "Build number from https:\/\/jenkins.canvasmc.io\/job\/Canvas\/. Set to 'latest' to get the newest build",
+            "env_variable": "CANVAS_BUILD",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+        }
+    ]
+}

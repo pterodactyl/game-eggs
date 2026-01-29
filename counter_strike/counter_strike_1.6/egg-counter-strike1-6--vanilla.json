@@ -1,0 +1,132 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-02-04T15:41:42+01:00",
+    "name": "Counter Strike 1.6 - Vanilla",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Counter Strike 1.6 - Vanilla\r\n\r\nCounter-Strike: 1.6 is a multiplayer first-person shooter video game developed by Valve Corporation.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/games:source": "ghcr.io\/ptero-eggs\/games:source"
+    },
+    "file_denylist": [],
+    "startup": ".\/hlds_run -console {{SERVER_PORT}} -game cstrike -{{SRV_SECURE}} +port {{SERVER_PORT}} +sv_lan 0 +maxplayers {{SRV_SLOTS}} +map {{SRV_STARTMAP}} +sys_ticrate 1200 -pingboost {{SRV_PINGBOOST}} -norestart",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Connection to Steam servers successful\"\r\n}",
+        "logs": "{\r\n    \"custom\": true,\r\n    \"location\": \"logs\/latest.log\"\r\n}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n## download and install steamcmd\r\n# Ensure Steam credentials are set\r\nif [[ -z \"${STEAM_USER}\" ]] || [[ -z \"${STEAM_PASS}\" ]]; then\r\n    echo -e \"Steam user is not set.\"\r\n    echo -e \"Using anonymous login.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n# Needed for cs 1.6\r\n.\/steamcmd.sh +@sSteamCmdForcePlatformType windows +login anonymous +force_install_dir \/mnt\/server +app_update \"90 -beta Beta\" validate +quit ## looking at cs 1.6\r\n\r\n# Ensure listip.cfg exists\r\nif [[ ! -f \"\/mnt\/server\/cstrike\/listip.cfg\" ]]; then\r\n    echo \"\/\/ This file stores banned IPs\" > \/mnt\/server\/cstrike\/listip.cfg\r\n    echo \"Created listip.cfg...\"\r\nelse\r\n    echo \"listip.cfg already exists.\"\r\nfi\r\n\r\n# Ensure banned.cfg exists\r\nif [[ ! -f \"\/mnt\/server\/cstrike\/banned.cfg\" ]]; then\r\n    echo \"\/\/ This file stores banned Steam IDs and IPs\" > \/mnt\/server\/cstrike\/banned.cfg\r\n    echo \"Created banned.cfg...\"\r\nelse\r\n    echo \"banned.cfg already exists.\"\r\nfi\r\n\r\n# Ensure server.cfg hostname is up-to-date\r\nSERVER_CFG_PATH=\"\/mnt\/server\/cstrike\/server.cfg\"\r\nif [[ -f \"$SERVER_CFG_PATH\" ]]; then\r\n    sed -i \"s\/^hostname .*\/hostname \\\"${HOSTNAME}\\\"\/\" \"$SERVER_CFG_PATH\"\r\nfi\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation Complete!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Hostname",
+            "description": "This sets the hostname of the server. Example: \"My Custom CS 1.6 Server\"",
+            "env_variable": "HOSTNAME",
+            "default_value": "Counter-Strike 1.6 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players (Slots)",
+            "description": "",
+            "env_variable": "SRV_SLOTS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Startmap",
+            "description": "",
+            "env_variable": "SRV_STARTMAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Pingboost",
+            "description": "",
+            "env_variable": "SRV_PINGBOOST",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Username",
+            "description": "Username associated wanted to be used. Not needed.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam Password for account. Not needed.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Auth",
+            "description": "Steam authenticator code for the account. Not Needed.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Secure or Insecure",
+            "description": "",
+            "env_variable": "SRV_SECURE",
+            "default_value": "secure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}

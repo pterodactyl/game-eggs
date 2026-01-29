@@ -1,0 +1,25 @@
+{
+	"ApplicationVersion" : {
+		"__type" : "string",
+		"value" : "0.6.01"
+	},
+	"WorldSettingProfile" : {
+		"__type" : "WorldSettingProfile,Assembly-CSharp",
+		"value" : {
+			"worldDescription" : "",
+			"enemyDifficulty" : 0,
+			"enemyGarrisonDifficulty" : 1,
+			"enemyRaidDifficulty" : 1,
+			"survivalDifficulty" : 0,
+			"isDeathPenaltiesEnabled" : true,
+			"isFriendlyFireEnabled" : false,
+			"isResearchShared" : true,
+			"isMapShared" : true,
+			"isFlagShared" : true,
+			"isSpawnPointShared" : true,
+			"isUsingRandomSpawnPoints" : false,
+			"respawnTime" : 10,
+			"lootRespawnIntervalInDays" : 4
+		}
+	}
+}

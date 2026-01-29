@@ -1,0 +1,92 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-04-24T20:44:10+00:00",
+    "name": "Trackmania",
+    "author": "eggs@purpleflaghosting.com",
+    "description": "Trackmania combines easy-to-learn, hard-to-master gameplay with a wide diversity of tracks and skin customization, in addition to regular seasons & live events.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:debian": "ghcr.io\/ptero-eggs\/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/TrackmaniaServer \/dedicated_cfg=dedicated_cfg.txt \/game_settings={{GAME_CONFIG}} \/noDaemon",
+    "config": {
+        "files": "{\r\n    \"UserData\/Config\/dedicated_cfg.txt\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"dedicated.masterserver_account.login\": \"{{server.build.env.MASTERSERVER_LOGIN}}\",\r\n            \"dedicated.masterserver_account.password\": \"{{server.build.env.MASTERSERVER_PASSWORD}}\",\r\n            \"dedicated.server_options.name\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"dedicated.server_options.comment\": \"{{server.build.env.SERVER_COMMENT}}\",\r\n            \"dedicated.server_options.password\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"dedicated.system_config.server_port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"...Load succeeds\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "cd \/mnt\/server || exit 1\r\n\r\necho \"Downloading Trackmania Server.\"\r\nwget http:\/\/files.v04.maniaplanet.com\/server\/TrackmaniaServer_Latest.zip -O TrackmaniaServer.zip\r\n\r\necho \"Extracting Trackmania Server.\"\r\nunzip -o TrackmaniaServer.zip\r\nrm TrackmaniaServer.zip\r\n\r\necho \"Setting file permissions.\"\r\nchmod 755 TrackmaniaServer\r\n\r\necho \"Setting up config.\"\r\nif [ ! -f UserData\/Config\/dedicated_cfg.txt ] ; then\r\n    echo \"Creating default config file.\"\r\n    cp UserData\/Config\/dedicated_cfg.default.txt UserData\/Config\/dedicated_cfg.txt\r\nfi\r\n\r\nif [ ! -f MatchSettings\/example.txt ] ; then\r\n    echo \"Creating default match settings file\"\r\n    mkdir -p MatchSettings\r\n    cp UserData\/Maps\/MatchSettings\/example.txt MatchSettings\/example.txt\r\nfi",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Master Server Login",
+            "description": "Master Server username. Obtained from https:\/\/www.trackmania.com\/player\/dedicated-servers",
+            "env_variable": "MASTERSERVER_LOGIN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Master Server Password",
+            "description": "Password for the servers master server account. Obtained from Obtained from https:\/\/www.trackmania.com\/player\/dedicated-servers",
+            "env_variable": "MASTERSERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Config FIle",
+            "description": "Location of the game config file",
+            "env_variable": "GAME_CONFIG",
+            "default_value": "MatchSettings\\example.txt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Comment",
+            "description": "",
+            "env_variable": "SERVER_COMMENT",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:1024",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        }
+    ]
+}

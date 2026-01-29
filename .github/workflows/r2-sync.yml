@@ -1,0 +1,39 @@
+name: Sync to Cloudflare R2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: auto
+      AWS_S3_FORCE_PATH_STYLE: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.MIRROR_R2_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MIRROR_R2_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+
+      - name: Sync to Cloudflare R2
+        run: |
+          REPO_NAME="${{ github.event.repository.name }}"
+          ENDPOINT="https://${{ vars.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          DEST="s3://${{ vars.MIRROR_R2_BUCKET }}/${REPO_NAME}"
+
+          aws s3 sync . "$DEST" \
+            --endpoint-url "$ENDPOINT" \
+            --follow-symlinks \
+            --delete \
+            --exact-timestamps \
+            --exclude "*" \
+            --include "**/*" \
+            --exclude ".*" \
+            --exclude "**/README.md" \
+            --exclude "**/egg-*.json" \
+            --exclude "**/meta-*.json"

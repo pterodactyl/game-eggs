@@ -1,0 +1,114 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-07-07T17:48:25+02:00",
+    "name": "Banana Shooter",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Banana Shooter is a free-to-play action game that offers a unique twist to the traditional survival RPG genre.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/BSDS.x86_64 -batchmode -nographics +Server {{SERVER}} +maxplayercount 40 +port {{SERVER_PORT}} \"$@\"",
+    "config": {
+        "files": "{\r\n    \"Servers\/PterodactylServer\/Config.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"Server.STEAM_GSLT\": \"{{server.build.env.STEAM_GSLT}}\",\r\n            \"Browser.Server_Name\": \"{{server.build.env.SERVER_NAME}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Connect to steam server successfully\"\r\n}",
+        "logs": "{}",
+        "stop": "^SIGKILL"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\nmkdir -p \/mnt\/server\/Servers\/PterodactylServer\r\n\r\ncat > \/mnt\/server\/Servers\/PterodactylServer\/Config.json <<EOF\r\n{\r\n  \"Config_Version\": \"1.363\",\r\n  \"Server\": {\r\n    \"DLC_Only\": false,\r\n    \"STEAM_GSLT\": \"\",\r\n    \"VAC_Secure\": true,\r\n    \"Enable_Scheduled_Shutdown\": true,\r\n    \"Scheduled_Restart_Time\": \"T02:00:00\",\r\n    \"Scheduled_Restart_Warnings\": [\r\n      \"00:30:00\",\r\n      \"00:15:00\",\r\n      \"00:05:00\",\r\n      \"00:01:00\",\r\n      \"00:00:30\",\r\n      \"00:00:15\",\r\n      \"00:00:03\",\r\n      \"00:00:02\",\r\n      \"00:00:01\"\r\n    ],\r\n    \"Enable_Update_Restart\": true,\r\n    \"Update_Shutdown_Check_Interval\": 300.0,\r\n    \"Update_Shutdown_Warnings\": [\r\n      \"00:03:00\",\r\n      \"00:01:00\",\r\n      \"00:00:30\",\r\n      \"00:00:15\",\r\n      \"00:00:03\",\r\n      \"00:00:02\",\r\n      \"00:00:01\"\r\n    ]\r\n  },\r\n  \"Browser\": {\r\n    \"Server_Name\": \"\",\r\n    \"Description_Short\": \"\"\r\n  },\r\n  \"Game\": {\r\n    \"Random_Map\": false,\r\n    \"Random_GameMode\": false,\r\n    \"Minimal_Player_Amount\": 2,\r\n    \"Server_Type\": 1\r\n  }\r\n}\r\nEOF\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2406780",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Server will check for updates on every restart. Use 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Username",
+            "description": "This dedicated server requires a steam account that own a copy of the game",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "This dedicated server requires a steam account that own a copy of the game",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Authenticaton",
+            "description": "This dedicated server requires a steam account that own a copy of the game",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Server Login Token",
+            "description": "Listing your server on the in-game list requires a Login Token to be set.\r\nhttps:\/\/bs-docs.readthedocs.io\/en\/latest\/server\/game-server-login-tokens.html",
+            "env_variable": "STEAM_GSLT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server name",
+            "description": "The name of the server as shown in the server list",
+            "env_variable": "SERVER_NAME",
+            "default_value": "BananaShooter",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "field_type": "text"
+        },
+        {
+            "name": "Server",
+            "description": "Do not change this",
+            "env_variable": "SERVER",
+            "default_value": "PterodactylServer",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        }
+    ]
+}

@@ -1,0 +1,112 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-06-16T15:45:13+02:00",
+    "name": "Soldat 2",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Soldat 2 is a 2D deathmatch shooter with real guns, ragdoll violence and physics-based movement.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:debian": "ghcr.io\/ptero-eggs\/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/soldat2 Name={{SERVER_NAME}} Port={{SERVER_PORT}} WebSocketsPort={{WEBSOCKETS_PORT}} WebSocketsRconPort={{RCON_PORT}} MaxPlayers={{MAX_PLAYERS}} ServerPassword={{SERVER_PASSWORD}} RconPassword={{RCON_PASSWORD}}",
+    "config": {
+        "files": "{\r\n    \"autoconfig.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"GameServerConfig.Name\": \"{{env.SERVER_NAME}}\",\r\n            \"GameServerConfig.Port\": \"{{server.build.default.port}}\",\r\n            \"GameServerConfig.WebSocketsPort\": \"{{env.WEBSOCKETS_PORT}}\",\r\n            \"GameServerConfig.WebSocketsRconPort\": \"{{env.RCON_PORT}}\",\r\n            \"GameServerConfig.RconPassword\": \"{{env.RCON_PASSWORD}}\",\r\n            \"GameServerConfig.MaxPlayers\": \"{{env.MAX_PLAYERS}}\",\r\n            \"GameServerConfig.GreetMessage\": \"{{env.GREET_MESSAGE}}\",\r\n            \"GameServerConfig.AdminPlayfabId\": \"{{env.ADMIN_PLAYFAB_ID}}\",\r\n            \"GameServerConfig.ServerPassword\": \"{{env.SERVER_PASSWORD}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"ALL RULES SCRIPTS INITIALIZED\"\r\n}",
+        "logs": "{}",
+        "stop": "^SIGKILL"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\n# download & extract server files\r\nwget -O soldat2-linuxserver-release.tar.gz \"https:\/\/dl.thd.vg\/soldat2-linuxserver-release.tar.gz\"\r\ntar -zxf soldat2-linuxserver-release.tar.gz\r\nrm soldat2-linuxserver-release.tar.gz\r\n\r\n# move content to \/mnt\/server\r\nmv soldat2-linuxserver-release\/* soldat2-linuxserver-release\/.* \/mnt\/server 2>\/dev\/null || true\r\nrm -r soldat2-linuxserver-release\r\n\r\ncd \/mnt\/server\r\nchmod +x .\/soldat2\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server name",
+            "description": "The name of your server (this will show in the master list) Do not include spaces",
+            "env_variable": "SERVER_NAME",
+            "default_value": "PterodactylServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The amount of players that can join your server at once. Maximum is 12.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:12",
+            "field_type": "text"
+        },
+        {
+            "name": "WebSockets Port",
+            "description": "WebSockets port (optional). Use 0 to disable.",
+            "env_variable": "WEBSOCKETS_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON WebSockets Port",
+            "description": "RCON WebSocket port (optional). Use 0 to disable.",
+            "env_variable": "RCON_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Password",
+            "description": "The password for RCON access.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "RconPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Greet Message",
+            "description": "This message is shown to players when they join.",
+            "env_variable": "GREET_MESSAGE",
+            "default_value": "Welcome! Be friendly and have fun!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin PlayFab ID",
+            "description": "Your Playfab ID will show up in the server logs as 1 YOUR_NAME joined the server [YOUR_PLAYFAB_ID])",
+            "env_variable": "ADMIN_PLAYFAB_ID",
+            "default_value": "IDHere",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "If set, players must enter this password to join.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "ServerPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+        }
+    ]
+}

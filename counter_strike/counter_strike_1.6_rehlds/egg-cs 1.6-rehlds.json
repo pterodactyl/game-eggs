@@ -1,0 +1,134 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https:\/\/pterodactyleggs.com\/egg\/679e55e22d54e24a498434e5\/download"
+    },
+    "exported_at": "2025-04-10T13:11:33+02:00",
+    "name": "Counter Strike 1.6 - ReHLDS",
+    "author": "ptero@redbananaofficial.com",
+    "description": "CS 1.6 ReHLDS binaries egg.\r\n\r\nReHLDS is a reverse-engineered, optimized version of HLDS.\r\nDeveloped by third-party modders to improve stability, performance, and security.\r\nFully compatible with MetaMod, AMX Mod X, and other plugins.\r\n\r\nIncluded modules are rehlds, reunion, amxmodx, metamod-r, reapi and ReGameDLL_CS",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/games:source": "ghcr.io\/ptero-eggs\/games:source"
+    },
+    "file_denylist": [],
+    "startup": ".\/hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart +maxplayers 32 +pingboost 2 +sys_ticrate 1200",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Connection to Steam servers successful\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\nif [[ -z \"${STEAM_USER}\" ]] || [[ -z \"${STEAM_PASS}\" ]]; then\r\n    echo -e \"Steam user is not set.\\nUsing anonymous user.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\n# Download and install SteamCMD\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\n\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n# Install game via SteamCMD\r\n.\/steamcmd.sh \\\r\n+force_install_dir \/mnt\/server \\\r\n+login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} \\\r\n+app_set_config 90 mod ${HLDS_GAME} \\\r\n$( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) \\\r\n+app_update ${SRCDS_APPID} \\\r\n$( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) \\\r\n$( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) \\\r\n${INSTALL_FLAGS} validate \\\r\n+quit\r\n\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\ncd \/mnt\/server\r\n\r\n# Download repo etc\r\nREPO_OWNER=\"Red-Banana-Official\"\r\nREPO_NAME=\"cstrike1.6_rehlds\"\r\nRELEASE_DATA=$(curl -s https:\/\/api.github.com\/repos\/$REPO_OWNER\/$REPO_NAME\/releases\/latest)\r\n\r\nTAG_NAME=$(echo \"$RELEASE_DATA\" | jq -r '.tag_name')\r\n[[ \"$TAG_NAME\" == \"null\" ]] && TAG_NAME=\"1.0.0\"\r\n\r\nDOWNLOAD_URL=$(echo \"$RELEASE_DATA\" | jq -r '.zipball_url')\r\nOUTPUT_FILE=\"$REPO_NAME-$TAG_NAME.zip\"\r\n\r\nrm -rf ${REPO_OWNER}-*\r\necho \"Downloading release: $OUTPUT_FILE\"\r\ncurl -sSL -o \"$OUTPUT_FILE\" \"$DOWNLOAD_URL\" || { echo \"Failed to download $OUTPUT_FILE\"; exit 1; }\r\necho \"Downloaded: $OUTPUT_FILE\"\r\necho \"-----------------------------------------\"\r\n\r\nunzip -q -o \"$OUTPUT_FILE\"\r\nrm -f \"$OUTPUT_FILE\"\r\n\r\nEXTRACTED_DIR=$(find . -maxdepth 1 -type d -name \"${REPO_OWNER}-*\" | head -n 1)\r\ncd \"$EXTRACTED_DIR\"\r\n\r\n# Module install\r\ninstall_module() {\r\n    local NAME=$1\r\n    local DIR=$2\r\n    ZIP=$(find modules\/$DIR\/ -type f -name '*.zip' | sort -V | tail -n 1)\r\n    \r\n    if [[ -z \"$ZIP\" ]]; then\r\n        echo \"Error: ZIP file for module '$NAME' not found.\"\r\n        return 1\r\n    fi\r\n\r\n    echo \"Installing module: $NAME\"\r\n    \r\n    mkdir -p \"${NAME}-install\"\r\n    cp \"$ZIP\" \"${NAME}-install\"\r\n    cd \"${NAME}-install\"\r\n    unzip -q -o *.zip\r\n\r\n    case \"$NAME\" in\r\n        \"rehlds\"|\"ReGameDLL_CS\") \r\n            cp -r bin\/linux32\/* \/mnt\/server\r\n            ;;\r\n        \"amxmodx\"|\"reapi\") \r\n            cp -r addons \/mnt\/server\/cstrike\r\n            ;;\r\n        \"metamod-r\")\r\n            cp -r addons \/mnt\/server\/cstrike\r\n            mkdir -p \/mnt\/server\/cstrike\/addons\/metamod\r\n            touch \/mnt\/server\/cstrike\/addons\/metamod\/plugins.ini\r\n            grep -qxF \"linux addons\/amxmodx\/dlls\/amxmodx_mm_i386.so\" \/mnt\/server\/cstrike\/addons\/metamod\/plugins.ini || echo \"linux addons\/amxmodx\/dlls\/amxmodx_mm_i386.so\" >> \/mnt\/server\/cstrike\/addons\/metamod\/plugins.ini\r\n            sed -i 's|^gamedll_linux.*|gamedll_linux \"addons\/metamod\/metamod_i386.so\"|' \/mnt\/server\/cstrike\/liblist.gam || echo 'gamedll_linux \"addons\/metamod\/metamod_i386.so\"' >> \/mnt\/server\/cstrike\/liblist.gam\r\n            ;;\r\n        \"reunion\")\r\n            mkdir -p \/mnt\/server\/cstrike\/addons\/metamod\/reunion\/\r\n            cp -r bin\/Linux\/* \/mnt\/server\/cstrike\/addons\/metamod\/reunion\/\r\n            touch \/mnt\/server\/cstrike\/addons\/metamod\/plugins.ini\r\n            grep -qxF \"linux addons\/metamod\/reunion\/reunion_mm_i386.so\" \/mnt\/server\/cstrike\/addons\/metamod\/plugins.ini || echo \"linux addons\/metamod\/reunion\/reunion_mm_i386.so\" >> \/mnt\/server\/cstrike\/addons\/metamod\/plugins.ini\r\n            cp reunion.cfg \/mnt\/server\/cstrike\/reunion.cfg\r\n            SALT=$(tr -dc 'A-Za-z0-9' < \/dev\/urandom | head -c 50)\r\n            sed -i \"s\/^SteamIdHashSalt\\s*=.*\/SteamIdHashSalt = $SALT\/\" \/mnt\/server\/cstrike\/reunion.cfg\r\n            ;;\r\n    esac\r\n\r\n    cd ..\r\n    rm -rf \"${NAME}-install\"\r\n    echo \"Module '$NAME' installed successfully.\"\r\n}\r\n\r\ndeclare -A MODULES=(\r\n    [\"rehlds\"]=\"rehlds\"\r\n    [\"amxmodx\"]=\"amxmodx\"\r\n    [\"ReGameDLL_CS\"]=\"ReGameDLL_CS\"\r\n    [\"reapi\"]=\"reapi\"\r\n    [\"metamod-r\"]=\"metamod-r\"\r\n    [\"reunion\"]=\"reunion\"\r\n)\r\n\r\nIFS=',' read -r -a MODULE_LIST <<< \"${INSTALL_MODULES}\"\r\nfor mod in \"${MODULE_LIST[@]}\"; do\r\n    [[ -n \"${MODULES[$mod]}\" ]] && install_module \"$mod\" \"${MODULES[$mod]}\"\r\ndone\r\n\r\n# Ensure files exist\r\nmkdir -p \/mnt\/server\/cstrike\/addons\/amxmodx\/data\r\n[[ ! -f \/mnt\/server\/cstrike\/listip.cfg ]] && echo \"\/\/ Banned IPs\" > \/mnt\/server\/cstrike\/listip.cfg\r\n[[ ! -f \/mnt\/server\/cstrike\/banned.cfg ]] && echo \"\/\/ Banned IDs\" > \/mnt\/server\/cstrike\/banned.cfg\r\n[[ ! -f \/mnt\/server\/cstrike\/addons\/amxmodx\/data\/csstats.dat ]] && touch \/mnt\/server\/cstrike\/addons\/amxmodx\/data\/csstats.dat\r\n\r\nchmod -R 777 \/mnt\/server\r\nrm -rf \/mnt\/server\/Red-Banana-Official-*\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation Complete!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "ReHLDS Version",
+            "description": "The version of ReHLDS to install, or 'latest' for the latest release.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Available Modules",
+            "description": "Available Modules: rehlds, reunion, amxmodx, metamod-r, reapi and ReGameDLL_CS",
+            "env_variable": "INSTALL_MODULES",
+            "default_value": "rehlds,reunion,amxmodx,metamod-r,reapi,ReGameDLL_CS",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Hostname",
+            "description": "This sets the hostname of the server. Example: \"My Custom CS 1.6 Server\"",
+            "env_variable": "HOSTNAME",
+            "default_value": "Counter-Strike 1.6 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS",
+            "env_variable": "HLDS_GAME",
+            "default_value": "cstrike",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "steam_legacy",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+        },
+        {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+        },
+        {
+            "name": "Validate",
+            "description": "Validate game files on update. Keep it disabled with ReHLDS due to SteamCMD overwriting its changes",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

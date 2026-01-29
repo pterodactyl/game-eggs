@@ -1,0 +1,72 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2024-12-13T16:14:15+00:00",
+    "name": "Nazi Zombies: Portable",
+    "author": "jordanadamsbusiness@outlook.com",
+    "description": "NZ:P (Nazi Zombies: Portable) is based off of the FTEQW (Fore Thought Engine Quake World). This egg is specifically made for use with NZ:P (just downloads assets and QuakeC from NZ:P repositories) but there is nothing stopping you from using it as a general FTEQW egg given the NZ:P fork of FTEQW only added fog to the client (and added SDL which caused issues with arguments being eaten preventing dedicated flag from being read) which is why upstream FTEQW is used.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:ubuntu": "ghcr.io\/ptero-eggs\/yolks:ubuntu"
+    },
+    "file_denylist": [],
+    "startup": ".\/fteqw-sv64 -dedicated +sv_port {{SERVER_PORT}} +sv_port_tcp {{SERVER_PORT}} +com_protocolname {{PROTOCOL}} +sv_mintic {{TICKRATE}} +map {{MAP}} {{GAME_ARGS}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"======== Nazi Zombies Portable Initialized ========\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\r\n# Nazi Zombies: Portable (NZ:P) Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n\r\n# FTEQW (Engine)\r\nwget https:\/\/www.fteqw.org\/dl\/fteqw_linux64.zip\r\nunzip -o fteqw_linux64.zip -d \/mnt\/server\r\n\r\n# Assets\r\nASSETS_LATEST_VERSION=$(curl -L -s -H 'Accept: application\/json' https:\/\/github.com\/nzp-team\/assets\/releases\/latest | jq -r '.tag_name')\r\nwget \"https:\/\/github.com\/nzp-team\/assets\/releases\/download\/$ASSETS_LATEST_VERSION\/pc-nzp-assets.zip\"\r\nunzip -o pc-nzp-assets.zip -d \/mnt\/server\r\n\r\n# QuakeC\r\nQUAKEC_LATEST_VERSION=$(curl -L -s -H 'Accept: application\/json' https:\/\/github.com\/nzp-team\/quakec\/releases\/latest | jq -r '.tag_name')\r\nwget \"https:\/\/github.com\/nzp-team\/quakec\/releases\/download\/$QUAKEC_LATEST_VERSION\/fte-nzp-qc.zip\"\r\nwget \"https:\/\/github.com\/nzp-team\/quakec\/releases\/download\/$QUAKEC_LATEST_VERSION\/standard-nzp-qc.zip\"\r\nunzip -o fte-nzp-qc.zip -d \/mnt\/server\/nzp\r\nunzip -o standard-nzp-qc.zip -d \/mnt\/server\/nzp",
+            "container": "ghcr.io\/ptero-eggs\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Protocol",
+            "description": "NZ:P Native Clients - `NZP-REBOOT`.\r\nNZ:P Web Clients - `NZP-REBOOT-WEB`.\r\n\r\nHit your \"`\/~\" key on your keyboard, this will open console, then you will type `connect ip:port` for native clients, for web clients you would type `connect ws:\/\/ip:port`. In addition, you MUST be on the HTTP version of the website you are playing the web client on, otherwise the browser will block the request",
+            "env_variable": "PROTOCOL",
+            "default_value": "NZP-REBOOT",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Tickrate",
+            "description": "Think of this like fps, the default value is 1 frame per 45 ms (0.045 seconds) which is ~22 fps, 30 fps is ~33.3 ms, 60 fps is ~16.6ms, the reason the tickrate is low is due to zombies being bandwidth heavy (especially in the higher rounds), take caution when changing this, but if you up the tickrate, it may fix physics bugs like zombies getting stuck on terrain.",
+            "env_variable": "TICKRATE",
+            "default_value": "0.045",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Map",
+            "description": "The map to load, you can find a list via `listmaps`, default map is ndu otherwise known as \"Nacht der Untoten\"",
+            "env_variable": "MAP",
+            "default_value": "ndu",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Additional Game Arguments",
+            "description": "`+cvar value` is the format for changing the cvars",
+            "env_variable": "GAME_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "max:200",
+            "field_type": "text"
+        }
+    ]
+}

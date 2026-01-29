@@ -1,0 +1,82 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-01-11T07:12:57+00:00",
+    "name": "R5Reloaded",
+    "author": "eggs@purpleflaghosting.com",
+    "description": "R5Reloaded - Modded Apex Legends server",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "wine64 r5apex_ds.exe -noconsole -port {{SERVER_PORT}} +launchplaylist \"{{PLAYLIST}}\" +hostname \"{{SERVER_NAME}}\" {{ARGS}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\":\":Installed NetKey:\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "# Update package cache and install 7z\r\napt update\r\napt install p7zip-full -y\r\n\r\n# Change to server directory\r\ncd \/mnt\/server || exit 1\r\n\r\n# Download server file\r\necho \"Downloading: ${DL_URL}\"\r\nwget \"${DL_URL}\" -O server_download.7z\r\n\r\n# Extract\r\necho \"Extracting server files\"\r\n7z x server_download.7z\r\n\r\n# Cleanup\r\necho \"Cleaning up\"\r\nrm server_download.7z",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Playlist",
+            "description": "Playlist to load",
+            "env_variable": "PLAYLIST",
+            "default_value": "fs_dm",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Download URL",
+            "description": "URL to download R5Reloaded server build from",
+            "env_variable": "DL_URL",
+            "default_value": "https:\/\/r5reloaded.com\/server-download",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:500",
+            "field_type": "text"
+        },
+        {
+            "name": "Args",
+            "description": "Additional arguments to append to the startup command",
+            "env_variable": "ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}

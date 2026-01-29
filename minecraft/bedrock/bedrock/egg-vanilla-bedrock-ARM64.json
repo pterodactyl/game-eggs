@@ -1,0 +1,94 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2024-09-24T13:43:50-07:00",
+    "name": "Vanilla Bedrock ARM64",
+    "author": "josdekurk@gmail.com",
+    "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket\/Windows 10 Edition\".",
+    "features": [
+        "pid_limit"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:box64": "ghcr.io\/ptero-eggs\/yolks:box64"
+    },
+    "file_denylist": [],
+    "startup": "box64 .\/bedrock_server",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"server-name\": \"{{server.build.env.SERVERNAME}}\",\r\n            \"gamemode\": \"{{server.build.env.GAMEMODE}}\",\r\n            \"difficulty\": \"{{server.build.env.DIFFICULTY}}\",\r\n            \"allow-cheats\": \"{{server.build.env.CHEATS}}\",\r\n            \"max-threads\": \"2\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Server started\"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl jq\r\n\r\ncd /mnt/server || { echo \"Failed to change directory to /mnt/server\"; exit 1; }\r\n\r\n# Default version to latest if not set\r\nBEDROCK_VERSION=${BEDROCK_VERSION:-latest}\r\n\r\n# Filename to use for the downloaded file\r\nDOWNLOAD_FILE=\"bedrock-server-installer.zip\"\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\n\r\nif [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo \"Finding latest Bedrock server version\"\r\n    DOWNLOAD_URL=$(curl --silent https://net-secondary.web.minecraft-services.net/api/v1.0/download/links | jq -r '.result.links[] | select(.downloadType == \"serverBedrockLinux\") | .downloadUrl')\r\n    if [ -z \"${DOWNLOAD_URL}\" ]; then\r\n        echo \"Failed to retrieve the latest Bedrock server version. Please check your network connection or the Minecraft API.\"\r\n        exit 1\r\n    fi\r\nelse\r\n    echo \"Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\necho \"Download URL: $DOWNLOAD_URL\"\r\n\r\n\r\n\r\n\r\n\r\necho -e \"Backing up config files\"\r\nmkdir /tmp/config_backup\r\ncp -v server.properties /tmp/config_backup/ 2>/dev/null \r\ncp -v permissions.json /tmp/config_backup/ 2>/dev/null \r\ncp -v allowlist.json /tmp/config_backup/ 2>/dev/null \r\n\r\n\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho -e \"Restoring backup config files\"\r\ncp -rfv /tmp/config_backup/* /mnt/server/ 2>/dev/null || { echo \"No files to restore\"; }\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+        },
+        {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+        },
+        {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        }
+    ]
+}

@@ -1,0 +1,112 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-10-06T13:52:09+02:00",
+    "name": "Half-Life 2: Deathmatch",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Fast multiplayer action set in the Half-Life 2 universe! HL2's physics adds a new dimension to deathmatch play. Play straight deathmatch or try Combine vs. Resistance teamplay. Toss a toilet at your friend today!",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/srcds_run -console -game hl2mp -maxplayers {{MAX_PLAYERS}} +map {{MAP_NAME}} -port {{SERVER_PORT}} -tickrate {{TICK_RATE}}",
+    "config": {
+        "files": "{\r\n    \"hl2mp\/cfg\/server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"hostname \": \"hostname \\\"{{server.build.env.SERVER_NAME}}\\\"\",\r\n            \"sv_password \": \"sv_password \\\"{{server.build.env.SERVER_PASSWORD}}\\\"\",\r\n            \"rcon_password \": \"rcon_password \\\"{{server.build.env.RCON_PASSWORD}}\\\"\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Connection to Steam servers successful.\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## create server config\r\ncat <<EOF > \/mnt\/server\/hl2mp\/cfg\/server.cfg\r\n\/\/ Basic server settings\r\nhostname \"${SERVER_NAME}\"\r\nsv_password \"${SERVER_PASSWORD}\"\r\nrcon_password \"${RCON_PASSWORD}\"\r\nsv_cheats 0\r\nsv_lan 0\r\nsv_contact \"your_email@example.com\"\r\nsv_region 0\r\nmp_disable_autokick 0\r\n\r\n\/\/ Gameplay settings\r\nsv_hl2mp_weapon_respawn_time 20\r\nsv_hl2mp_item_respawn_time 30\r\nmp_weaponstay 0\r\nmp_autocrosshair 1\r\nsv_alltalk 1\r\nmp_allowspectators 1\r\nsv_voiceenable 1\r\nmp_forcerespawn 1\r\nmp_timelimit 20\r\nmp_winlimit 0\r\nmp_maxrounds 0\r\nmp_teams_unbalance_limit 0\r\nmp_friendlyfire 0\r\nmp_flashlight 1\r\nmp_autoteambalance 0\r\nmp_restartgame 1\r\n\r\n\/\/ Player settings\r\nsv_timeout 60\r\nsv_noclipaccelerate 5\r\nsv_noclipspeed 5\r\n\r\n\/\/ Miscellaneous settings\r\nsv_downloadurl \"\"\r\nmp_forcecamera 1\r\nmapcyclefile \"mapcycle.txt\"\r\n\r\n\/\/ Server security settings\r\nsv_allowupload 1\r\nsv_allowdownload 1\r\nsv_rcon_banpenalty 10\r\nsv_rcon_maxfailures 5\r\n\r\n\/\/ Map-related settings\r\nmp_chattime 5\r\nEOF\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232370",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232370",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl-server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Map Name",
+            "description": "The name of the map",
+            "env_variable": "MAP_NAME",
+            "default_value": "dm_lockdown",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "The password used to join the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Rcon Password",
+            "description": "The password used for the server rcon",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Tick Rate",
+            "description": "Server tick rate",
+            "env_variable": "TICK_RATE",
+            "default_value": "66",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        }
+    ]
+}

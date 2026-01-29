@@ -1,0 +1,165 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-10-27T22:40:22+01:00",
+    "name": "Cubic Odyssey",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Embark on a galactic journey in Cubic Odyssey, an open-world adventure where you explore vibrant planets, craft tools, build vehicles, and fight the Red Darkness. Uncover ancient mysteries, and shape a universe full of life, danger, and limitless possibilities!",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "Wine Latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest",
+        "Wine Staging": "ghcr.io\/ptero-eggs\/yolks:wine_staging"
+    },
+    "file_denylist": [],
+    "startup": "wine .\/server\/CubicOdysseyServer.exe -Port={{GAME_PORT}} -Password=\"{{SERVER_PASSWORD}}\" -Gamemode={{GAMEMODE}} -MaxNumPlayers={{MAX_PLAYERS}}",
+    "config": {
+        "files": "{\r\n    \"config\/server_config.txt\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"\\t\\tserverName \": \"\\t\\tserverName \\\"{{server.build.env.SERVER_NAME}}\\\"\",\r\n            \"\\t\\tprivateServer \": \"\\t\\tprivateServer {{server.build.env.PRIVATE_SERVER}}\",\r\n            \"\\t\\tgalaxySeed \": \"\\t\\tgalaxySeed {{server.build.env.GALAXY_SEED}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Lobbies (OnCreateLobbyFinished): lobby created.\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd and request app license\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_license_request 3858450 $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam Username",
+            "description": "A steam username of an account that owns the server tool is required",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Auth Code",
+            "description": "Steam Auth Code required if the Steam Account is using Steam Auth. Slow installs will cause the code to expire before it can be used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name of the server, this will be shown on the server-list",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Cubic Odyssey Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "If enabled players must enter the password to join the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Game port",
+            "description": "This sets the port the server will bind to",
+            "env_variable": "GAME_PORT",
+            "default_value": "20000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "This will set the maximum number of allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Gamemode",
+            "description": "Sets the desired game mode, it's adventure by default, available options: adventure, creative",
+            "env_variable": "GAMEMODE",
+            "default_value": "adventure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:adventure,creative",
+            "field_type": "text"
+        },
+        {
+            "name": "Private Server",
+            "description": "This will make the server private\/public",
+            "env_variable": "PRIVATE_SERVER",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:TRUE,FALSE",
+            "field_type": "text"
+        },
+        {
+            "name": "Galaxy Seed",
+            "description": "This sets the seed used by the server",
+            "env_variable": "GALAXY_SEED",
+            "default_value": "21945875634",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:11",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "autoupdate Server on start or restart. 1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3858450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3858450",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "Required to always install and update the correct version of the game.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

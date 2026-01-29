@@ -1,0 +1,92 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-04-06T02:41:08+02:00",
+    "name": "Arclight",
+    "author": "chredeur@pastanetwork.com",
+    "description": "A Bukkit server implementation on common mod loaders.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 8": "ghcr.io\/ptero-eggs\/yolks:java_8",
+        "Java 11": "ghcr.io\/ptero-eggs\/yolks:java_11",
+        "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
+        "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
+        "Java 19": "ghcr.io\/ptero-eggs\/yolks:java_19",
+        "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
+        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}} nogui",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# Arclight Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\ncd \/mnt\/server\r\n\r\nBASE_API_URL=\"https:\/\/files.hypoglycemia.icu\/v1\/files\/arclight\"\r\n\r\nif [ -n \"${DOWNLOAD_URL}\" ]; then\r\n    echo \"Using custom download URL: ${DOWNLOAD_URL}\"\r\nelse\r\n    echo \"Fetching available Minecraft versions for Arclight...\"\r\n    ARCLIGHT_VERSION=$(curl -s \"${BASE_API_URL}\/minecraft\" | jq -r '.files[].name' | sort -Vr)\r\n    if [ -z \"$ARCLIGHT_VERSION\" ] || [ \"$ARCLIGHT_VERSION\" == \"null\" ]; then\r\n        echo \"Error: Could not fetch version list from API.\"\r\n        exit 1\r\n    fi\r\n    if [ \"$MINECRAFT_VERSION\" == \"auto\" ]; then\r\n        MINECRAFT_VERSION=$(echo \"$ARCLIGHT_VERSION\" | head -n 1)\r\n        echo \"Auto-selected Minecraft version: ${MINECRAFT_VERSION}\"\r\n    else\r\n        VERSION_EXISTS=$(echo \"$ARCLIGHT_VERSION\" | grep -Fx \"$MINECRAFT_VERSION\")\r\n        if [ -z \"$VERSION_EXISTS\" ]; then\r\n            echo \"Warning: Specified version '${MINECRAFT_VERSION}' not found. Falling back to the latest available version.\"\r\n            MINECRAFT_VERSION=$(echo \"$ARCLIGHT_VERSION\" | head -n 1)\r\n            echo \"Fallback version: ${MINECRAFT_VERSION}\"\r\n        fi\r\n    fi\r\n\r\n    echo \"Fetching available loaders for version ${MINECRAFT_VERSION}...\"\r\n    LOADER_LIST=$(curl -s \"${BASE_API_URL}\/minecraft\/${MINECRAFT_VERSION}\/loaders\" | jq -r '.files[].name')\r\n    if [ -z \"$LOADER_LIST\" ] || [ \"$LOADER_LIST\" == \"null\" ]; then\r\n        echo \"Error: Could not fetch loader list from API.\"\r\n        exit 1\r\n    fi\r\n    LOADER_EXISTS=$(echo \"$LOADER_LIST\" | grep -Fx \"$ARCLIGHT_LOADER\")\r\n    if [ -z \"$LOADER_EXISTS\" ]; then\r\n        echo \"Warning: Specified loader '${ARCLIGHT_LOADER}' not found for version ${MINECRAFT_VERSION}\"\r\n        exit 1\r\n    fi\r\n\r\n    echo \"Fetching available channels for version ${MINECRAFT_VERSION} and loader ${ARCLIGHT_LOADER}...\"\r\n    CHANNEL_LIST=$(curl -s \"${BASE_API_URL}\/minecraft\/${MINECRAFT_VERSION}\/loaders\/${ARCLIGHT_LOADER}\")\r\n    CHANNEL_LIST_NAME=$(echo \"$CHANNEL_LIST\" | jq -r '.files[].name')\r\n    if [ \"$ARCLIGHT_CHANNEL\" == \"auto\" ]; then\r\n        echo \"Selecting preferred channel for loader ${ARCLIGHT_LOADER} ${MINECRAFT_VERSION}...\"\r\n        ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | grep -E 'latest-stable|version-stable|latest-snapshot|version-snapshot' | \\\r\n            grep -x 'latest-stable' || \\\r\n            echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-stable' || \\\r\n            echo \"$CHANNEL_LIST_NAME\" | grep -x 'latest-snapshot' || \\\r\n            echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-snapshot' | head -n 1)\r\n    \r\n        if [ -z \"$ARCLIGHT_CHANNEL\" ]; then\r\n            echo \"No preferred channel found. Falling back to last in list.\"\r\n            ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | tail -n 1)\r\n        fi\r\n\r\n        CHANNEL_TYPE=$(echo \"$CHANNEL_LIST\" | jq -r \".files[] | select(.name==\\\"${ARCLIGHT_CHANNEL}\\\") | .type\")\r\n        echo \"Auto-selected channel: ${ARCLIGHT_CHANNEL}\"\r\n    else\r\n        if [ \"$ARCLIGHT_CHANNEL\" == \"beta\" ]; then\r\n            CHANNELS=(\"latest-snapshot\" \"versions-snapshot\")\r\n        elif [ \"$ARCLIGHT_CHANNEL\" == \"stable\" ]; then\r\n            CHANNELS=(\"latest-stable\" \"versions-stable\")\r\n        fi\r\n        \r\n        for CHANNEL in \"${CHANNELS[@]}\"; do\r\n            if echo \"$CHANNEL_LIST_NAME\" | grep -q \"$CHANNEL\"; then\r\n                ARCLIGHT_CHANNEL=\"$CHANNEL\"\r\n                break\r\n            fi\r\n        done\r\n        \r\n        if [ -z \"$ARCLIGHT_CHANNEL\" ]; then\r\n            echo \"Warning: Specified channel '${ARCLIGHT_CHANNEL}' not found for loader ${ARCLIGHT_LOADER} and Minecraft version ${MINECRAFT_VERSION}. Falling back to default channel.\"\r\n    \r\n            ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | grep -E 'latest-stable|version-stable|latest-snapshot|version-snapshot' | \\\r\n                grep -x 'latest-stable' || \\\r\n                echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-stable' || \\\r\n                echo \"$CHANNEL_LIST_NAME\" | grep -x 'latest-snapshot' || \\\r\n                echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-snapshot' | head -n 1)\r\n    \r\n            if [ -z \"$ARCLIGHT_CHANNEL\" ]; then\r\n                ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | tail -n 1)\r\n            fi\r\n    \r\n            echo \"Fallback channel: ${ARCLIGHT_CHANNEL}\"\r\n        fi\r\n\r\n        CHANNEL_TYPE=$(echo \"$CHANNEL_LIST\" | jq -r \".files[] | select(.name==\\\"${ARCLIGHT_CHANNEL}\\\") | .type\")\r\n    fi\r\n\r\n    echo \"Fetching builds for ${ARCLIGHT_LOADER}-${MINECRAFT_VERSION}-${ARCLIGHT_CHANNEL}...\"\r\n    if [ -z \"$CHANNEL_TYPE\" ] || [ \"$CHANNEL_TYPE\" == \"null\" ] || [ \"$CHANNEL_TYPE\" == \"link\" ]; then\r\n        BUILD_NAME=${ARCLIGHT_CHANNEL}\r\n        DOWNLOAD_URL=\"${BASE_API_URL}\/minecraft\/${MINECRAFT_VERSION}\/loaders\/${ARCLIGHT_LOADER}\/${ARCLIGHT_CHANNEL}\"\r\n    elif [ \"$CHANNEL_TYPE\" == \"directory\" ]; then\r\n        BUILD=$(curl -s \"${BASE_API_URL}\/minecraft\/${MINECRAFT_VERSION}\/loaders\/${ARCLIGHT_LOADER}\/${ARCLIGHT_CHANNEL}\" | jq -r '.files[0]')\r\n        BUILD_NAME=$(echo \"${BUILD}\" | jq -r '.name')\r\n        DOWNLOAD_URL=\"${BASE_API_URL}\/minecraft\/${MINECRAFT_VERSION}\/loaders\/${ARCLIGHT_LOADER}\/${ARCLIGHT_CHANNEL}\/${BUILD_NAME}\"\r\n    else\r\n        echo \"Error: Unknown channel type. Exiting.\"\r\n        exit 1\r\n    fi\r\n\r\n\r\n    echo \"Selected build: ${BUILD_NAME}\"\r\nfi\r\n\r\necho \"Downloading Arclight from: ${DOWNLOAD_URL}\"\r\n\r\nif [ -f \"${SERVER_JARFILE}\" ]; then\r\n    echo \"Backing up existing server jar...\"\r\n    mv \"${SERVER_JARFILE}\" \"${SERVER_JARFILE}.old\"\r\nfi\r\n\r\ncurl -s -L -o \"${SERVER_JARFILE}\" \"${DOWNLOAD_URL}\"\r\n\r\nif [ $? -ne 0 ]; then\r\n    echo \"Download failed. Please check the URL or your internet connection.\"\r\n    exit 1\r\nfi\r\n\r\necho \"Download complete. File saved as ${SERVER_JARFILE}\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Jar File",
+            "description": "Name of the server JAR file that will be created (e.g. server.jar).",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Download Path",
+            "description": "Optional custom download URL. Leave empty to use the Arclight API.",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Arclight Channel",
+            "description": "Select the Arclight build channel (e.g. stable, beta). Use 'auto' to use the most recent one.",
+            "env_variable": "ARCLIGHT_CHANNEL",
+            "default_value": "auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:stable,beta,auto",
+            "field_type": "text"
+        },
+        {
+            "name": "Arclight Loader",
+            "description": "Select the mod loader you want to use (forge, neoforge, fabric).",
+            "env_variable": "ARCLIGHT_LOADER",
+            "default_value": "forge",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:forge,neoforge,fabric",
+            "field_type": "text"
+        }
+    ]
+}

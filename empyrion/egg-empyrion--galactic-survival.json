@@ -1,0 +1,222 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-01-25T15:56:40+00:00",
+    "name": "Empyrion: Galactic Survival",
+    "author": "eggs@purpleflaghosting.com",
+    "description": "Build and explore in a true space sandbox survival adventure. Construct mighty capital vessels, sprawling planetary settlements, and vast space stations in your galactic journey to discover the mysteries of Empyrion!",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "cd DedicatedServer ; wine EmpyrionDedicated.exe -batchmode -nographics -logFile ..\/Logs\/server\/server.log & PID=$! ; tail -c0 -F ..\/Logs\/server\/server.log & until nc -z 127.0.0.1 {{TELNET_PORT}}; do sleep 1;done ; telnet -E 127.0.0.1 {{TELNET_PORT}} ; wait $PID",
+    "config": {
+        "files": "{\r\n    \"dedicated.yaml\": {\r\n        \"parser\": \"yaml\",\r\n        \"find\": {\r\n            \"ServerConfig.Srv_Port\": \"{{server.build.default.port}}\",\r\n            \"ServerConfig.Srv_Name\": \"{{env.SERVER_NAME}}\",\r\n            \"ServerConfig.Srv_MaxPlayers\": \"{{env.MAX_PLAYERS}}\",\r\n            \"ServerConfig.Srv_Description\": \"{{env.SERVER_DESCRIPTION}}\",\r\n            \"ServerConfig.Srv_Public\": \"{{env.SERVER_PUBLIC}}\",\r\n            \"ServerConfig.Srv_Password\": \"{{env.SERVER_PASSWORD}}\",\r\n            \"ServerConfig.Tel_Enabled\": true,\r\n            \"ServerConfig.Tel_Port\": \"{{env.TELNET_PORT}}\",\r\n            \"ServerConfig.Tel_Pwd\": \"\",\r\n            \"GameConfig.Seed\": \"{{env.GAME_SEED}}\",\r\n            \"ServerConfig.EACActive\": \"{{env.EAC_ACTIVE}}\",\r\n            \"ServerConfig.MaxAllowedSizeClass\": \"{{env.MAX_ALLOWED_SIZE_CLASS}}\",\r\n            \"ServerConfig.AllowedBlueprints\": \"{{env.ALLOWED_BLUEPRINTS}}\",\r\n            \"ServerConfig.HeartbeatServer\": \"{{env.SERVER_HEARTBEAT}}\",\r\n            \"ServerConfig.TimeoutBootingPfServer\": \"{{env.TIMEOUT_BOOTING_PF_SERVER}}\",\r\n            \"GameConfig.GameName\": \"{{env.GAME_NAME}}\",\r\n            \"GameConfig.Mode\": \"{{env.GAME_MODE}}\",\r\n            \"GameConfig.CustomScenario\": \"{{env.CUSTOM_SCENARIO}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{}",
+        "logs": "{}",
+        "stop": "saveandexit 0"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "530870",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Telnet Port",
+            "description": "DO NOT expose to the internet. Used internally for console connection.",
+            "env_variable": "TELNET_PORT",
+            "default_value": "1030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Server name to show in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Description",
+            "description": "Server info, can contain [b]bold[\/b] text or a [u][url=empyriongame.com]link[\/url][\/u].",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "An Empyrion Galactic Survival server hosted on Pterodactyl.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:127",
+            "field_type": "text"
+        },
+        {
+            "name": "Seed",
+            "description": "The seed determines how the world is procedurally generated - the same seed means the same world",
+            "env_variable": "GAME_SEED",
+            "default_value": "1011345",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,9999999",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Max number of players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Public",
+            "description": "Disable if you want to hide your server in the Server Browser. If server is not visible you can connect via IP or via joining a friend's game.",
+            "env_variable": "SERVER_PUBLIC",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password required to enter the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Beta ID",
+            "description": "Installs beta branch if specified.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Allowed Blueprints",
+            "description": "None = Blueprint system completely disabled, StockOnly = only stock blueprints can be produced, All = all types allowed (default)",
+            "env_variable": "ALLOWED_BLUEPRINTS",
+            "default_value": "All",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:All,StockOnly,None",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Heartbeat",
+            "description": "Timeout in seconds after which a playfield server process will be killed (and all players on it disconnected) if it does no longer send heartbeat messages to the dedi. Set 0 to disable this feature",
+            "env_variable": "SERVER_HEARTBEAT",
+            "default_value": "15",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,180",
+            "field_type": "text"
+        },
+        {
+            "name": "Timeout Booting PfServer",
+            "description": "Monitors booting playfield server processes, kills them if they time out (time in seconds, 0 = disabled). This is a conservative default, for faster servers 60 seconds should be ok",
+            "env_variable": "TIMEOUT_BOOTING_PF_SERVER",
+            "default_value": "90",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,600",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Mode",
+            "description": "Survival or Creative.",
+            "env_variable": "GAME_MODE",
+            "default_value": "Survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20|in:Survival,Creative",
+            "field_type": "text"
+        },
+        {
+            "name": "EAC Active",
+            "description": "",
+            "env_variable": "EAC_ACTIVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Allowed Size Class",
+            "description": "Restrict allowed Blueprint size class: restricted types are not allowed to be produced or spawned 1 = allow only small blueprints, ... , 10 = allow very large blueprints, ..., 50 = allow gigantic blueprints, ... , 0 = no limits. Warning: large blueprints can have very strong performance impact!",
+            "env_variable": "MAX_ALLOWED_SIZE_CLASS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "Custom Scenario",
+            "description": "Enable custom scenario. Name of custom scenario from folder Content\\Scenarios.",
+            "env_variable": "CUSTOM_SCENARIO",
+            "default_value": "Default Multiplayer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Name",
+            "description": "Determines name of the save game.",
+            "env_variable": "GAME_NAME",
+            "default_value": "DediGame",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}

@@ -1,0 +1,124 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-02-12T15:57:31+01:00",
+    "name": "Hurtworld",
+    "author": "brycea@terrahost.cloud",
+    "description": "Hurtworld is a hardcore multiplayer survival FPS with a focus on deep survival progression that doesn't become trivial once you establish some basic needs. Built for hardcore gamers, Hurtworld aims to punish.\r\n\r\nThis egg includes the options to install Oxide\/uMod and corresponding plugins",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/Hurtworld.x86_64 -batchmode -nographics -exec \"host {{SERVER_PORT}};queryport {{QUERY_PORT}};maxplayers {{MAX_PLAYERS}};servername {{HOSTNAME}};creativemode {{CREATIVE_MODE}};addadmin {{ADMINS}}\" -logfile $1",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"orphaned items\"\r\n}",
+        "logs": "{}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n# Server Files: \/mnt\/server\r\n# Image: 'ghcr.io\/ptero-eggs\/installers:debian'\r\n# Ensure Steam credentials are set\r\nif [[ -z \"${STEAM_USER}\" ]] || [[ -z \"${STEAM_PASS}\" ]]; then\r\n    echo -e \"Steam user is not set. Using anonymous login.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\n# Install SteamCMD\r\necho \"Downloading and installing SteamCMD...\"\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncd \/tmp\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# Set ownership to prevent permission issues\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n# Install server using SteamCMD\r\necho \"Installing Hurtworld server via SteamCMD...\"\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server \\\r\n    +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} \\\r\n    $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) \\\r\n    +app_update ${SRCDS_APPID} \\\r\n    $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) \\\r\n    $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) \\\r\n    ${INSTALL_FLAGS} validate +quit\r\n\r\n# Set up Steam libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n# Copy Steam libraries to Hurtworld directories\r\nmkdir -p \/mnt\/server\/Hurtworld_Data\/Plugins\/x86\r\nmkdir -p \/mnt\/server\/Hurtworld_Data\/Plugins\/x86_64\r\ncp -v linux32\/steamclient.so \/mnt\/server\/Hurtworld_Data\/Plugins\/x86\/steamclient.so\r\ncp -v linux64\/steamclient.so \/mnt\/server\/Hurtworld_Data\/Plugins\/x86_64\/steamclient.so\r\n\r\n# Check if INSTALL_OXIDE needs to be installed\r\nif [[ \"${INSTALL_OXIDE}\" == \"1\" ]]; then\r\n    echo \"INSTALL_OXIDE is set to 1. Downloading and installing uMod\/Oxide...\"\r\n    curl -sSL -o umod.zip \"https:\/\/umod.org\/games\/hurtworld\/download\/develop\"\r\n\r\n    if [ -f umod.zip ]; then\r\n        echo \"Extracting uMod\/Oxide...\"\r\n        unzip -o umod.zip -d \/mnt\/server\r\n        rm umod.zip\r\n    else\r\n        echo \"Failed to download uMod\/Oxide!\"\r\n        exit 1  # Stop the script if Oxide fails to install\r\n    fi\r\n\r\n    # Ensure Oxide directory exists for plugins\r\n    PLUGIN_DIR=\"\/mnt\/server\/oxide\/plugins\"\r\n    mkdir -p \"$PLUGIN_DIR\"\r\n\r\n    if [[ -n \"${INSTALL_PLUGINS}\" ]]; then\r\n        IFS=',' read -ra PLUGINS <<< \"${INSTALL_PLUGINS}\"\r\n\r\n        echo \"Downloading selected Oxide plugins...\"\r\n        for PLUGIN in \"${PLUGINS[@]}\"; do\r\n            PLUGIN_NAME=$(echo \"$PLUGIN\" | sed -e 's\/^ *\/\/g' -e 's\/ *$\/\/g' -e 's\/\"\/\/g')\r\n\r\n            # url formatting\r\n            PLUGIN_FILE=\"${PLUGIN_NAME\/\/ \/}\"\r\n            PLUGIN_URL=\"https:\/\/umod.org\/plugins\/${PLUGIN_FILE}.cs\"\r\n\r\n            # Download the plugin\r\n            echo \"Downloading plugin: $PLUGIN_NAME\"\r\n            curl -sSL -o \"$PLUGIN_DIR\/${PLUGIN_FILE}.cs\" \"$PLUGIN_URL\"\r\n\r\n            # Verify the downloaded file is valid\r\n            if grep -q \"<!DOCTYPE html>\" \"$PLUGIN_DIR\/${PLUGIN_FILE}.cs\"; then\r\n                echo \"Error: Plugin '$PLUGIN_NAME' not found! Removing invalid file.\"\r\n                rm -f \"$PLUGIN_DIR\/${PLUGIN_FILE}.cs\"\r\n            else\r\n                echo \"Successfully downloaded: $PLUGIN_NAME\"\r\n            fi\r\n        done\r\n    else\r\n        echo \"INSTALL_PLUGINS is empty. No plugins will be installed.\"\r\n    fi\r\nelse\r\n    echo \"INSTALL_OXIDE is set to 0. Skipping uMod\/Oxide installation and plugin downloads.\"\r\nfi\r\n\r\n# Ensure directory exists\r\nmkdir -p \/mnt\/server\/Hurtworld_Data\/Managed\r\n\r\n## Install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "405100",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:405100",
+            "field_type": "text"
+        },
+        {
+            "name": "Include Oxide",
+            "description": "This option will allow you to automatically install Oxide\/uMod on the server.\r\nDefault value is 0, change it to a 1 to install.",
+            "env_variable": "INSTALL_OXIDE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Install Plugins",
+            "description": "This variable allows you to automatically install Oxide plugins. \r\nFormat example: No Build Zones,Loot Chests,HW Time Control\r\nPlugins can be found at: https:\/\/umod.org\/plugins?categories=hurtworld",
+            "env_variable": "INSTALL_PLUGINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "Server Query Default Port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "13871",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Max players allowed on the server at one time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Hurtworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Owner Guid",
+            "description": "Steam id of the server owner.",
+            "env_variable": "ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:17",
+            "field_type": "text"
+        },
+        {
+            "name": "Creative Mode",
+            "description": "Turn creative mode on and off (free build). Value as 0 for off, 1 for on.",
+            "env_variable": "CREATIVE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "AUTO_UPDATE",
+            "description": "Disabling or enabling automated updates on boot.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

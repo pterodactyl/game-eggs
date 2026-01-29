@@ -1,0 +1,47 @@
+UseSteamAuth: false
+ValidateDlcOwnership: []
+MandatoryClientSecurityLevel: 0
+EnableAntiAfk: true
+MaxAfkTimeMinutes: 10
+AfkKickBehavior: PlayerInput
+MaxPing: 500
+MaxPingSeconds: 10
+ForceLights: false
+NetworkBubbleDistance: 500.0
+OutsideNetworkBubbleRefreshRateHz: 4
+EnableServerDetails: true
+ServerDescription: ""
+EnableRealTime: false
+EnableWeatherFx: false
+RainTrackGripReductionPercent: 0.0
+EnableAi: false
+GeoParamsCountryOverride: null
+EnablePlugins: []
+IgnoreConfigurationErrors:
+  DisplayErrorsToUsers: true
+  LogErrorsToConsole: true
+  LogErrorsToFile: false
+EnableClientMessages: false
+EnableCustomUpdate: false
+PlayerLoadingTimeoutMinutes: 10
+LokiSettings: null
+RconPort: 0
+DebugWelcomeMessage: false
+ForceServerTrackParams: false
+EnableAlternativeCarChecksums: false
+EnableLegacyPluginInterface: false
+EnableUPnP: false
+LoadingImageUrl: null
+UserGroups:
+  default_blacklist: blacklist.txt
+  default_whitelist: whitelist.txt
+  default_admins: admins.txt
+BlacklistUserGroup: default_blacklist
+WhitelistUserGroup: default_whitelist
+AdminUserGroup: default_admins
+CorsAllowedOrigins: null
+AiParams:
+  Aggression: 0.5
+  MinRacingSkill: 0.0
+  MaxRacingSkill: 1.0
+  Consistency: 0.5

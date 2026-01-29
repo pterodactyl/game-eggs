@@ -1,0 +1,194 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-01-19T10:12:33+00:00",
+    "name": "Aloft",
+    "author": "eggs@purpleflaghosting.com",
+    "description": "Soar the skies in Aloft, the co-op sandbox survival game set in a world of floating islands. Build any island into a skyship, your home in the clouds. Find lost knowledge, cure the fungal corruption, and brave the hurricane to restore the ecosystem.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "[ ! -d \"${SAVE_PATH}\/w_{{SAVE_NAME}}\" ] && wine Aloft.exe -batchmode -nographics -server -logFile create.log create#{{SAVE_NAME}}#{{NUM_ISLANDS}}#{{CREATIVE_MODE}}# log#ERROR# ; wine Aloft.exe -batchmode -nographics -server -logFile server.log load#{{SAVE_NAME}}# servername#{{SERVER_NAME}}# log#ERROR# isvisible#{{IS_VISIBLE}}# privateislands#{{PRIVATE_ISLANDS}}# playercount#{{MAX_PLAYERS}}# serverport#{{SERVER_PORT}}#  $(printf \"admin#%s# \" ${ADMIN_IDS}) & tail -F server.log -c0 --pid=$?",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Server Ready\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "SRCDS_APPID",
+            "description": "Steam App ID to install",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1660080",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2022 wmp11 mf sound=disabled",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Map Name",
+            "description": "Map name is the name of the map and save file you want to create. No spaces allowed.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "Aloft",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_num|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Name of the server to appear in the server list. Currently doesn't support spaces.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A_Pterodactyl_Hosted_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Number of players allowed on the server at any one time. Max 8.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+        },
+        {
+            "name": "Creative Mode",
+            "description": "Whether the game is set in creative mode or not. Only applies when the world is first generated.",
+            "env_variable": "CREATIVE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "Number of Islands",
+            "description": "The number of islands in the map. Only applies when the world is first generated.",
+            "env_variable": "NUM_ISLANDS",
+            "default_value": "500",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin IDs",
+            "description": "One or more Steam64ID numbers. Multiple admin IDs can be provided by separating with spaces.",
+            "env_variable": "ADMIN_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255|regex:\/^[0-9\\s]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Is Visible",
+            "description": "If your server is going to be visible through the lobby browser or just accessible through a code.",
+            "env_variable": "IS_VISIBLE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Private Islands",
+            "description": "If home island spawning is protected or not in game.",
+            "env_variable": "PRIVATE_ISLANDS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam User",
+            "description": "Steam username used to install the server",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam account password used to install the server",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "Flag to install windows depot from steam",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Path",
+            "description": "Stores the save path for use in the startup command",
+            "env_variable": "SAVE_PATH",
+            "default_value": ".wine\/drive_c\/users\/container\/AppData\/LocalLow\/Astrolabe Interactive\/Aloft\/Data01\/Saves",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "WINEDLLOVERRIDES",
+            "description": "",
+            "env_variable": "WINEDLLOVERRIDES",
+            "default_value": "mscoree,mshtml=",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        }
+    ]
+}

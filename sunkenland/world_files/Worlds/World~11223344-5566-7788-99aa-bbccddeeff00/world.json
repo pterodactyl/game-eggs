@@ -1,0 +1,777 @@
+
+{
+	"ApplicationVersion" : {
+		"__type" : "string",
+		"value" : "0.6.01"
+	},
+	"Enemy" : {
+		"__type" : "EnemySaveData,Assembly-CSharp",
+		"value" : {
+		"nextSiegeTime" : 9039,
+		"gergeTime" : 600,
+		"StartCountDown" : false,
+		"CurEnemyIndex" : 0,
+		"Examlevel" : 0,
+		"ExamWaveIndex" : 0
+	}
+	},
+	"Faction" : {
+		"__type" : "System.Collections.Generic.List`1[[FactionData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		{
+			"FactionType" : 4,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 3,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 10,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 7,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 8,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 9,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 6,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 2,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 11,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 1,
+			"IsFriendly" : false
+		},{
+			"FactionType" : 13,
+			"IsFriendly" : false
+		}
+	]
+	},
+	"WorldLocations" : {
+		"__type" : "System.Collections.Generic.List`1[[LocationData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		{
+			"ID" : 1518484736226618671,
+			"FactionType" : 3,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5802304861498408842,
+			"FactionType" : 4,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 3246512265697067933,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 4541337516792617782,
+			"FactionType" : 10,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5360963719893734222,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 3712943840098470031,
+			"FactionType" : 4,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 7434706431722753326,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 4897102158648239545,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 353148506269889260,
+			"FactionType" : 10,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 6861703178489995584,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5935396406126784988,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 2208367707896076430,
+			"FactionType" : 3,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5102573272838740384,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 6926917204620028831,
+			"FactionType" : 6,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 4430535642246403225,
+			"FactionType" : 2,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 8092584520501183589,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5925270502639646647,
+			"FactionType" : 4,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 7124979230175538260,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 7828419080954883661,
+			"FactionType" : 8,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 7378310626262984251,
+			"FactionType" : 8,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 4477827395974648976,
+			"FactionType" : 4,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 6463629240606540940,
+			"FactionType" : 7,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 7549393970831898472,
+			"FactionType" : 3,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 1463211897198622929,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 2685643263686291823,
+			"FactionType" : 7,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 833383012190116134,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 2260788467565478730,
+			"FactionType" : 7,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 7858163441097022563,
+			"FactionType" : 4,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 2086995003649108816,
+			"FactionType" : 4,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 8417386305634022788,
+			"FactionType" : 9,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 8413700654374255127,
+			"FactionType" : 7,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5903783447257932021,
+			"FactionType" : 3,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 8086795798721920650,
+			"FactionType" : 7,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5843169266608021970,
+			"FactionType" : 10,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 5810672662808766566,
+			"FactionType" : 13,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 9038532660897685216,
+			"FactionType" : 9,
+			"FoundBlueprintCount" : 0
+		},{
+			"ID" : 931100494609600311,
+			"FactionType" : 7,
+			"FoundBlueprintCount" : 0
+		}
+	]
+	},
+	"UnidirectionalDoors" : {
+		"__type" : "System.Collections.Generic.List`1[[UnidirectionalDoorData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		{
+			"InstanceID" : 956950375673931975,
+			"IsOpen" : false
+		},{
+			"InstanceID" : 3939913742300520038,
+			"IsOpen" : false
+		},{
+			"InstanceID" : 5258045787154496560,
+			"IsOpen" : false
+		}
+	]
+	},
+	"RotarySawUnitDatas" : {
+		"__type" : "System.Collections.Generic.List`1[[RotarySawUnitData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"WorldBatteryChargers" : {
+		"__type" : "System.Collections.Generic.List`1[[BatteryChargerData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"MonitorDoors" : {
+		"__type" : "System.Collections.Generic.List`1[[MonitorDoorData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"Rockers" : {
+		"__type" : "System.Collections.Generic.List`1[[RockerData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"Trees" : {
+		"__type" : "System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"TradeContractors" : {
+		"__type" : "System.Collections.Generic.Dictionary`2[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[TradeContractorData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : {0:{
+			"activeContractsIndex" : [
+				30,8,11
+			],
+			"newContractCooldownTimer" : 600
+		}
+	}
+	},
+	"EnviroTime" : {
+		"__type" : "EnviroTimeData,Assembly-CSharp",
+		"value" : {
+		"year" : 2024,
+		"month" : 6,
+		"days" : 10,
+		"hour" : 8,
+		"minute" : 56,
+		"second" : 9
+	}
+	},
+	"Weather" : {
+		"__type" : "string",
+		"value" : "Cloudy 2"
+	},
+	"ItemSpawners" : {
+		"__type" : "System.Collections.Generic.Dictionary`2[[System.Int64, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[ItemSpawnerSaveData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : {0:{
+			"amount" : 7,
+			"timer" : 0
+		},6498082830874993386:{
+			"amount" : 2,
+			"timer" : 0
+		},2366520798708188909:{
+			"amount" : 5,
+			"timer" : 0
+		},2569515471467978990:{
+			"amount" : 4,
+			"timer" : 0
+		},1716211846045982062:{
+			"amount" : 6,
+			"timer" : 0
+		},4702006939845628812:{
+			"amount" : 2,
+			"timer" : 0
+		},7880613421731702727:{
+			"amount" : 2,
+			"timer" : 0
+		},8740105992067842323:{
+			"amount" : 3,
+			"timer" : 0
+		},6782615822408645681:{
+			"amount" : 4,
+			"timer" : 0
+		},7949010668831524027:{
+			"amount" : 45,
+			"timer" : 0
+		},2444530743256497206:{
+			"amount" : 4,
+			"timer" : 0
+		},4015990150125509819:{
+			"amount" : 7,
+			"timer" : 0
+		},8205918711079495958:{
+			"amount" : 1,
+			"timer" : 0
+		},8370352015394269434:{
+			"amount" : 2,
+			"timer" : 0
+		},2436245632997363885:{
+			"amount" : 4,
+			"timer" : 0
+		},3253816810242496484:{
+			"amount" : 4,
+			"timer" : 0
+		},5893036190418762071:{
+			"amount" : 1,
+			"timer" : 0
+		},8182332639432793261:{
+			"amount" : 2,
+			"timer" : 0
+		},7951131339223384225:{
+			"amount" : 5,
+			"timer" : 0
+		},2359035490386452414:{
+			"amount" : 13,
+			"timer" : 0
+		},2800753435630017085:{
+			"amount" : 3,
+			"timer" : 0
+		},3164105254944451701:{
+			"amount" : 6,
+			"timer" : 0
+		},7169267834166236582:{
+			"amount" : 2,
+			"timer" : 0
+		},2500099084456500419:{
+			"amount" : 4,
+			"timer" : 0
+		},6799181418964669619:{
+			"amount" : 3,
+			"timer" : 0
+		},654227919073502253:{
+			"amount" : 7,
+			"timer" : 0
+		}
+	}
+	},
+	"FishSpawners" : {
+		"__type" : "System.Collections.Generic.Dictionary`2[[System.Int64, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[FishSpawnerData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : {2262605925143371276:{
+			"Amount" : 2,
+			"Timer" : 29
+		},7330734889918273675:{
+			"Amount" : 2,
+			"Timer" : 29
+		},972396863541638040:{
+			"Amount" : 2,
+			"Timer" : 29
+		},8637173283836644705:{
+			"Amount" : 3,
+			"Timer" : 29
+		},1752973142443309232:{
+			"Amount" : 2,
+			"Timer" : 29
+		},5271572078806328501:{
+			"Amount" : 3,
+			"Timer" : 29
+		},1649100643287626095:{
+			"Amount" : 2,
+			"Timer" : 29
+		},7571420225375571155:{
+			"Amount" : 1,
+			"Timer" : 29
+		},1836040531765562648:{
+			"Amount" : 2,
+			"Timer" : 29
+		},1598417535250191160:{
+			"Amount" : 2,
+			"Timer" : 29
+		},2122003914671812156:{
+			"Amount" : 4,
+			"Timer" : 29
+		},2081182072164840146:{
+			"Amount" : 2,
+			"Timer" : 29
+		},5678431924256909277:{
+			"Amount" : 2,
+			"Timer" : 29
+		},2235346385772676830:{
+			"Amount" : 3,
+			"Timer" : 29
+		},5715690173254774258:{
+			"Amount" : 3,
+			"Timer" : 29
+		},8461841327673923598:{
+			"Amount" : 4,
+			"Timer" : 29
+		},6342021639680127913:{
+			"Amount" : 3,
+			"Timer" : 29
+		},7564880075316185735:{
+			"Amount" : 1,
+			"Timer" : 29
+		},3649344580356441629:{
+			"Amount" : 0,
+			"Timer" : 29
+		},5593340148107701523:{
+			"Amount" : 1,
+			"Timer" : 29
+		},1312707988638991758:{
+			"Amount" : 2,
+			"Timer" : 29
+		},7956927538958933137:{
+			"Amount" : 3,
+			"Timer" : 29
+		},3338674276429808809:{
+			"Amount" : 1,
+			"Timer" : 29
+		},4354412964823751995:{
+			"Amount" : 3,
+			"Timer" : 29
+		},3510059134350573144:{
+			"Amount" : 2,
+			"Timer" : 29
+		},4072181505149308693:{
+			"Amount" : 2,
+			"Timer" : 29
+		},5547689564212014375:{
+			"Amount" : 4,
+			"Timer" : 29
+		}
+	}
+	},
+	"Army" : {
+		"__type" : "System.Collections.Generic.Dictionary`2[[System.Int64, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[ArmySaveData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : {8523328078120386979:{
+			"amount" : 7
+		},2068471549467445529:{
+			"amount" : 1
+		},5765945225059741263:{
+			"amount" : 4
+		},4860487903966433280:{
+			"amount" : 2
+		},1198526763731270861:{
+			"amount" : 9
+		},2984590053859429078:{
+			"amount" : 6
+		},5564307308715826562:{
+			"amount" : 5
+		},683744809766616885:{
+			"amount" : 7
+		},5554383299951563594:{
+			"amount" : 3
+		},2407363063602751206:{
+			"amount" : 8
+		},1446837742084083898:{
+			"amount" : 4
+		},8131786224672610695:{
+			"amount" : 4
+		},2636239042303071838:{
+			"amount" : 3
+		},2396904995461381144:{
+			"amount" : 6
+		},3755738261316478937:{
+			"amount" : 3
+		},8164894833600021866:{
+			"amount" : 5
+		},3895830568529723358:{
+			"amount" : 15
+		},3487289916515912582:{
+			"amount" : 6
+		},2398529738889784046:{
+			"amount" : 2
+		},233369725516754586:{
+			"amount" : 9
+		},6756154331450620987:{
+			"amount" : 4
+		},7265396989002742370:{
+			"amount" : 5
+		},5827438798909298160:{
+			"amount" : 5
+		},1034256290981793803:{
+			"amount" : 3
+		},4753012661318636603:{
+			"amount" : 11
+		},9127990091223322167:{
+			"amount" : 4
+		},6608913057880132340:{
+			"amount" : 3
+		},3483589367155437156:{
+			"amount" : 13
+		},6318485354842389779:{
+			"amount" : 11
+		},2504089879302591032:{
+			"amount" : 4
+		},1510824213903976869:{
+			"amount" : 2
+		},6708508821109511180:{
+			"amount" : 0
+		},1150021662455940515:{
+			"amount" : 4
+		},5547270881295122534:{
+			"amount" : 6
+		},2648465346044748008:{
+			"amount" : 2
+		},1425071611466948585:{
+			"amount" : 2
+		},5672319725714620156:{
+			"amount" : 1
+		},5563031157806414434:{
+			"amount" : 3
+		},1386860013646791649:{
+			"amount" : 6
+		},2636684250232467641:{
+			"amount" : 17
+		},3081169275968884339:{
+			"amount" : 2
+		},7177038713447503116:{
+			"amount" : 2
+		},4223304888309587009:{
+			"amount" : 2
+		},1944689303070812177:{
+			"amount" : 2
+		},4278101693517077553:{
+			"amount" : 2
+		},7720823962184742665:{
+			"amount" : 7
+		},172036826847572171:{
+			"amount" : 2
+		},3346949801929517328:{
+			"amount" : 2
+		},5945724479348887081:{
+			"amount" : 20
+		},5293194450524246822:{
+			"amount" : 2
+		},5643165707830472:{
+			"amount" : 4
+		},7574563523711279132:{
+			"amount" : 6
+		},7110891290434244671:{
+			"amount" : 10
+		},677959973995711183:{
+			"amount" : 6
+		},5577768441831619496:{
+			"amount" : 6
+		},9105145138740987406:{
+			"amount" : 0
+		},2798283360573010492:{
+			"amount" : 11
+		},179510433308984305:{
+			"amount" : 2
+		},1898253350448520260:{
+			"amount" : 1
+		},8733243017297250469:{
+			"amount" : 5
+		},2221191468132480392:{
+			"amount" : 1
+		},5790307181521317634:{
+			"amount" : 2
+		},8944231159948350638:{
+			"amount" : 2
+		},7551442239509266376:{
+			"amount" : 4
+		},5330734373945069223:{
+			"amount" : 5
+		},3212547607860026221:{
+			"amount" : 6
+		},8713479216080935957:{
+			"amount" : 4
+		},5818901282045309539:{
+			"amount" : 1
+		},6299787368462606108:{
+			"amount" : 5
+		},3751262639419426651:{
+			"amount" : 2
+		},7844828929488271833:{
+			"amount" : 4
+		},2453397967920685455:{
+			"amount" : 10
+		},2260073891824167349:{
+			"amount" : 2
+		},291068950562434711:{
+			"amount" : 2
+		},695500974892682285:{
+			"amount" : 7
+		},842192338167271114:{
+			"amount" : 0
+		},3770967192642378774:{
+			"amount" : 4
+		},6761415584898157789:{
+			"amount" : 3
+		},3359435094376998240:{
+			"amount" : 8
+		},3391444001522291059:{
+			"amount" : 16
+		},7295562790471564022:{
+			"amount" : 4
+		},5407985124160893937:{
+			"amount" : 4
+		},8434126756743738369:{
+			"amount" : 6
+		},8093886530427561201:{
+			"amount" : 2
+		},6827356104833888024:{
+			"amount" : 10
+		},9008302624619821895:{
+			"amount" : 6
+		},6001645022591287266:{
+			"amount" : 4
+		},3378476772450681043:{
+			"amount" : 6
+		},3344993007091986382:{
+			"amount" : 4
+		},3536711011857680184:{
+			"amount" : 0
+		},9189875820901928948:{
+			"amount" : 1
+		}
+	}
+	},
+	"CanSleep" : {
+		"__type" : "bool",
+		"value" : true
+	},
+	"SleepHour" : {
+		"__type" : "int",
+		"value" : 0
+	},
+	"SleepMinute" : {
+		"__type" : "int",
+		"value" : 0
+	},
+	"SleepCoolingTime" : {
+		"__type" : "float",
+		"value" : 0
+	},
+	"FirstSleep" : {
+		"__type" : "bool",
+		"value" : true
+	},
+	"GameTime" : {
+		"__type" : "int",
+		"value" : 1
+	},
+	"DestroyedObjects" : {
+		"__type" : "System.Collections.Generic.List`1[[System.Int64, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"LearnedItems" : {
+		"__type" : "System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"UnlockItems" : {
+		"__type" : "System.Collections.Generic.List`1[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"ResearchLevel" : {
+		"__type" : "int",
+		"value" : 1
+	},
+	"DiscardItems" : {
+		"__type" : "System.Collections.Generic.List`1[[DiscardedItemData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"DropBags" : {
+		"__type" : "System.Collections.Generic.List`1[[DroppedBagData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"Collectables" : {
+		"__type" : "System.Collections.Generic.List`1[[CollectableData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : [
+		
+	]
+	},
+	"TutorialIndex" : {
+		"__type" : "int",
+		"value" : 0
+	},
+	"Map" : {
+		"__type" : "MapSaveData,Assembly-CSharp",
+		"value" : {
+		"MapMarksDictionary" : {
+		}
+	}
+	},
+	"Quests" : {
+		"__type" : "System.Collections.Generic.Dictionary`2[[System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[QuestSaveData, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]],mscorlib",
+		"value" : {"NormalQuest_SurvivalGuide":{
+			"__type" : "QuestSystem.NormalQuestSaveData,Assembly-CSharp",
+			"questObjectiveSaveDataList" : [
+				{
+					"__type" : "QuestSystem.QuestObjectiveBuildBuildingSaveData,Assembly-CSharp",
+					"alreadyBuiltAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_1_BuildBuilding_WoodBase",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveBuildBuildingSaveData,Assembly-CSharp",
+					"alreadyBuiltAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_2_BuildBuilding _Research Table",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveBuildBuildingSaveData,Assembly-CSharp",
+					"alreadyBuiltAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_2_BuildBuilding D3_Simple Purifier",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveBuildBuildingSaveData,Assembly-CSharp",
+					"alreadyBuiltAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_2_BuildBuilding_D1_Gridiron",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveCraftItemSaveData,Assembly-CSharp",
+					"alreadyCraftedAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_2_CraftItem_1",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveBuildBuildingSaveData,Assembly-CSharp",
+					"alreadyBuiltAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_3_BuildBuilding_A0_Simple Bed",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveBuildBuildingSaveData,Assembly-CSharp",
+					"alreadyBuiltAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_4_BuildBuilding_B1_Wooden Chest",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveCraftItemSaveData,Assembly-CSharp",
+					"alreadyCraftedAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_4_CraftItem_Roasted Mushroom",
+					"status" : 2
+				},{
+					"id" : "SurvivalGuide_QuestObjective_4_DiscoverLocation_TraderOutpost",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.QuestObjectiveCraftItemSaveData,Assembly-CSharp",
+					"alreadyCraftedAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_5_CraftItem_C1_Bow",
+					"status" : 2
+				},{
+					"__type" : "QuestSystem.Research.QuestObjectiveResearchAmount+QuestObjectiveResearchAmountSaveData,Assembly-CSharp",
+					"alreadyResearchedAmount" : 0,
+					"id" : "SurvivalGuide_QuestObjective_ResearchAmount_1",
+					"status" : 2
+				}
+			],
+			"isViewedByPlayer" : true,
+			"status" : 1
+		}
+	}
+	}
+}

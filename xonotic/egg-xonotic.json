@@ -1,0 +1,52 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-04-03T09:14:57+00:00",
+    "name": "Xonotic",
+    "author": "parker@parkervcp.com",
+    "description": "This is for the default xonotic setup.",
+    "features": null,
+    "docker_images": {
+        "SteamCMD (Debian)": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/xonotic-linux64-dedicated +log_file latest.log +net_address 0.0.0.0 +port {{SERVER_PORT}} +maxplayers {{MAX_PLAYERS}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Server listening on address 0.0.0.0:\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\r\n# Vanilla Xonotic Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\napk add rsync --no-cache\r\n\r\nmkdir -p \/mnt\/server\r\n\r\ncd \/mnt\/server\r\n\r\nwget -O xonotic.zip http:\/\/dl.xonotic.org\/xonotic-${VERSION}.zip\r\n\r\nunzip -o xonotic.zip\r\n\r\nmv Xonotic\/* .\/\r\n\r\n.\/misc\/tools\/rsync-updater\/update-to-autobuild.sh -y\r\n\r\n# create initial folder structure to copy the default config to, because it only gets created on first startup\r\nmkdir -p .xonotic\/data\r\ncp -n server\/server.cfg .xonotic\/data\/server.cfg || true # do not overwrite existing config file\r\n\r\nrm -rf COPYING Makefile *glx* *glx *sdl* *sdl *linux32* *exe *.app *.sh bin* GPL* Docs\/ gmqcc\/ source\/ misc\/ Xonotic\/ xonotic.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Max Players",
+            "description": "Max players allowed on the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,2",
+            "field_type": "text"
+        },
+        {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "0.8.6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}

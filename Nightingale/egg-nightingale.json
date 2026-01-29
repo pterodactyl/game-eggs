@@ -1,0 +1,132 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-08-24T01:52:01+02:00",
+    "name": "Nightingale",
+    "author": "brainshead@gmail.com",
+    "description": "Nightingale is an open world survival crafting game, where you\u2019ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you\u2019ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world.",
+    "features": null,
+    "docker_images": {
+        "Debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/NWX\/Binaries\/Linux\/NWXServer-Linux-Shipping NWX -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers= {{MAX_PLAYER}} $( [ \"$CHEATS\" == \"1\" ] && printf %s '-EnableCheats' ) -port={{SERVER_PORT}} -multihome=0.0.0.0",
+    "config": {
+        "files": "{\r\n    \"NWX\/Config\/ServerSettings.ini\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"StartingDifficulty\": \"StartingDifficulty={{server.build.env.Difficulty}}\",\r\n            \"Password\": \"Password={{server.build.env.PASSWORD}}\",\r\n            \"AdminPassword\": \"AdminPassword={{server.build.env.ADMIN_PASSWORD}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Game mode became ready\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n#Custom Commands\r\n\r\n# Copy default server settings if none exist\r\nif [ ! -f \/mnt\/server\/NWX\/Config\/ServerSettings.ini ]; then\r\n    cp \/mnt\/server\/NWX\/Config\/ExampleServerSettings.ini \/mnt\/server\/NWX\/Config\/ServerSettings.ini\r\n    echo \"ServerSettings.ini created from ExampleServerSettings.ini\"\r\nelse\r\n    echo \"ServerSettings.ini already exists, keeping current settings.\"\r\nfi\r\n\r\n# Make sure file is executable\r\nchmod +x \/mnt\/server\/NWX\/Binaries\/Linux\/NWXServer-Linux-Shipping\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3796810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Difficulty",
+            "description": "Starting map difficulty, choose from [easy, medium, hard, extreme]. \r\nUsed for the very first map, if one is not supplied from an imported character.",
+            "env_variable": "Difficulty",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:easy,medium,hard,extreme",
+            "field_type": "text"
+        },
+        {
+            "name": "Password",
+            "description": "By default the server will start with no password required for players to connect. It is\r\nrecommended to set one to ensure only players you intend can connect.",
+            "env_variable": "PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "If an admin password is set, players with the correct password can authenticate in-game in order to kick and ban other players.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "letmein",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Max players",
+            "description": "By default Nightingale supports a maximum of six players in a realm. This maximum can bechanged through a command-line argument.\r\nPlease note that increasing the maximum number of players past six is unsupported and may result in unintended behaviour.",
+            "env_variable": "MAX_PLAYER",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Cheats Mode",
+            "description": "To allow use of the cheat\/debug menu and commands, add the enable cheats command-line argument. Players will need to authenticate with the admin password to use the cheats in-game.",
+            "env_variable": "CHEATS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

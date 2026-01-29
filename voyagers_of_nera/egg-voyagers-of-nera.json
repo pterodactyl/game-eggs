@@ -1,0 +1,112 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-09-25T11:15:09+00:00",
+    "name": "Voyagers of Nera",
+    "author": "eggs@purpleflaghosting.com",
+    "description": "Voyagers of Nera is a cooperative survival-crafting game for up to 10 players set in a vast ocean full of ancient ruins and diverse biomes. Nera is a magical ocean world full of beauty, magic, and danger. You are an Echo, descendants of the long-extinct protectors of this world.",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "wine BoatGame\/Binaries\/Win64\/BoatGameServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -log -LoggingInShippingEnabled=true & tail -c0 --pid=$? -F BoatGame\/Saved\/Logs\/BoatGame.log",
+    "config": {
+        "files": "{\r\n    \"BoatGame\/Saved\/PersistedData\/CustomConfig\/CustomHostServerUserSettings.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[\/Script\/BoatGame.BGCustomHostServerSettings].HostServerDisplayName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[\/Script\/BoatGame.BGCustomHostServerSettings].HostServerPassword\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"[\/Script\/BoatGame.BGCustomHostServerSettings].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"[\/Script\/BoatGame.BGCustomHostServerSettings].AutosaveTimerSeconds\": \"{{server.build.env.AUTOSAVE_TIMER_SECONDS}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Successfully created session\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "The public name of your server other players will see when browsing servers.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|max:50|regex:\/^[A-Za-z0-9\\-_ ]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "The password required for players to join your game.\r\n\r\nA blank value means the server will not be password-protected and is joinable by any player.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed to be connected to your server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,10",
+            "field_type": "text"
+        },
+        {
+            "name": "Autosave Timer",
+            "description": "How often your server will automatically save. It\u2019s not recommended to adjust this setting unless you specifically have a reason to.",
+            "env_variable": "AUTOSAVE_TIMER_SECONDS",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:10,900",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam App ID",
+            "description": "Steam App ID to install",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3937860",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:3937860",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "Install Windows version of App from steam",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Wine Debug",
+            "description": "Disable wine debug messages",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "XVFB",
+            "description": "Disable X virtual framebuffer",
+            "env_variable": "XVFB",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+        }
+    ]
+}

@@ -1,0 +1,134 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "null"
+    },
+    "exported_at": "2025-04-12T12:31:51+02:00",
+    "name": "Stormworks: Build and Rescue",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.\r\nStormworks now requires a steam account that owns a copy of the game to download\/update the server files, as the server files are now shipped with the base-game",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "xvfb-run wine server64.exe +server_dir \/home\/container\/server_data",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Connected to steam\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n# apt -y update\r\n# apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n# Create server_data directory\r\nmkdir -p \/mnt\/server\/server_data\r\n\r\nRANDOM_SEED=$(shuf -i 1-999999999 -n 1)\r\n\r\ncat > \/mnt\/server\/server_data\/server_config.xml <<EOF\r\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<server_data port=\"${SERVER_PORT}\" name=\"${SERVER_NAME}\" seed=\"${RANDOM_SEED}\" save_name=\"autosave_server\" max_players=\"${MAX_PLAYERS}\" password=\"${SERVER_PASSWORD}\" day_length=\"30\" night_length=\"30\" infinite_resources=\"false\" unlock_all_islands=\"false\" settings_menu=\"false\" base_island=\"data\/tiles\/island12.xml\" settings_menu_lock=\"false\" infinite_batteries=\"false\" infinite_fuel=\"false\" engine_overheating=\"false\" ceasefire=\"false\" infinite_ammo=\"false\" no_clip=\"false\" map_teleport=\"false\" vehicle_spawn=\"false\" photo_mode=\"false\" respawning=\"false\" cleanup_vehicle=\"false\" clear_fow=\"false\" third_person=\"true\" third_person_vehicle=\"true\" vehicle_damage=\"false\" player_damage=\"false\" npc_damage=\"false\" aggressive_animals=\"false\" sea_monsters=\"false\" lightning=\"true\" teleport_vehicle=\"true\" fast_travel=\"true\" starting_currency=\"201111\" despawn_on_leave=\"false\" map_show_players=\"false\" map_show_vehicles=\"false\" show_3d_waypoints=\"false\" show_name_plates=\"false\" override_weather=\"false\" override_time=\"false\" override_wind=\"false\" physics_timestep=\"0\" wildlife_enabled=\"true\" unlock_components=\"true\" dlc_weapons=\"false\" dlc_arid=\"false\" dlc_space=\"false\">\r\n\t<admins>\r\n\t\t<id value=\"${STEAM64_ID}\"\/>\r\n\t<\/admins>\r\n\t<authorized\/>\r\n\t<blacklist\/>\r\n\t<whitelist\/>\r\n\t<playlists>\r\n\t\t<path path=\"rom\/data\/missions\/default_ai\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_ai_aircraft\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_cargo\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_dock_bollards\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_elevators\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_forest_fire_missions\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_resource_storage\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_locations\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_transport_locations\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_arctic\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_building\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_delivery\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_main\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_sawyer\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_natural_disasters\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_paths\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_resource_trading\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_tutorial\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/dlc_weapons_ai\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_underwater\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_arid\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_railroad_signals\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_landmarks\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_oil_survey\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_mission_zones_moon\"\/>\r\n\t\t<path path=\"rom\/data\/missions\/default_fish_survey\"\/>\r\n\t<\/playlists>\r\n\t<mods\/>\r\n<\/server_data>\r\nEOF\r\n\r\n## installation end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"Note; The server will generate a config file based on your set variables, any changes to these variables after install will also need to be manually changed in \/home\/container\/server_data\/server_config.xml\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam Username",
+            "description": "The user has to own the game; it cannot be installed without it \/ an anonymous user.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "The user has to own the game; it cannot be installed without it \/ an anonymous user.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Authentication",
+            "description": "To be used with Steam's authenticator.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name of the server.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Stormworks",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "This is not required to be set, but it is highly recommended that you do so.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "DefaultPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Admin (Steam64ID)",
+            "description": "This user will be an admin on the server.\r\nExample of a website that can help u find it;\r\nhttps:\/\/www.steamidfinder.com\/",
+            "env_variable": "STEAM64_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|size:17|regex:\/^\\d{17}$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The maximum amount of players that are allowed to be in the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,32",
+            "field_type": "text"
+        },
+        {
+            "name": "SRCDS_APPID",
+            "description": "Steam App ID.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "573090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:573090",
+            "field_type": "text"
+        },
+        {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+        },
+        {
+            "name": "AUTO_UPDATE",
+            "description": "This will auto-update SteamCMD on boot. 0 is disabled, 1 is enabled.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

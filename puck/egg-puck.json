@@ -1,0 +1,122 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-09-05T12:44:17+10:00",
+    "name": "Puck",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Hop on your skates and jump into a physics based hockey game. No rules, no timeouts, just get the puck in the goal. May the best team win!",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/Puck.x86_64",
+    "config": {
+        "files": "{\r\n    \"server_configuration.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"port\": \"{{server.build.default.port}}\",\r\n            \"pingPort\": \"{{server.build.env.QUERY_PORT}}\",\r\n            \"maxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"password\": \"{{server.build.env.SRV_PASSWORD}}\",\r\n            \"kickTimeout\": \"{{server.build.env.KICK_TIMEOUT}}\",\r\n            \"targetFrameRate\": \"{{server.build.env.FRAME_RATE}}\",\r\n            \"serverTickRate\": \"{{server.build.env.SERVER_TICK_RATE}}\",\r\n            \"clientTickRate\" : \"{{server.build.env.CLIENT_TICK_RATE}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": [\r\n        \"Server authenticated\"\r\n    ]\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## CUSTOM\r\n## Create default config\r\nprintf \"{\\r\\n  \\\"port\\\": 7777,\\r\\n  \\\"pingPort\\\": 7778,\\r\\n  \\\"name\\\": \\\"Pterodactyl Puck Server\\\",\\r\\n  \\\"maxPlayers\\\": 10,\\r\\n  \\\"password\\\": \\\"\\\",\\r\\n  \\\"voip\\\": false,\\r\\n  \\\"isPublic\\\": true,\\r\\n  \\\"adminSteamIds\\\": [],\\r\\n  \\\"reloadBannedSteamIds\\\": false,\\r\\n  \\\"usePuckBannedSteamIds\\\": true,\\r\\n  \\\"printMetrics\\\": true,\\r\\n  \\\"kickTimeout\\\": 300,\\r\\n  \\\"sleepTimeout\\\": 60,\\r\\n  \\\"joinMidMatchDelay\\\": 10,\\r\\n  \\\"targetFrameRate\\\": 120,\\r\\n  \\\"serverTickRate\\\": 100,\\r\\n  \\\"clientTickRate\\\": 200,\\r\\n  \\\"startPaused\\\": false,\\r\\n  \\\"allowVoting\\\": true,\\r\\n  \\\"phaseDurationMap\\\": {\\r\\n    \\\"Warmup\\\": 600,\\r\\n    \\\"FaceOff\\\": 3,\\r\\n    \\\"Playing\\\": 300,\\r\\n    \\\"BlueScore\\\": 5,\\r\\n    \\\"RedScore\\\": 5,\\r\\n    \\\"Replay\\\": 10,\\r\\n    \\\"PeriodOver\\\": 15,\\r\\n    \\\"GameOver\\\": 15\\r\\n  },\\r\\n  \\\"mods\\\": [\\r\\n    {\\r\\n      \\\"id\\\": 3493628417,\\r\\n      \\\"enabled\\\": false,\\r\\n      \\\"clientRequired\\\": false\\r\\n    }\\r\\n  ]\\r\\n}\\r\\n\" > \/mnt\/server\/server_configuration.json\r\n\r\n## End of installation\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "Query Port of the server, Additional Allocation required.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7778",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3481440",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3481440",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] Auto Update",
+            "description": "Auto Update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Password",
+            "description": "The password required to join the server.",
+            "env_variable": "SRV_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Kick Timeout",
+            "description": "Time before player is kicked for AFK",
+            "env_variable": "KICK_TIMEOUT",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|",
+            "field_type": "text"
+        },
+        {
+            "name": "Target Framerate",
+            "description": "Framerate of server, Should be 10-20 Above Tick Rate!",
+            "env_variable": "FRAME_RATE",
+            "default_value": "120",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:380",
+            "field_type": "text"
+        },
+        {
+            "name": "Target Tick rate",
+            "description": "Tick rate of Server",
+            "env_variable": "SERVER_TICK_RATE",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:360",
+            "field_type": "text"
+        },
+        {
+            "name": "Client Tick Rate",
+            "description": "This value should be at least double the servers tick rate, but too high may cause instabilities in some clients. Do not go above 360 even if double the Server Tick is above. Unless you understand what you are doing.",
+            "env_variable": "CLIENT_TICK_RATE",
+            "default_value": "360",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:720",
+            "field_type": "text"
+        }
+    ]
+}

@@ -1,0 +1,55 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-04-20T21:46:27+00:00",
+    "name": "Nukkit",
+    "author": "parker@parkervcp.com",
+    "description": "Nukkit is a nuclear-powered server software for Minecraft Bedrock Edition\r\n\r\nhttps:\/\/cloudburstmc.org",
+    "features": null,
+    "docker_images": {
+        "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
+        "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
+        "Java 11": "ghcr.io\/ptero-eggs\/yolks:java_11",
+        "Java 8": "ghcr.io\/ptero-eggs\/yolks:java_8"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}} --language eng",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\r\n# Nukkit Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\napk add --no-cache openssl\r\n\r\ncd \/mnt\/server\r\n\r\n## Only download if a path is provided, otherwise continue.\r\nif [ \"${NUKKIT_VERSION}\" == \"latest\" ]; then\r\n    wget https:\/\/repo.opencollab.dev\/api\/maven\/latest\/file\/maven-snapshots\/cn\/nukkit\/nukkit\/1.0-SNAPSHOT?extension=jar -O ${SERVER_JARFILE}\r\nelif [ -n \"${NUKKIT_VERSION}\" ]; then\r\n    wget https:\/\/repo.opencollab.dev\/maven-snapshots\/cn\/nukkit\/nukkit\/1.0-SNAPSHOT\/nukkit-${NUKKIT_VERSION}.jar -O ${SERVER_JARFILE}\r\nfi\r\n\r\necho -s \"Install completed!\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Jar File",
+            "description": "The name of the Nukkit jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:\/^([\\w\\d._-]+)(\\.jar)$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Nukkit Version",
+            "description": "The snapshot version of Nukkit to download (e.g. 1.0-20250805.172443-1219). Use \"latest\" for latest or leave empty and download manually.",
+            "env_variable": "NUKKIT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+        }
+    ]
+}

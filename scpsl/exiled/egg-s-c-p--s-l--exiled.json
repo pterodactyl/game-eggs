@@ -1,0 +1,84 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-11-15T12:35:55+00:00",
+    "name": "SCP:SL - Exiled",
+    "author": "eggs@purpleflaghosting.com",
+    "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server with Exiled Plugin Framework - https:\/\/github.com\/ExMod-Team\/EXILED",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "Mono - Latest": "ghcr.io\/ptero-eggs\/yolks:mono_latest"
+    },
+    "file_denylist": [],
+    "startup": ".\/LocalAdmin {{SERVER_PORT}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Waiting for players\"\r\n}",
+        "logs": "{}",
+        "stop": "EXIT"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\nmkdir -p $HOME\/.config\r\n\r\n# Download Exiled installer\r\ncurl -L -o \/tmp\/Exiled.Installer-Linux https:\/\/github.com\/ExMod-Team\/EXILED\/releases\/latest\/download\/Exiled.Installer-Linux \r\nchmod +x \/tmp\/Exiled.Installer-Linux\r\n\r\n\r\n# Run Exiled installer\r\nif [[ -n $EXILED_VERSION  ]] && [[ \"${EXILED_VERSION}\" != \"latest\" ]]; then\r\n    echo \"Installing Exiled version ${EXILED_VERSION}...\"\r\n\r\n    if [[ \"${EXILED_PRE_RELEASES}\" == \"1\" ]]; then\r\n        echo \"Including Exiled pre-releases\"\r\n    fi\r\nelse\r\n    echo \"Installing the latest Exiled version...\"\r\n    EXILED_VERSION=\"\"\r\nfi\r\n\r\n# shellcheck disable=SC2046\r\n\/tmp\/Exiled.Installer-Linux --path \/mnt\/server\/ --appdata \/mnt\/server\/.config --skip-version-select --exiled \/mnt\/server\/.config $( [[ \"${EXILED_PRE_RELEASES}\" == \"1\" ]] && echo \"--pre-releases \" || echo \"\" )$( [[ -n \"${EXILED_VERSION}\" ]] && echo \"--target-version ${EXILED_VERSION} \" || echo \"\" )\r\n\r\n\r\n\r\necho \"Installation complete.\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Exiled Version",
+            "description": "Exiled version to install. \"latest\" will install the latest release of Exiled.",
+            "env_variable": "EXILED_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Exiled Pre-Releases",
+            "description": "If Exiled Version is set to latest, this will cause it to include pre-release versions.\r\nThis is not required to be on when setting a specific Exiled version",
+            "env_variable": "EXILED_PRE_RELEASES",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "SRCDS_APPID",
+            "description": "Steam AppID to install",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "996560",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta Branch",
+            "description": "Installs beta branch from steam if specified. Requires a reinstall to switch branches properly.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Dotnet Bundle",
+            "description": "For EXILED Framework Updater.",
+            "env_variable": "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
+            "default_value": ".\/dotnet-bundle",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        }
+    ]
+}

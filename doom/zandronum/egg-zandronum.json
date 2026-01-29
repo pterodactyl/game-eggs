@@ -1,0 +1,152 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-07-19T22:21:54+02:00",
+    "name": "Zandronum",
+    "author": "sup@libtar.de",
+    "description": "Zandronum is a multiplayer oriented port, based off Skulltag, for Doom and Doom II by id Software.\r\n\r\nThis egg uses the Freedoom WAD by default.",
+    "features": null,
+    "docker_images": {
+        "Ubuntu": "ghcr.io\/ptero-eggs\/yolks:ubuntu"
+    },
+    "file_denylist": [],
+    "startup": ".\/zandronum-server -port {{SERVER_PORT}} -config \/home\/container\/zandronum.ini +set dmflags {{DMFLAGS}} +set dmflags2 {{DMFLAGS2}} +set zadmflags {{ZADMFLAGS}} +set compatflags {{COMPATFLAGS}} +set compatflags2 {{COMPATFLAGS2}} +set zacompatflags {{ZACOMPATFLAGS}} -iwad IWAD\/{{IWAD}} -file PWAD\/{{PWADS}} -host {{MAX_PLAYERS}} +map {{MAP}} -skill {{SKILL}}  -netmode 1",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"UDP Initialized.\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/sh\r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\nARCH=\"linuxserver-armv8\"\r\nif [ \"$(uname -m)\" = \"x86_64\" ]; then\r\n  ARCH=\"linux-x86_64\"\r\nfi\r\n\r\necho \"Fetching available Zandronum versions for architecture $ARCH...\"\r\nhtml=$(curl -s https:\/\/zandronum.com\/downloads\/)\r\n\r\necho \"Matched files:\"\r\nmatched=$(echo \"$html\" | grep -oE \"zandronum[0-9.]+-${ARCH}\\.tar\\.bz2\" | sort -u)\r\necho \"$matched\"\r\n\r\n# Extract version numbers (including 3.2 now)\r\nversions=$(echo \"$matched\" | sed -E \"s\/zandronum([0-9.]+)-.*\/\\1\/\")\r\nlatest_version=$(echo \"$versions\" | sort -V | tail -n1)\r\n\r\ndownload_success=0\r\n\r\nuser_agent=\"Mozilla\/5.0 (X11; Linux x86_64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/115.0 Safari\/537.36\"\r\n\r\ndownload_with_retries() {\r\n  local url=\"$1\"\r\n  local tries=3\r\n  local wait=5\r\n  local count=1\r\n  local filename\r\n  filename=$(basename \"$url\")\r\n\r\n  while [ $count -le $tries ]; do\r\n    echo \"Download attempt $count of $tries...\"\r\n    if curl -L --fail --retry 2 --retry-delay 5 -A \"$user_agent\" -o \"$filename\" \"$url\"; then\r\n      return 0\r\n    else\r\n      echo \"Download attempt $count failed, retrying in $wait seconds...\"\r\n      sleep $wait\r\n    fi\r\n    count=$((count + 1))\r\n  done\r\n\r\n  return 1\r\n}\r\n\r\nfilename=\"zandronum${latest_version}-${ARCH}.tar.bz2\"\r\nurl=\"https:\/\/zandronum.com\/downloads\/${filename}\"\r\n\r\necho \"Checking if file exists at $url...\"\r\nif curl -A \"$user_agent\" --silent --fail --output \/dev\/null \"$url\"; then\r\n  echo \"Attempting to download $filename...\"\r\n  if download_with_retries \"$url\"; then\r\n    echo \"Successfully downloaded $filename.\"\r\n    download_success=1\r\n  else\r\n    echo \"Download failed for $filename after retries.\"\r\n  fi\r\nelse\r\n  echo \"File not found: $filename\"\r\nfi\r\n\r\nif [ \"$download_success\" -ne 1 ]; then\r\n  echo \"ERROR: Could not download the latest Zandronum version. Exiting.\"\r\n  exit 1\r\nfi\r\n\r\necho \"Extracting $filename...\"\r\ntar -xjf \"$filename\"\r\nrm -f \"$filename\"\r\nrm -f zandronum  # Remove the client binary\r\n\r\nchmod +x zandronum-server\r\n\r\nmkdir -p IWAD PWAD\r\n\r\necho \"Fetching latest Freedoom release...\"\r\nfreedoom_url=$(curl -s https:\/\/api.github.com\/repos\/freedoom\/freedoom\/releases\/latest | jq -r '.assets[].browser_download_url' | grep -m1 -i 'freedoom-.*\\.zip')\r\n\r\nif [ -z \"$freedoom_url\" ]; then\r\n  echo \"Failed to fetch Freedoom release. Exiting.\"\r\n  exit 1\r\nfi\r\n\r\necho \"Downloading Freedoom from $freedoom_url...\"\r\ncurl -L -o freedoom.zip \"$freedoom_url\"\r\nunzip -j -o freedoom.zip '*\/*' -d IWAD\/\r\nrm freedoom.zip\r\nrm -f IWAD\/*.html IWAD\/*.pdf\r\n\r\necho \"Downloading default config...\"\r\nwget -q -O zandronum.ini https:\/\/raw.githubusercontent.com\/ptero-eggs\/game-eggs\/main\/doom\/zandronum\/zandronum.ini\r\n\r\ntouch adminlist.txt whitelist.txt banlist.txt\r\n\r\nif [ \"$GEOIP\" = \"1\" ]; then\r\n  echo \"Downloading GeoIP data...\"\r\n  wget -q -O GeoIP.dat https:\/\/raw.githubusercontent.com\/ptero-eggs\/game-eggs\/main\/doom\/zandronum\/GeoIP.dat\r\nfi\r\n\r\necho \"Install complete. Zandronum version ${latest_version} is ready.\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on your game server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|integer|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "IWAD",
+            "description": "An IWAD is the main resource file for a Doom-engine game, containing all the game's original sounds, levels, and graphics.",
+            "env_variable": "IWAD",
+            "default_value": "freedoom1.wad",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "PWADS",
+            "description": "If you wish to use multiple PWAD you can do so by separating them with spaces.\r\n\r\nA PWAD is a WAD containing lumps of data, often used as addons. They replace in-game assets.",
+            "env_variable": "PWADS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Skill",
+            "description": "Set the difficulty of the game.",
+            "env_variable": "SKILL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|between:0,15",
+            "field_type": "text"
+        },
+        {
+            "name": "map",
+            "description": "The map the server should start with.",
+            "env_variable": "MAP",
+            "default_value": "e1m1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "dmflags",
+            "description": "Gameplay flags. https:\/\/wiki.zandronum.com\/DMFlags",
+            "env_variable": "DMFLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "dmflags2",
+            "description": "Gameplay flags. https:\/\/wiki.zandronum.com\/DMFlags",
+            "env_variable": "DMFLAGS2",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "zadmflags",
+            "description": "Zandronum specific gameplay flags. https:\/\/wiki.zandronum.com\/DMFlags",
+            "env_variable": "ZADMFLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "compatflags",
+            "description": "Compatibility flags. https:\/\/wiki.zandronum.com\/DMFlags",
+            "env_variable": "COMPATFLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "compatflags2",
+            "description": "Compatibility flags. https:\/\/wiki.zandronum.com\/DMFlags",
+            "env_variable": "COMPATFLAGS2",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "zacompatflags",
+            "description": "Zandronum specific compatibility flags. https:\/\/wiki.zandronum.com\/DMFlags",
+            "env_variable": "ZACOMPATFLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable GeoIP",
+            "description": "GeoIP is used to identify the country of the client's ip address",
+            "env_variable": "GEOIP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

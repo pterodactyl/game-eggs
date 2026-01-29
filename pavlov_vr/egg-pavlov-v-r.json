@@ -1,0 +1,94 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2023-07-02T17:55:48+02:00",
+    "name": "Pavlov VR",
+    "author": "admin@devil.wtf",
+    "description": "Pavlov VR is a multiplayer shooter in VR with heavy focus on community features. Realistic reloading features and fast paced combat as part of the core experience. Play the #1 most popular VR shooter on PC today.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:ubuntu": "ghcr.io\/ptero-eggs\/steamcmd:ubuntu"
+    },
+    "file_denylist": [],
+    "startup": ".\/Pavlov\/Binaries\/Linux\/PavlovServer-Linux-Shipping  Pavlov -PORT={{SERVER_PORT}} -KEY=\"{{API_KEY}}\"",
+    "config": {
+        "files": "{\r\n    \"Pavlov\/Saved\/Config\/RconSettings.txt\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"Password=\": \"Password={{env.RCON_PASSWORD}}\",\r\n            \"Port=\": \"Port={{env.RCON_PORT}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Starting Server Status Helper on Port\"\r\n}",
+        "logs": "{}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\nchmod +x \"\/mnt\/server\/Pavlov\/Binaries\/Linux\/PavlovServer-Linux-Shipping\"\r\n\r\n# Install Configuration Files\r\nmkdir -p \/mnt\/server\/Pavlov\/Saved\/Logs\r\nmkdir -p \/mnt\/server\/Pavlov\/Saved\/Config\/LinuxServer\r\nmkdir -p \/mnt\/server\/Pavlov\/Saved\/maps\r\n\r\n\r\ncd \/mnt\/server\/Pavlov\/Saved\/Config\/LinuxServer\r\nif [ ! -f Game.ini ]; then\r\n    echo -e \"Downloading Pavlov VR Game.ini\"\r\n    curl -ssL -o Game.ini https:\/\/raw.githubusercontent.com\/ptero-eggs\/game-eggs\/main\/pavlov_vr\/Game.ini\r\nfi\r\n\r\ncd \/mnt\/server\/Pavlov\/Saved\/Config\r\nif [ ! -f RconSettings.txt ]; then\r\n    echo -e \"Downloading Pavlov VR RconSettings.txt\"\r\n    curl -ssL -o RconSettings.txt https:\/\/raw.githubusercontent.com\/ptero-eggs\/game-eggs\/main\/pavlov_vr\/RconSettings.txt\r\nfi\r\n\r\ncd \/mnt\/server\/\r\nif [ -f PavlovServer.sh ]; then\r\n    rm PavlovServer.sh\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "App ID",
+            "description": "Pavlov VR steam app id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "622970",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:622970",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Password",
+            "description": "Enter a password for your RCON Configuration.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "CHANGE_ME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Port",
+            "description": "Port for your RCON Configuration.",
+            "env_variable": "RCON_PORT",
+            "default_value": "8188",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta id",
+            "description": "Beta branch of a steam app",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,beta_server",
+            "field_type": "text"
+        },
+        {
+            "name": "Api key",
+            "description": "For your server to show up in the server list, there is now a requirement to have an ApiKey issued by vankrupt. This is to prevent DOS attacks against the master server.\r\nGet it here: https:\/\/pavlov-ms.vankrupt.com\/servers\/v1\/key",
+            "env_variable": "API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        }
+    ]
+}

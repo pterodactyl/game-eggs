@@ -1,0 +1,83 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-11-06T06:47:00+00:00",
+    "name": "FTB Server",
+    "author": "runemaster580@gmail.com",
+    "description": "FTB modpacks are now distributed through their own API. This egg was developed for support for modpacks that are distributed through this.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 8": "ghcr.io\/ptero-eggs\/yolks:java_8",
+        "Java 11": "ghcr.io\/ptero-eggs\/yolks:java_11",
+        "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
+        "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
+        "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
+        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
+        "Java 23": "ghcr.io\/ptero-eggs\/yolks:java_23",
+        "Java 24": "ghcr.io\/ptero-eggs\/yolks:java_24"
+    },
+    "file_denylist": [],
+    "startup": "java $( [[ -f log4jfix\/Log4jPatcher.jar ]] && printf %s \"-javaagent:log4jfix\/Log4jPatcher.jar \" ) -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[ ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# FTB Pack Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\nif [ ! -d \/mnt\/server ]; then\r\n    mkdir -p \/mnt\/server\r\nfi\r\ncd \/mnt\/server || { echo \"Failed to change into server directory\"; exit 1; }\r\n\r\n\r\n# Download needed software.\r\nfunction install_required {\r\n    apt update\r\n    apt install -y curl jq\r\n}\r\n\r\nfunction get_modpack_id {\r\n    urlencode() {\r\n        local string=\"${1\/\/ \/%20}\"\r\n        echo \"$string\"\r\n    }\r\n    \r\n    # if no modpack id is set and modpack search term is set.\r\n    if [ -z \"${FTB_MODPACK_ID}\" ] && [ -n \"${FTB_SEARCH_TERM}\" ]; then\r\n        encoded_search_term=$(urlencode \"$FTB_SEARCH_TERM\")\r\n        JSON_DATA=$(curl -sSL https:\/\/api.feed-the-beast.com\/v1\/modpacks\/public\/modpack\/search\/8?term=\"${encoded_search_term}\")\r\n    \r\n        # grabs the first modpack in array.\r\n        FTB_MODPACK_ID=$(echo -e \"${JSON_DATA}\" | jq -r \".packs[0]\")\r\n    fi\r\n    \r\n    if [ -z \"${FTB_MODPACK_VERSION_ID}\" ] && [ -n \"${FTB_VERSION_STRING}\" ]; then\r\n        # grabs the correct version id matching the string.\r\n        FTB_MODPACK_VERSION_ID=$(curl -sSL https:\/\/api.feed-the-beast.com\/v1\/modpacks\/public\/modpack\/\"${FTB_MODPACK_ID}\" | jq -r --arg VSTRING \"${FTB_VERSION_STRING}\" '.versions[] | select(.name == $VSTRING) | .id')\r\n    fi\r\n}\r\n\r\nfunction run_installer {\r\n    # get architecture for installer\r\n    INSTALLER_TYPE=$([ \"$(uname -m)\" == \"x86_64\" ] && echo \"linux\" || echo \"arm\/linux\")\r\n    echo \"ModpackID: ${FTB_MODPACK_ID} VersionID: ${FTB_MODPACK_VERSION_ID:-latest} InstallerType: ${INSTALLER_TYPE}\"\r\n\r\n    # download installer\r\n    curl -Ls https:\/\/api.feed-the-beast.com\/v1\/modpacks\/public\/modpack\/0\/0\/server\/${INSTALLER_TYPE} --output serversetup\r\n    chmod +x .\/serversetup\r\n    \r\n    # remove old forge files (to allow updating)\r\n    rm -rf libraries\/net\/minecraftforge\/forge\r\n    rm -rf libraries\/net\/neoforged\/forge\r\n    rm -rf libraries\/net\/neoforged\/neoforge\r\n    rm -f unix_args.txt\r\n    \r\n    # Remove old log4jpatcher\r\n    rm -rf log4jfix\/\r\n    \r\n    # run installer\r\n    # shellcheck disable=SC2046\r\n    .\/serversetup -pack \"${FTB_MODPACK_ID}\" $([ -n \"$FTB_MODPACK_VERSION_ID\" ] && echo \"-version $FTB_MODPACK_VERSION_ID\") -no-colours -no-java -auto -force || { echo \"Failed to run FTB Installer\"; exit 1; }\r\n}\r\n\r\n# allows startup command to work\r\nfunction move_startup_files {\r\n    # create symlink for forge unix_args.txt if exists\r\n    if compgen -G \"libraries\/net\/minecraftforge\/forge\/*\/unix_args.txt\"; then\r\n        ln -sf libraries\/net\/minecraftforge\/forge\/*\/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # create symlink for neoforge unix_args.txt if exists\r\n    if compgen -G \"libraries\/net\/neoforged\/forge\/*\/unix_args.txt\"; then\r\n        ln -sf libraries\/net\/neoforged\/forge\/*\/unix_args.txt unix_args.txt\r\n    fi\r\n    if compgen -G \"libraries\/net\/neoforged\/neoforge\/*\/unix_args.txt\"; then\r\n        ln -sf libraries\/net\/neoforged\/neoforge\/*\/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # Create symlink for log4jpatcher that is sometimes included\r\n    if compgen -G \"log4jfix\/Log4jPatcher-*.jar\"; then\r\n        ln -sf log4jfix\/Log4jPatcher-*.jar log4jfix\/Log4jPatcher.jar\r\n    fi\r\n    \r\n    # move forge\/neoforge\/fabric jar file to start-server.jar if exists\r\n    if compgen -G \"forge-*.jar\"; then\r\n        mv -f forge-*.jar start-server.jar\r\n    elif compgen -G \"fabric-*.jar\"; then\r\n        mv -f fabric-*.jar start-server.jar\r\n    fi\r\n}\r\n\r\n# installer cleanup\r\nfunction installer_cleanup {\r\n    rm serversetup\r\n    rm -f run.bat\r\n    rm -f run.sh\r\n}\r\n\r\n# run installation steps\r\ninstall_required\r\nget_modpack_id\r\nrun_installer\r\nmove_startup_files\r\ninstaller_cleanup\r\n\r\necho \"Finished installing FTB modpack\"",
+            "container": "eclipse-temurin:8-jdk-jammy",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "FTB Pack search term",
+            "description": "the search term for finding the modpack. needs to be at least 4 characters long.\r\nFind out what term is needed by using the ftb app and searching with the term. make sure it only returns 1 result.\r\ncan also be searched for via: https:\/\/api.feed-the-beast.com\/v1\/modpacks\/public\/modpack\/search\/8?term={SEARCHTERM}\r\n\r\nonly needed if the modpack id and modpack version id is unknown.",
+            "env_variable": "FTB_SEARCH_TERM",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "FTB modpack ID",
+            "description": "The FTB Api modpack ID.\r\nNeeded if not using the search variable\r\n\r\nExample: FTB Interactions ID is 5.\r\nhttps:\/\/api.feed-the-beast.com\/v1\/modpacks\/public\/modpack\/5",
+            "env_variable": "FTB_MODPACK_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "FTB Pack Version",
+            "description": "what version of the modpack to install. leave empty if using the modpack version id variable.",
+            "env_variable": "FTB_VERSION_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "FTB Pack Version ID",
+            "description": "The modpack api version ID.\r\nLeave this and FTB Pack Version empty to install latest.\r\n\r\nExample FTB Revelations version id for version \"2.0.2\" is 86.\r\nwhich would come out as: https:\/\/api.feed-the-beast.com\/v1\/modpacks\/public\/modpack\/5\/86",
+            "env_variable": "FTB_MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+        }
+    ]
+}

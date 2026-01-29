@@ -1,0 +1,102 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-10-30T16:08:41+01:00",
+    "name": "KSP - LMP",
+    "author": "brainshead@gmail.com",
+    "description": "Dedicated server for the LunaMultiplayer (LMP) mod for Kerbal Space Program. Automatically installs the latest or specified version from GitHub. Runs on .NET 5 using the official Ptero-Eggs yolk.",
+    "features": null,
+    "docker_images": {
+        "Dotnet 5 ": " ghcr.io\/ptero-eggs\/yolks:dotnet_5"
+    },
+    "file_denylist": [],
+    "startup": "dotnet .\/LMPServer\/Server.dll",
+    "config": {
+        "files": "{\r\n    \"LMPServer\/Config\/ConnectionSettings.xml\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"ConnectionSettingsDefinition.Port\": \"{{server.build.default.port}}\"\r\n        }\r\n    },\r\n    \"LMPServer\/Config\/GeneralSettings.xml\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"GeneralSettingsDefinition.ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"GeneralSettingsDefinition.Password\": \"{{server.build.env.PASSWORD}}\",\r\n            \"GeneralSettingsDefinition.AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\",\r\n            \"GeneralSettingsDefinition.MaxPlayers\": \"{{server.build.env.MaxPlayers}}\",\r\n            \"GeneralSettingsDefinition.GameDifficulty\": \"{{server.build.env.GameDifficulty}}\",\r\n            \"GeneralSettingsDefinition.GameMode\": \"{{server.build.env.GameMode}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"All systems up and running\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# ==================================================\r\n# Kerbal Space Program - LunaMultiplayer Server Installer\r\n# ==================================================\r\n# Runs inside container using Ptero-Eggs .NET 5 yolk base\r\n\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\ncd \/mnt\/server\r\n\r\n# Determine version to install\r\nif [ -z \"${LMP_VERSION}\" ]; then\r\n    echo \"No version specified, downloading latest release...\"\r\n    RELEASE_URL=$(curl -s https:\/\/api.github.com\/repos\/LunaMultiplayer\/LunaMultiplayer\/releases\/latest | grep browser_download_url | grep 'Server-Release.zip' | cut -d '\"' -f 4)\r\nelse\r\n    echo \"Downloading specified version: ${LMP_VERSION}\"\r\n    RELEASE_URL=\"https:\/\/github.com\/LunaMultiplayer\/LunaMultiplayer\/releases\/download\/${LMP_VERSION}\/LunaMultiplayer-Server-Release.zip\"\r\nfi\r\n\r\nif [ -z \"${RELEASE_URL}\" ]; then\r\n    echo \"Failed to fetch release URL from GitHub!\"\r\n    exit 1\r\nfi\r\n\r\necho \"Downloading LunaMultiplayer Server from: ${RELEASE_URL}\"\r\ncurl -L -o LMPServer.zip \"${RELEASE_URL}\"\r\nunzip -o LMPServer.zip -d .\r\nrm -f LMPServer.zip\r\n\r\n# Normalize extracted structure if necessary\r\nif [ -d LMPServer\/Server ]; then\r\n    mv LMPServer\/Server\/* LMPServer\/ || true\r\nfi\r\n\r\n# Ensure executable permissions\r\nchmod +x LMPServer\/Server 2>\/dev\/null || true\r\n\r\n# Create default config if missing\r\nmkdir -p LMPServer\/Config\r\nif [ ! -f LMPServer\/Config\/ConnectionSettings.xml ]; then\r\n    cat > LMPServer\/Config\/ConnectionSettings.xml <<EOF\r\n<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ConnectionSettingsDefinition xmlns:xsi=\"http:\/\/www.w3.org\/2001\/XMLSchema-instance\" xmlns:xsd=\"http:\/\/www.w3.org\/2001\/XMLSchema\">\r\n  <!--The address the server listens on. If set to the unspecified IPv6 address [::], the server listens for both IPv6 and IPv4-->\r\n  <ListenAddress>0.0.0.0<\/ListenAddress>\r\n  <!--The UDP port the server listens on. You don't need to open it on your router if RegisterWithMasterServer = true. If you want that players can connect against your server MANUALLY you will need to open it on your router-->\r\n  <Port>${SERVER_PORT}<\/Port>\r\n  <!--Heartbeat interval in ms. MUST be lower than the ConnectionMsTimeout value.-->\r\n  <HearbeatMsInterval>1000<\/HearbeatMsInterval>\r\n  <!--Connection timeout in ms. If no heartbeats are received after this interval, the client is disconnected.-->\r\n  <ConnectionMsTimeout>30000<\/ConnectionMsTimeout>\r\n  <!--Tries to use UPnP to open the ports in your router-->\r\n  <Upnp>true<\/Upnp>\r\n  <!--UPnP timeout in ms for trying to open the ports-->\r\n  <UpnpMsTimeout>5000<\/UpnpMsTimeout>\r\n  <!--Maximum transmission unit (MTU) size in bytes. Min value is 1. Default value is 1408. Max value is 8192.-->\r\n  <MaximumTransmissionUnit>1408<\/MaximumTransmissionUnit>\r\n  <!--Try to expand MTU size-->\r\n  <AutoExpandMtu>false<\/AutoExpandMtu>\r\n<\/ConnectionSettingsDefinition>\r\nEOF\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "LMP Version",
+            "description": "Leave blank to install the latest LunaMultiplayer release, or specify a version tag (e.g. 0.29.3).",
+            "env_variable": "LMP_VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Name of the server. Max 30 char.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Password",
+            "description": "Password for the server. Leave it empty if you want to make a public server. Max 30 chars.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "Admin password for the server. Leave it empty if you don't want to allow server administration from KSP. Max 30 chars.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "Nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "MaxPlayers",
+            "description": "Maximum amount of players that can join the server.",
+            "env_variable": "MaxPlayers",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Difficulty",
+            "description": "Specify the gameplay difficulty of the server. Values: Easy, Normal, Moderate, Hard, Custom.\r\n\r\nChanging value gives an message : Your GameplaySettings file is different than your GeneralSettings - Difficulty value. \r\n\r\nSo the difficulty setting will be set as \"Custom\". In case you want to use the default setting values for the difficulty you have chosen.\r\nRemove the GameplaySettings.xml file so it's recreated again.",
+            "env_variable": "GameDifficulty",
+            "default_value": "Easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Easy,Normal,Moderate,Hard,Custom",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Mode",
+            "description": "Specify the game Type. Values: Sandbox, Career, Science",
+            "env_variable": "GameMode",
+            "default_value": "Sandbox",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Sandbox,Career,Science",
+            "field_type": "text"
+        }
+    ]
+}

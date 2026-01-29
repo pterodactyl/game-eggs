@@ -1,0 +1,32 @@
+name: Add comment on new request
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  add-comment:
+    if: github.event.issue.type.name == 'Egg Request'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add comment
+        run: gh issue comment "$NUMBER" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: |
+            Thank you for submitting your **egg request**! 🥚
+          
+            Your suggestion helps us identify games that the community would like to see supported in the repository.
+          
+            Please keep in mind:
+            - Egg requests are fulfilled by **volunteer staff and community members**.
+            - There is **no guaranteed timeline** for development or publication.
+            - We **cannot guarantee** that an egg for this game will be created.
+          
+            If you’re interested in contributing, you’re always welcome to help develop an egg for this request or collaborate with others who may wish to work on it.
+          
+            We appreciate your contribution and enthusiasm for helping grow the Pterodactyl Eggs ecosystem!

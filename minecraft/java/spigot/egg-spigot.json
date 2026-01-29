@@ -1,0 +1,71 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-01-12T08:12:41+00:00",
+    "name": "Spigot",
+    "author": "support@pterodactyl.io",
+    "description": "Spigot is the most widely-used modded Minecraft server software in the world. It powers many of the top Minecraft server networks around to ensure they can cope with their huge player base and ensure the satisfaction of their players. Spigot works by reducing and eliminating many causes of lag, as well as adding in handy features and settings that help make your job of server administration easier.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+        "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+        "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+        "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+        "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+        "java 22": "ghcr.io/ptero-eggs/yolks:java_22"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n# Spigot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nmkdir -p /usr/share/man/man1\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"x64\" || echo \"aarch64\")\r\n    \r\nfunction install_java() {\r\n  echo \"ARCH: ${ARCH}\"\r\n  echo \"Download URl: $1\"\r\n  curl -L \"$1\" -o java.tar.gz\r\n  tar xzf java.tar.gz\r\n  export PATH=$PWD/$2/bin:$PATH\r\n  java -version\r\n}\r\n\r\nfunction build_spigot()\r\n{\r\n  java -Xms$1M -jar BuildTools.jar --rev \"${DL_VERSION}\" || { echo -e \"\\n install failed! Attempted to install ${DL_VERSION} with memory of ${SERVER_MEMORY} and Java version of:\"; java -version; exit 1; }\r\n}\r\n\r\n\r\n## Only download if a path is provided, otherwise continue.\r\nif [ -n \"${DL_PATH}\" ]; then\r\n    cd /mnt/server || { echo \"Failed to change directory\"; exit 1;}\r\n    MODIFIED_DOWNLOAD=$(eval echo \"$(echo \"${DL_PATH}\" | sed -e 's/{{/${/g' -e 's/}}/}/g')\")\r\n    echo -e \"Using custom provided download link ${MODIFIED_DOWNLOAD}\"\r\n    curl -L \"${MODIFIED_DOWNLOAD}\" -o \"${SERVER_JARFILE}\"\r\nelse\r\n    # Fetch the java version info from the spigotmc API\r\n    if [ -z \"$DL_VERSION\" ] || [ \"$DL_VERSION\" == \"latest\" ]; then\r\n        DL_VERSION=\"latest\"\r\n        SPIGOT_VERSION_JSON=$(curl --fail -s https://hub.spigotmc.org/versions/latest.json)\r\n    else\r\n        # Get requested version    \r\n        if ! SPIGOT_VERSION_JSON=$(curl --fail -s https://hub.spigotmc.org/versions/${DL_VERSION}.json) ; then\r\n            # Default to latest\r\n            echo \"Invalid version requested... defaulting to latest.\"\r\n            DL_VERSION=\"latest\"\r\n            SPIGOT_VERSION_JSON=$(curl --fail -s https://hub.spigotmc.org/versions/${DL_VERSION}.json)\r\n        fi\r\n    fi\r\n    JAVA_VERSION_INDEX_MIN=$(echo \"$SPIGOT_VERSION_JSON\" | jq -r '.javaVersions[0]')\r\n    JAVA_VERSION_INDEX_MAX=$(echo \"$SPIGOT_VERSION_JSON\" | jq -r '.javaVersions[1]')\r\n\r\n\r\n    # Spigot version table - https://hub.spigotmc.org/stash/projects/SPIGOT/repos/buildtools/browse/src/main/java/org/spigotmc/builder/JavaVersion.java\r\n    # Install the minimum supported java version\r\n    if  [ 52 -ge \"$JAVA_VERSION_INDEX_MIN\" ] && [ 52 -le \"$JAVA_VERSION_INDEX_MAX\" ]; then\r\n        install_java \"https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jdk_${ARCH}_linux_hotspot_8u312b07.tar.gz\" jdk8u312-b07\r\n    elif [ 60 -ge \"$JAVA_VERSION_INDEX_MIN\" ] && [ 60 -le \"$JAVA_VERSION_INDEX_MAX\" ]; then\r\n        install_java \"https://github.com/adoptium/temurin16-binaries/releases/download/jdk-16.0.2%2B7/OpenJDK16U-jdk_${ARCH}_linux_hotspot_16.0.2_7.tar.gz\" jdk-16.0.2+7\r\n    elif [ 61 -ge \"$JAVA_VERSION_INDEX_MIN\" ] && [ 61 -le \"$JAVA_VERSION_INDEX_MAX\" ]; then\r\n        install_java \"https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_${ARCH}_linux_hotspot_17.0.1_12.tar.gz\" jdk-17.0.1+12\r\n    elif [ 65 -ge \"$JAVA_VERSION_INDEX_MIN\" ] && [ 65 -le \"$JAVA_VERSION_INDEX_MAX\" ]; then\r\n        install_java \"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.3%2B9/OpenJDK21U-jdk_${ARCH}_linux_hotspot_21.0.3_9.tar.gz\" jdk-21.0.3+9\r\n    elif [ 67 -ge \"$JAVA_VERSION_INDEX_MIN\" ] && [ 67 -le \"$JAVA_VERSION_INDEX_MAX\" ]; then\r\n        install_java \"https://github.com/adoptium/temurin23-binaries/releases/download/jdk-23.0.1%2B11/OpenJDK23U-jdk_${ARCH}_linux_hotspot_23.0.1_11.tar.gz\" jdk-23.0.1+11\r\n    else\r\n        echo \"Unsupported Java version required\"\r\n        exit 1\r\n    fi\r\n\r\n    mkdir -p /srv/\r\n    cd /srv/ || { echo \"Failed to change directory\"; exit 1;}\r\n    curl -L https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar -o BuildTools.jar\r\n\r\n    # Force the minimum Wings install container memory should someone provide less or 0 as it will break the Java build process\r\n    if [ \"$SERVER_MEMORY\" -lt 1024 ]; then\r\n        echo -e \"Do not use 0 for memory with Java applications. Defaulting to 1024MB.\\n WARNING! 1024MB might not be enough to build 1.17+ releases.\"\r\n        SERVER_MEMORY=1024            \r\n    fi\r\n    build_spigot \"${SERVER_MEMORY}\"\r\n    mv spigot-*.jar \"/mnt/server/${SERVER_JARFILE}\"\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+        },
+        {
+            "name": "Download Path",
+            "description": "A URL to use to download Spigot rather than building it on the server. This is not user viewable. Use <code>{{DL_VERSION}}</code> in the URL to automatically insert the assigned version into the URL. If you do not enter a URL Spigot will build directly in the container (this will fail on low memory containers).",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Spigot Version",
+            "description": "The version of Spigot to download (using the --rev tag from https://hub.spigotmc.org/versions). Use \"latest\" for latest.",
+            "env_variable": "DL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,10",
+            "field_type": "text"
+        }
+    ]
+}

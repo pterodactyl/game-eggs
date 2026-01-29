@@ -1,0 +1,132 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-08-06T01:23:58+02:00",
+    "name": "Sunkenland",
+    "author": "brainshead@gmail.com",
+    "description": "Get ready for a Waterworld-themed survival game with modular base building, sunken city scavenging, crafting, base defense, and invasions of NPC clans for resources and territory. Ready for the water apocalypse?",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "wine .\/Sunkenland-DedicatedServer.exe -nographics -batchmode -worldGuid {{WORLD_GUID}} -region {{REGION}} -password {{PASSWORD}}  -maxPlayerCapacity {{MAX_PLAYER}} -publicIP {{SERVER_IP}} -publicPort {{SERVER_PORT}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n\"done\": \"Server Start Complete, Ready for Clients to Join. ServerID is \"\r\n}",
+        "logs": "{}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# Sunkenland SteamCMD Base Installation Script\r\n# Image: ghcr.io\/ptero-eggs\/installers:debian\r\n# Server Files: \/mnt\/server\r\n\r\n# --- Install dependencies ---\r\napt update -y\r\napt install -y rsync curl tar git\r\n\r\n# --- Steam Variables ---\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam login info (optional)\r\n# SRCDS_APPID - Steam App ID (Sunkenland = 2512750)\r\n# SRCDS_BETAID, SRCDS_BETAPASS - Optional beta branch\/password\r\n# WINDOWS_INSTALL - Set to 1 for Windows game\r\n# INSTALL_FLAGS - Extra steamcmd flags\r\n# AUTO_UPDATE - Set to 1 or 0\r\n\r\n# --- Validate Steam credentials ---\r\nif [[ -z \"${STEAM_USER}\" || -z \"${STEAM_PASS}\" ]]; then\r\n    echo \"No Steam credentials provided. Using anonymous login.\"\r\n    STEAM_USER=\"anonymous\"\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo \"Steam user set to: ${STEAM_USER}\"\r\nfi\r\n\r\n# --- Install SteamCMD ---\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n# --- Run SteamCMD to install the game ---\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && echo '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -n \"${SRCDS_BETAID}\" ]] && echo \"-beta ${SRCDS_BETAID}\" ) $( [[ -n \"${SRCDS_BETAPASS}\" ]] && echo \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n# --- Setup Steam client libraries ---\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n# --- Validate SERVER_NAME ---\r\nif [[ -z \"${SERVER_NAME}\" ]]; then\r\n    echo \"SERVER_NAME is empty. Using fallback: 'Pterodactyl Sunkenland'\"\r\n    SERVER_NAME=\"Pterodactyl Sunkenland\"\r\nelse\r\n    echo \"SERVER_NAME is: ${SERVER_NAME}\"\r\nfi\r\n\r\n# --- Define world file directory ---\r\nWORLD_BASE=\"\/mnt\/server\/.wine\/drive_c\/users\/container\/AppData\/LocalLow\/Vector3 Studio\/Sunkenland\"\r\nWORLD_DIR=\"$WORLD_BASE\/Worlds\"\r\n\r\n# --- Optional world file setup ---\r\nTARGET_GUID=\"11223344-5566-7788-99aa-bbccddeeff00\"\r\n\r\nif [[ \"${WORLD_GUID}\" == \"$TARGET_GUID\" ]]; then\r\n    echo \"Detected matching GUID '$TARGET_GUID' \u2014 Downloading standard world files...\"\r\n\r\n    # Clone specific folder from GitHub (sparse checkout)\r\n    mkdir -p \/tmp\/world_files\r\n    git clone --depth 1 --filter=blob:none --sparse --branch main https:\/\/github.com\/Ptero-Eggs\/game-eggs\/sunkenland \/tmp\/world_files\/worlds\r\n    cd \/tmp\/world_files\/worlds\r\n    git sparse-checkout init --cone\r\n    git sparse-checkout set sunkenland\/world_files\r\n    git pull origin main\r\n\r\n    # Copy world files into place\r\n    mkdir -p \"$WORLD_BASE\"\r\n    rsync -a \/tmp\/world_files\/worlds\/sunkenland\/world_files\/Worlds\/ \"$WORLD_DIR\/\"\r\n\r\n    # Rename downloaded world folder\r\n    ORIGINAL_FOLDER=\"$WORLD_DIR\/World~${WORLD_GUID}\"\r\n    NEW_FOLDER=\"$WORLD_DIR\/${SERVER_NAME}~${WORLD_GUID}\"\r\n\r\n    if [[ -d \"$ORIGINAL_FOLDER\" ]]; then\r\n        if [[ \"$ORIGINAL_FOLDER\" != \"$NEW_FOLDER\" ]]; then\r\n            if [[ -d \"$NEW_FOLDER\" ]]; then\r\n                echo \"Removing existing folder at $NEW_FOLDER to avoid nesting.\"\r\n                rm -rf \"$NEW_FOLDER\"\r\n            fi\r\n            mv \"$ORIGINAL_FOLDER\" \"$NEW_FOLDER\"\r\n            echo \"World folder renamed from 'World' to '${SERVER_NAME}', with GUID: ${WORLD_GUID}\"\r\n        else\r\n            echo \"World folder already named correctly: $ORIGINAL_FOLDER\"\r\n        fi\r\n    else\r\n        echo \"Expected world folder not found at: $ORIGINAL_FOLDER\"\r\n    fi\r\n\r\n    rm -rf \/tmp\/world_files\r\nelse\r\n    echo \"WORLD_GUID is '${WORLD_GUID}' \u2014 skipping auto world setup.\"\r\nfi\r\n\r\n# --- Handle manually uploaded world folder ---\r\nFOUND_FOLDERS=$(find \"$WORLD_DIR\" -maxdepth 1 -type d -name \"*~${WORLD_GUID}\" -printf \"%f\\n\")\r\n\r\nif [[ -n \"$FOUND_FOLDERS\" ]]; then\r\n    while IFS= read -r folder; do\r\n        ORIGINAL_FOLDER=\"$WORLD_DIR\/$folder\"\r\n        NEW_FOLDER=\"$WORLD_DIR\/${SERVER_NAME}~${WORLD_GUID}\"\r\n\r\n        if [[ \"$ORIGINAL_FOLDER\" != \"$NEW_FOLDER\" ]]; then\r\n            if [[ -d \"$NEW_FOLDER\" ]]; then\r\n                echo \"Removing existing folder at $NEW_FOLDER to avoid nesting.\"\r\n                rm -rf \"$NEW_FOLDER\"\r\n            fi\r\n            mv \"$ORIGINAL_FOLDER\" \"$NEW_FOLDER\"\r\n            echo \"Manually uploaded world folder renamed to: $NEW_FOLDER\"\r\n        else\r\n            echo \"World folder already correctly named: $ORIGINAL_FOLDER\"\r\n        fi\r\n    done <<< \"$FOUND_FOLDERS\"\r\nelse\r\n    echo \"No folder found with GUID: $WORLD_GUID\"\r\nfi\r\n\r\n# --- Ensure AdminSteamIDs.txt and BanSteamIDs.txt exist ---\r\nFINAL_WORLD_DIR=\"$WORLD_DIR\/${SERVER_NAME}~${WORLD_GUID}\"\r\n\r\nif [[ -d \"$FINAL_WORLD_DIR\" ]]; then\r\n    ADMIN_FILE=\"$FINAL_WORLD_DIR\/AdminSteamIDs.txt\"\r\n    BAN_FILE=\"$FINAL_WORLD_DIR\/BanSteamIDs.txt\"\r\n\r\n    if [[ ! -f \"$ADMIN_FILE\" ]]; then\r\n        touch \"$ADMIN_FILE\"\r\n        echo \"Created missing AdminSteamIDs.txt\"\r\n    else\r\n        echo \"AdminSteamIDs.txt already exists\"\r\n    fi\r\n\r\n    if [[ ! -f \"$BAN_FILE\" ]]; then\r\n        touch \"$BAN_FILE\"\r\n        echo \"Created missing BanSteamIDs.txt\"\r\n    else\r\n        echo \"BanSteamIDs.txt already exists\"\r\n    fi\r\nelse\r\n    echo \"World folder not found at: $FINAL_WORLD_DIR \u2014 skipping admin\/ban file creation\"\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Sunkenland installation completed.\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "App ID",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2667530",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,10",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "This is required to install the correct version. Removing or touching this will overwrite the files with a non-existing Linux releases.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINEDEBUG",
+            "description": "don't change this !!!",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "World GUID",
+            "description": "The world GUID is the later part of the world save file, for example, in this save file\r\n'YourWorldName~11223344-5566-7788-99aa-bbccffeeff00', \r\nthe part after '~' symbol is the guid, i.e.'11223344-5566-7788-99aa-bbccffeeff00'.\r\nSpecify Which World to start the game, if the world save file with\r\nentered GUID cannot be found, the server will fail to start and shut down itself",
+            "env_variable": "WORLD_GUID",
+            "default_value": "11223344-5566-7788-99aa-bbccddeeff00",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Region",
+            "description": "Set the custom Region. Default is ASIA. Please check Region Code Table below.\r\nAsia=asia, Chinese Mainland=cn, Japan=jp, Europe=eu, South America=sa\r\nSouth Korea=kr, USA, East=us, USA, West=usw",
+            "env_variable": "REGION",
+            "default_value": "asia",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Player",
+            "description": "Set the Max Player Count. The minimum value is 3\r\nand the maximum value is 15. Default is 3",
+            "env_variable": "MAX_PLAYER",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:3,15",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Set the password. Default is empty; Note that\r\nusing characters other than ASCII may result in password\r\nverification failure. The length limit is 8",
+            "env_variable": "PASSWORD",
+            "default_value": "12345678",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl World",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
+}

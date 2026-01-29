@@ -1,0 +1,32 @@
+name: Add comment on accepted request
+on:
+  issues:
+    types:
+      - labeled
+
+jobs:
+  add-comment:
+    if: >
+      github.event.label.name == 'Accepted' &&
+      github.event.issue.type.name == 'Egg Request'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add comment
+        run: gh issue comment "$NUMBER" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: |
+            This request has been marked as **accepted**.
+            
+            This means:
+            - We’ve determined that a suitable egg for this game would be welcomed in the repository once it’s developed and submitted.
+            - This request will be listed on [pterodactyleggs.com](https://pterodactyleggs.com), allowing users to follow any progress.
+            
+            However, please note that this does **not** mean:
+            - Work has already begun on developing an egg for this game.
+            - There is any guaranteed timeline for development or publication.
+            - We guarantee that an egg for this game will be developed.

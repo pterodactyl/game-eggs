@@ -1,0 +1,202 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-10-06T22:43:39+02:00",
+    "name": "Renown",
+    "author": "info@emeraldhost.de",
+    "description": "Renown is an intense medieval multiplayer survival experience set in a vast, ever-evolving world. Whether alone or rallying allies, gather resources, build powerful strongholds, and engage in brutal battles for dominance.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "SteamAppId=1512690 .\/Renown_Combat\/Binaries\/Linux\/Renown_CombatServer-Linux-Shipping Renown_Combat -PORT={{SERVER_PORT}} -QUERYPORT={{QUERY_PORT}} -BeaconPort={{BEACON_PORT}} -RCONPort={{RCON_PORT}} -LOG=Server.log -ini:Engine:[EpicOnlineServices]:DedicatedServerClientId=xyza78917DzEE5Ey0isciVt66QDm5IzM -ini:Engine:[EpicOnlineServices]:DedicatedServerClientSecret=m\/mrnywFCdeA1mW3ZSvv3qcVlQlfwi1a+7Z63Q44EGU",
+    "config": {
+        "files": "{\r\n    \"Renown_Combat\/Saved\/Config\/LinuxServer\/Game.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].ServerPassword\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].EnableRCON\": \"{{server.build.env.ENABLE_RCON}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].RCONPort\": \"{{server.build.env.RCON_PORT}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].RCONPassword\": \"{{server.build.env.RCON_PASSWORD}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].MapRotation\": \"{{server.build.env.MAP_ROTATION}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].GameSaveName\": \"{{server.build.env.SAVE_NAME}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].UseFirstMap\": \"{{server.build.env.USE_FIRST_MAP}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].Public\": \"{{server.build.env.PUBLIC}}\",\r\n            \"[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C].PrivateSession\": \"{{server.build.env.SERVER_LIST}}\"\r\n        }\r\n    },\r\n    \"Renown_Combat\/Saved\/Config\/LinuxServer\/Engine.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[Server].FirstPersonOnly\": \"{{server.build.env.FIRST_PERSON_ONLY}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Playercount = 0\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# Renown Combat Server Installation Script\r\n# Server Files: \/mnt\/server\r\n\r\n#apt update\r\n#apt -y install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nCONFIG_DIR=\"$HOME\/Renown_Combat\/Saved\/Config\/LinuxServer\"\r\nGAME_INI=\"$CONFIG_DIR\/Game.ini\"\r\nENGINE_INI=\"$CONFIG_DIR\/Engine.ini\"\r\n\r\n# Folder check\r\nif [ -d \"$CONFIG_DIR\" ]; then\r\n    echo \"Config directory exists, skipping\"\r\nelse\r\n    mkdir -p \"$CONFIG_DIR\"\r\nfi\r\n\r\nmkdir -p \"$CONFIG_DIR\"\r\n\r\n# Generate Game.ini\r\ncat <<EOF > \"$GAME_INI\"\r\n[\/Game\/Core\/Blueprints\/Renown_GameInstance.Renown_GameInstance_C]\r\nEnableRCON=${ENABLE_RCON}\r\nRCONPort=${RCON_PORT}\r\nRCONChatMessagesLimit=50\r\nRCONPassword=${RCON_PASSWORD}\r\nRCON_ServerMaxUptime=1800\r\nServerPassword=${SERVER_PASSWORD}\r\nServerName=${SERVER_NAME}\r\nMaxPlayers=${MAX_PLAYERS}\r\nbLAN=False\r\nbAntiCheat=False\r\nGameSaveName=${SAVE_NAME}\r\nGameDescription=Renown\r\nAdminPassword=${ADMIN_PASSWORD}\r\nAdminWhitelist=\r\nUseFirstMap=${USE_FIRST_MAP}\r\nPublic=${PUBLIC}\r\nMapRotation=${MAP_ROTATION}\r\nBanList=\r\nPrivateSession=${SERVER_LIST}\r\nMaxPing=195\r\nMOTD=\"NSLOCTEXT(\\\"[2CF2D1E04F419B14490A65BF06750767]\\\", \\\"F67B0BE94A3C4A2665B05284056D0757\\\", \\\"Welcome to this Pterodactyl Renown server!\\\")\"\r\nRegion=\r\nMaxServerUptime=28800\r\nDebugRCON=True\r\n\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_Base_GameMode.Renown_Base_GameMode_C]\r\nTimeLimit=0\r\nAutoBalance=0\r\nMaintenanceRate=(X=0.500000,Y=1.000000)\r\nResourceGainMultiplier=1\r\nGoldCoinGainMultiplier=1\r\nGlobalCraftingMultiplier=1\r\nGlobalSmeltingMultiplier=1\r\nGlobalResourceRespawnTimeMultiplier=1\r\nGlobalMaintenanceCostMultiplier=1\r\nGlobalDecayDamageMultiplier=1\r\nKickIdlePlayers=True\r\nIdleTimeOutTime=300\r\nMaxPlayersPerBanner=0\r\n\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_FFA_GameMode.Renown_FFA_GameMode_C]\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_TDM_GameMode.Renown_TDM_GameMode_C]\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_LTS_GameMode.Renown_LTS_GameMode_C]\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_Raid_GameMode.Renown_Raid_GameMode_C]\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_Survival_GameMode.Renown_Survival_GameMode_C]\r\nServerRebootTimeMinutes=120\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_Horde_GameMode.Renown_Horde_GameMode_C]\r\n[\/Game\/Core\/Blueprints\/GameModes\/Renown_Duels_GameMode.Renown_Duels_GameMode_C]\r\n\r\n[\/Script\/Renown_Combat.RenownDeveloperSettings]\r\nbEnableServerQueue=True\r\nbRunOnLan=False\r\nbIsServerClientRunningOnSameMachine=False\r\nReconnectionGracePeriodSeconds=90\r\nServerQueueMaxJoinDuration=300\r\nPurgePendingPlayerConnections=60\r\nPlayerSlotsToConsume=0\r\nMaxClientReconnectAttempts=0\r\n\r\n[\/Script\/Party.Party]\r\nDefaultMaxPartySize=5\r\n\r\n[\/Script\/Lobby.LobbyBeaconState]\r\nWaitForPlayersTimeRemaining=20.0\r\n\r\n[\/Script\/Engine.GameSession]\r\nMaxSpectators=2\r\nbRequiresPushToTalk=true\r\n\r\n[\/Script\/Engine.GameNetworkManager]\r\nTotalNetBandwidth=4000000\r\nMaxDynamicBandwidth=100000\r\nMinDynamicBandwidth=40000\r\nEOF\r\n\r\n# Generate Engine.ini\r\ncat <<EOF > \"$ENGINE_INI\"\r\n[Server]\r\nFirstPersonOnly=${FIRST_PERSON_ONLY}\r\nEOF\r\n\r\necho \"----------------------------------------\"\r\necho \"Installation completed successfully!\"\r\necho \"----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "The name of the server, as shown in the server list",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password used to access to the server, this can also be empty",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "Password used for admin access",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Max players",
+            "description": "The maximum amount of allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Public Server",
+            "description": "When Public Server is True, set Private Session to False",
+            "env_variable": "PUBLIC",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+        },
+        {
+            "name": "Private Session",
+            "description": "When Private Session is False, set Public Server to True",
+            "env_variable": "SERVER_LIST",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+        },
+        {
+            "name": "Map Rotation",
+            "description": "Defines which maps will rotate during gameplay",
+            "env_variable": "MAP_ROTATION",
+            "default_value": "RSurv-AlgaraIsle_p",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Name",
+            "description": "The name of the save file used by the server",
+            "env_variable": "SAVE_NAME",
+            "default_value": "Save_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "First Person Only",
+            "description": "Forces players to use first-person view only",
+            "env_variable": "FIRST_PERSON_ONLY",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "Use First Map",
+            "description": "If set to True, the server loads the first map in rotation on startup",
+            "env_variable": "USE_FIRST_MAP",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "Port used for server query and visibility in the server list",
+            "env_variable": "QUERY_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Beacon Port",
+            "description": "The server Beacon Port",
+            "env_variable": "BEACON_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Port",
+            "description": "Port used for remote console (RCON) connections",
+            "env_variable": "RCON_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable RCON",
+            "description": "Enable or disable RCON remote console access",
+            "env_variable": "ENABLE_RCON",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Password",
+            "description": "Password used to log in to the server via RCON",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "RconPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "If set to 1, the server will automatically update on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam App ID",
+            "description": "The Steam App ID used for updates and validation",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1512690",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:1512690",
+            "field_type": "text"
+        }
+    ]
+}

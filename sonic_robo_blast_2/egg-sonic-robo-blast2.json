@@ -1,0 +1,112 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-03-10T13:31:01+01:00",
+    "name": "Sonic Robo Blast 2",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Sonic Robo Blast 2 Dedicated Server",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "rm .\/latest-log.txt; wine .\/srb2win.exe -dedicated -port {{SERVER_PORT}} -room {{ROOM_NR}} & ENS_PID=$! ; tail -c0 -F .\/latest-log.txt --pid=$ENS_PID",
+    "config": {
+        "files": "{\r\n    \"adedserv.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"servername\": \"servername \\\"{{server.build.env.SRV_NAME}}\\\"\",\r\n            \"password\": \"password {{server.build.env.SRV_PW}}\",\r\n            \"maxplayers\": \"maxplayers {{server.build.env.MAX_PLAYERS}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"DEDICATED: No players at round start, idling...\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\n# SRB2_VERSION\r\nif [[ \"$SRB2_VERSION\" == \"latest\" ]]; then\r\n    echo \"Fetching latest SRB2 version from GitHub...\"\r\n    SRB2_VERSION=$(curl -s https:\/\/api.github.com\/repos\/STJr\/SRB2\/releases\/latest | jq -r '.tag_name' | sed 's\/SRB2_release_\/\/')\r\n    echo \"Latest SRB2 version is: $SRB2_VERSION\"\r\nfi\r\n\r\nSRB2_VERSION_NO_DOTS=\"${SRB2_VERSION\/\/.\/}\"\r\nSRB2_URL=\"https:\/\/github.com\/STJr\/SRB2\/releases\/download\/SRB2_release_${SRB2_VERSION}\/SRB2-v${SRB2_VERSION_NO_DOTS}-Full.zip\"\r\n\r\napt update && apt install -y unzip wget jq curl libsdl2-2.0-0 libpng16-16\r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server || exit\r\n\r\nwget -O SRB2.zip \"$SRB2_URL\"\r\nunzip SRB2.zip\r\nrm SRB2.zip\r\n\r\nchmod +x .\/srb2win.exe\r\n\r\nCONFIG_FILE=\"\/mnt\/server\/adedserv.cfg\"\r\n\r\nif [[ -f \"$CONFIG_FILE\" ]]; then\r\n    echo \"Ensuring necessary settings exist in configuration...\"\r\n    sed -i \"s\/^servername.*\/servername ${SRV_NAME}\/\" \"$CONFIG_FILE\"\r\n    sed -i \"s\/^password.*\/password ${SRV_PW}\/\" \"$CONFIG_FILE\"\r\n    sed -i \"s\/^maxplayers.*\/maxplayers ${MAX_PLAYERS}\/\" \"$CONFIG_FILE\"\r\nelse\r\n    echo \"Configuration file missing! Creating a new one...\"\r\n    cat > \"$CONFIG_FILE\" <<EOL\r\nservername \"${SRV_NAME:-\"My SRB2 Server\"}\"\r\nwait 5\r\npassword ${SRV_PW:-\"ChangeMe\"}\r\nwait 5\r\nmaxplayers ${MAX_PLAYERS:-20}\r\nEOL\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed for SRB2 $SRB2_VERSION\"\r\necho -e \"-------------------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server name",
+            "description": "The name of your server (this will show in the master list)",
+            "env_variable": "SRV_NAME",
+            "default_value": "Default Name",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Password",
+            "description": "The password used for joining the server",
+            "env_variable": "SRV_PW",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The amount of players that can join your server at once\r\nMaximum amount of players: 32",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Master List Room Number",
+            "description": "This advertises the server on the Master Server. ID specifies the room in which the server is hosted: 33 is the Standard room, while 28 is the Casual room.\r\n\r\nMaster List: https:\/\/ms.srb2.org\/",
+            "env_variable": "ROOM_NR",
+            "default_value": "33",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "SRB2 Version",
+            "description": "The version of Sonic Robo Blast 2 that will be used",
+            "env_variable": "SRB2_VERSION",
+            "default_value": "2.2.15",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "WINEDEBUG",
+            "description": "Used to suppress WINE FIXME messages. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "WINEARCH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+        },
+        {
+            "name": "WINEPATH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEPATH",
+            "default_value": "\/home\/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:\/home\/container",
+            "field_type": "text"
+        }
+    ]
+}

@@ -1,0 +1,232 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-12-18T02:47:27+01:00",
+    "name": "Fortresscraft Evolved",
+    "author": "brainshead@gmail.com",
+    "description": "FortressCraft Evolved is a unique blend of Voxel Landscapes, Tower Defense, Crafting, Logistics, Exploration, Combat and Assembly lines. Players begin by crash-landing on a strange alien world, left with only a small handful of starting machines..",
+    "features": null,
+    "docker_images": {
+        "Debian STEAMCMD": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "rm .\/unity.log; .\/FC_Linux_Universal.x86_64 -batchmode -nographics -logFile .\/unity.log & ENS_PID=$! ; tail -c0 -F .\/unity.log --pid=$ENS_PID | grep -Ev \"Filename:|DebugBindings|buildslave|Line:\"",
+    "config": {
+        "files": "{\r\n    \"Default\/firstrun.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[config].Name\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[config].Resources\": \"{{server.build.env.G_RESOURCE}}\",\r\n            \"[config].Conveyors\": \"{{server.build.env.G_CONVEYOR}}\",\r\n            \"[config].Power\": \"{{server.build.env.G_POWER}}\",\r\n            \"[config].Day\": \"{{server.build.env.G_DAY}}\",\r\n            \"[config].CarePackage\": \"{{server.build.env.G_CAREPACKAGE}}\",\r\n            \"[config].FlatLand\": \"{{server.build.env.G_FLATLAND}}\",\r\n            \"[config].RushMode\": \"{{server.build.env.G_RushMode}}\"\r\n         }\r\n    },\r\n    \"Default\/serveroverrides.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[config].RCONPort\": \"{{server.build.env.RCON_PORT}}\",\r\n            \"[config].RCONPassword\": \"{{server.build.env.RCON_PASSWORD}}\",\r\n            \"[config].ServerPort\": \"{{server.build.default.port}}\",\r\n            \"[config].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"[config].WorldName\": \"{{server.build.env.WORLDNAME}}\",\r\n            \"[config].IsPublic\": \"{{server.build.env.PUBLIC}}\",\r\n            \"[config].AutoPause\": \"{{server.build.env.AUTO_PAUSE}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Headless server active\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n#Custom Commands\r\nSOURCE_DIR=\"\/mnt\/server\/Default\/Example Server Ini files\"\r\nTARGET_DIR=\"\/mnt\/server\/Default\"\r\n\r\necho \"Copying default server ini files...\"\r\n\r\nif [ -d \"${SOURCE_DIR}\" ]; then\r\n    cp -v \"${SOURCE_DIR}\/firstrun.ini\" \"${TARGET_DIR}\/\" 2>\/dev\/null || echo \"firstrun.ini not found\"\r\n    cp -v \"${SOURCE_DIR}\/serveroverrides.ini\" \"${TARGET_DIR}\/\" 2>\/dev\/null || echo \"serveroverrides.ini not found\"\r\nelse\r\n    echo \"Warning: ${SOURCE_DIR} does not exist, skipping ini copy\"\r\nfi\r\n# Remove comment lines starting with --\r\nsed -i '\/^[[:space:]]*--\/d' \/mnt\/server\/Default\/firstrun.ini\r\n\r\n# Remove inline comments after values (e.g. \"greg  --comment\")\r\nsed -i 's\/\\s*--.*$\/\/' \/mnt\/server\/Default\/firstrun.ini\r\n    echo \" Cleanup INI file layout \"\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "[STEAM] Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443600",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM]  Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Beta Branch",
+            "description": "Installs beta branch if specified.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "linux_server_headless",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Server Name",
+            "description": "Server name",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Dedicated Server World",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] RCON port",
+            "description": "RCON Port",
+            "env_variable": "RCON_PORT",
+            "default_value": "27001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] RCON Password",
+            "description": "RCON Password",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Max Players",
+            "description": "Max Players (default is 64)",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "64",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] World Name",
+            "description": "Specific World to load by the server at startup",
+            "env_variable": "WORLDNAME",
+            "default_value": "WorldName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Public",
+            "description": "Should the Server list itself on the Publicserverlist? If you set this to true everybody might join. Griefers might\/will do what they want on the server, be sure to take measures.",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Auto Pause",
+            "description": "Should the server go to sleep when nobody is on it?",
+            "env_variable": "AUTO_PAUSE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "[GAME WORLD] Resources",
+            "description": "Choices are : Rapid, Plentiful, Scarce, Greg",
+            "env_variable": "G_RESOURCE",
+            "default_value": "scarce",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:rapid,plentiful,scarce,greg",
+            "field_type": "text"
+        },
+        {
+            "name": "[GAME WORLD] Conveyors",
+            "description": "Speed of conveyors : Slow, Fast",
+            "env_variable": "G_CONVEYOR",
+            "default_value": "slow",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:slow,fast",
+            "field_type": "text"
+        },
+        {
+            "name": "[GAME WORLD] Power",
+            "description": "Power Choices : Scarce, Plentiful",
+            "env_variable": "G_POWER",
+            "default_value": "scarce",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:scarce,plentiful",
+            "field_type": "text"
+        },
+        {
+            "name": "[GAME WORLD] Day",
+            "description": "Day Choices : Eternal, Normal, Night",
+            "env_variable": "G_DAY",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:eternal,normal,night",
+            "field_type": "text"
+        },
+        {
+            "name": "[GAME WORLD] CarePackage",
+            "description": "",
+            "env_variable": "G_CAREPACKAGE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "[GAME WORLD] Flat land",
+            "description": "",
+            "env_variable": "G_FLATLAND",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "[GAME WORLD] RushMode",
+            "description": "",
+            "env_variable": "G_RushMode",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        }
+    ]
+}

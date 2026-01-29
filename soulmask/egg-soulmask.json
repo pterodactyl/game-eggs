@@ -1,0 +1,152 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-07-04T16:45:10+02:00",
+    "name": "Soulmask",
+    "author": "josdekurk@gmail.com",
+    "description": "Escaping a deadly sacrificial ritual, you find an ancient mystical mask on your journey. This mask holds potent knowledge, changing the world you knew. Face the harsh challenges of nature, survive, rally followers, and build your own tribe. Explore and unveil the truths behind the enigmatic mask.",
+    "features": null,
+    "docker_images": {
+        "SteamCMD": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "\/home\/container\/WS\/Binaries\/Linux\/WSServer-Linux-Shipping WS Level01_Main -server -SteamServerName=\"{{SERVER_NAME}}\" -saving={{SAVE_TIME}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -EchoPort={{ECHO_PORT}} -forcepassthrough -adminpsw={{ADMIN_PASSWORD}} -PSW={{SERVER_PASSWORD}} -MaxPlayers={{MAX_PLAYERS}} -gamedistindex={{region}} -backup={{BACKUP_TIME}} -log -UTF8Output -MULTIHOME=0.0.0.0 -mod=\\\"{{MOD_ID}}\\\"",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Create Dungeon Successed\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} +app_update 1007 $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## Maybe this path is just needed?\r\nmkdir -p \/mnt\/server\/WS\/Saved\/Config\/LinuxServer\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3017300",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3017300",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Specifies the name of the game instance displayed in the server list",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Soulmask Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:85",
+            "field_type": "text"
+        },
+        {
+            "name": "Map Players",
+            "description": "Specifies the maximum number of players the game instance can support.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,70",
+            "field_type": "text"
+        },
+        {
+            "name": "Backup Interval",
+            "description": "Specifies the interval for writing the game database to disk (unit: seconds).",
+            "env_variable": "BACKUP_TIME",
+            "default_value": "960",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Time Interval",
+            "description": "Specifies the interval for writing game objects to the database (unit: seconds).",
+            "env_variable": "SAVE_TIME",
+            "default_value": "600",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "Specifies the Steam query port, UDP, needs to be open to the public.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|between:1024,65536",
+            "field_type": "text"
+        },
+        {
+            "name": "Echo Port",
+            "description": "Maintenance port, used for local telnet server maintenance, TCP, does not need to be open.",
+            "env_variable": "ECHO_PORT",
+            "default_value": "18888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|between:1024,65536",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Server password, private servers can specify a password, players must enter the password to enter the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "GM activation password.Open GM Panel (gm key [password])",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Mods",
+            "description": "Specifies the order and which mods are loaded. ModIDs need to be comma-separated such as: ModID1,ModID2,ModID3",
+            "env_variable": "MOD_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:\/^[0-9,]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Region",
+            "description": "1= Asia 2=North America 3=Europe 4=Mainland China 5=South America 6=Oceania 7=Africa",
+            "env_variable": "region",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|digits:1",
+            "field_type": "text"
+        }
+    ]
+}
