@@ -1,24 +1,25 @@
 {
-    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "_comment": "Created by BadDucky52 for Stationeers versions AFTER September 2025",
     "meta": {
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2024-04-05T01:19:24+02:00",
-    "name": "Stationeers",
+    "exported_at": "2025-09-25T13:09:09-04:00",
+    "name": "Stationeers - With User Pass Panel",
     "author": "eggs@goover.dev",
     "description": "Stationeers Server",
     "features": [
         "steam_disk_space"
     ],
     "docker_images": {
-        "ghcr.io\/ptero-eggs\/steamcmd:ubuntu": "ghcr.io\/ptero-eggs\/steamcmd:ubuntu"
+        "ghcr.io\/ptero-eggs\/yolks:debian_trixie": "ghcr.io\/ptero-eggs\/yolks:debian_trixie",
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
     },
     "file_denylist": [],
-    "startup": "stty cols 80 rows 24; .\/rocketstation_DedicatedServer.x86_64  -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} ;2>&1",
+    "startup": "rm -f ./server.log && ln -s /proc/1/fd/1 \"./server.log\" && ./rocketstation_DedicatedServer.x86_64  -file start \"{{SAVE_NAME}}\" {{WORLD_NAME}} {{DIFFICULTY}} {{STARTCONDITION}} {{STARTLOCATION}} -logFile \"./server.log\" -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true LocalIpAddress 0.0.0.0 ServerVisible true GamePort {{SERVER_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword \"{{SERVER_PASSWD}}\" AdminPassword \"{{ADMIN_PASSWD}}\" ServerAuthSecret \"{{SERVER_SECRET}}\" ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}};",
     "config": {
         "files": "{}",
-        "startup": "{\r\n    \"done\": \"World load complete\"\r\n}",
+        "startup": "{\r\n    \"done\": \"registered with session\"\r\n}",
         "logs": "{}",
         "stop": "^C"
     },
@@ -42,12 +43,42 @@
         },
         {
             "name": "World Name",
-            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "description": "Available Maps: Lunar, Mars2, Europa3, MimasHerschel, Vulcan2, Venus",
             "env_variable": "WORLD_NAME",
-            "default_value": "moon",
+            "default_value": "Lunar",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "rules": "nullable|string|in:,Lunar,Mars2,Europa3,MimasHerschel,Vulcan,Vulcan2,Venus",
+            "field_type": "text"
+        },
+        {
+            "name": "Difficulty",
+            "description": "Available: Creative, Easy, Normal, Stationeer",
+            "env_variable": "DIFFICULTY",
+            "default_value": "Normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Creative,Easy,Normal,Stationeer",
+            "field_type": "text"
+        },
+        {
+            "name": "Start Condition",
+            "description": "Available: DefaultStart, DefaultCommunity, Brutal, BrutalCommmunity, EuropaDefault, EuropaDefaultCommunity, EuropaBrutal, EuropaBrutalCommunity, MimasDefault, MimasDefaultCommunity, MimasBrutal, MimasBrutalCommunity, VulcanDefault, VulcanDefaultCommunity, VulcanBrutal, VulcanBrutalCommunity VenusDefault, VenusDefaultCommunity (Venus brutal uses VulcanBrutal/VulcanBrutalCommunity)",
+            "env_variable": "STARTCONDITION",
+            "default_value": "DefaultStart",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,DefaultStart,DefaultStartCommunity,Brutal,BrutalCommunity,EuropaDefault,EuropaDefaultCommunity,EuropaBrutal,EuropaBrutalCommunity,MimasDefault,MimasDefaultCommunity,MimasBrutal,MimasBrutalCommunity,VulcanDefault,VulcanDefaultCommunity,VulcanBrutal,VulcanBrutalCommunity,VenusDefault,VenusDefaultCommunity",
+            "field_type": "text"
+        },
+        {
+            "name": "Start Location",
+            "description": "See Dedicated server guide for IDs",
+            "env_variable": "STARTLOCATION",
+            "default_value": "DefaultStartLocation",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,DefaultStartLocation,LunarSpawnCraterVesper,LunarSpawnMontesUmbrarum,LunarSpawnCraterNox,LunarSpawnMonsArcanus,LunarSpawnRoundRobin,MarsSpawnCanyonOverlook,MarsSpawnButchersFlat,MarsSpawnFindersCanyon,MarsSpawnHellasCrags,MarsSpawnDonutFlats,MarsSpawnRoundRobin,EuropaSpawnIcyBasin,EuropaSpawnGlacialChannel,EuropaSpawnBalgatanPass,EuropaSpawnFrigidHighlands,EuropaSpawnTyreValley,EuropaSpawnRoundRobin,MimasSpawnCentralMesa,MimasSpawnHarrietCrater,MimasSpawnCraterField,MimasSpawnDustBowl,MimasSpawnRoundRobin,VulcanSpawnVestaValley,VulcanSpawnEtnasFury,VulcanSpawnIxionsDemise,VulcanSpawnTitusReach,VulcanSpawnRoundRobin,VenusSpawnGaiaValley,VenusSpawnDaisyValley,VenusSpawnFaithValley,VenusSpawnDuskValley,VenusSpawnRoundRobin",
             "field_type": "text"
         },
         {
@@ -65,8 +96,28 @@
             "description": "",
             "env_variable": "SERVER_PASSWD",
             "default_value": "",
-            "user_viewable": false,
-            "user_editable": false,
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "Deprecated. No longer used. Best to leave blank.",
+            "env_variable": "ADMIN_PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Auth Secret",
+            "description": "Used for server admin commands",
+            "env_variable": "SERVER_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
             "rules": "string|nullable",
             "field_type": "text"
         },
@@ -128,16 +179,6 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Update Port",
-            "description": "",
-            "env_variable": "UPDATE_PORT",
-            "default_value": "27014",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|string|max:50",
             "field_type": "text"
         },
         {
