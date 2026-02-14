@@ -4,9 +4,9 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2025-10-10T20:39:59+02:00",
+    "exported_at": "2026-02-14T12:57:58+01:00",
     "name": "Subnautica",
-    "author": "ptero@redbananaofficial.com",
+    "author": "felixseiboldt@gmail.com",
     "description": "Subnautica is an open world survival action-adventure video game developed and published by Unknown Worlds Entertainment. In it, players are free to explore the ocean on an alien planet, known as planet 4546B, after their spaceship, the Aurora, crashes on the planet's surface.\r\n\r\nNote: NitroxMod version >=1.7.0.0 is required",
     "features": [
         "steam_disk_space"
@@ -15,7 +15,7 @@
         "ghcr.io\/ptero-eggs\/yolks:dotnet_9": "ghcr.io\/ptero-eggs\/yolks:dotnet_9"
     },
     "file_denylist": [],
-    "startup": "export HOME=\/home\/container\/subnautica; .\/nitrox\/NitroxServer-Subnautica",
+    "startup": "export HOME=\/home\/container\/subnautica; .\/nitrox\/Nitrox.Server.Subnautica",
     "config": {
         "files": "{\r\n    \"server.cfg\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"ServerPort\": \"{{server.build.default.port}}\",\r\n            \"SaveInterval\": \"{{server.build.env.SAVE_INTERVAL}}\",\r\n            \"DisableAutoSave\": \"{{server.build.env.SAVE_DISABLE}}\",\r\n            \"SaveName\": \"{{server.build.env.SAVE_NAME}}\",\r\n            \"ServerPassword\": \"{{server.build.env.SUBNAUTICA_PASSWORD}}\",\r\n            \"AdminPassword\": \"{{server.build.env.SUBNAUTICA_ADMIN_PASSWORD}}\",\r\n            \"GameMode\": \"{{server.build.env.SERVER_MODE}}\",\r\n            \"AutoPortForward\": \"{{server.build.env.PORTFORWARD_ENABLE}}\",\r\n            \"SerializerMode\": \"{{server.build.env.SERIALIZER_MODE}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Server started\"\r\n}",
@@ -62,7 +62,7 @@
         },
         {
             "name": "Steam-GuardCode",
-            "description": "Yout Steam Guard Code",
+            "description": "Your Steam Guard Code",
             "env_variable": "STEAM_GUARDCODE",
             "default_value": "",
             "user_viewable": true,
