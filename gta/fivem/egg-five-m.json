@@ -4,16 +4,16 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2023-02-19T12:54:36+01:00",
+    "exported_at": "2025-10-20T20:14:27+02:00",
     "name": "FiveM",
     "author": "parker@parkervcp.com",
-    "description": "A new FiveM egg for the latest builds due to recent changes in FiveM",
+    "description": "A new FiveM \/RedM egg for the latest builds due to recent changes in FiveM",
     "features": null,
     "docker_images": {
         "ghcr.io\/ptero-eggs\/yolks:debian": "ghcr.io\/ptero-eggs\/yolks:debian"
     },
     "file_denylist": [],
-    "startup": "$(pwd)\/alpine\/opt\/cfx-server\/ld-musl-x86_64.so.1 --library-path \"$(pwd)\/alpine\/usr\/lib\/v8\/:$(pwd)\/alpine\/lib\/:$(pwd)\/alpine\/usr\/lib\/\" -- $(pwd)\/alpine\/opt\/cfx-server\/FXServer +set citizen_dir $(pwd)\/alpine\/opt\/cfx-server\/citizen\/ +set sv_licenseKey {{FIVEM_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} +set serverProfile default +set txAdminPort {{TXADMIN_PORT}} $( [ \"$TXADMIN_ENABLE\" == \"1\" ] || printf %s '+exec server.cfg' )",
+    "startup": "$(pwd)\/alpine\/opt\/cfx-server\/ld-musl-x86_64.so.1 --library-path \"$(pwd)\/alpine\/usr\/lib\/v8\/:$(pwd)\/alpine\/lib\/:$(pwd)\/alpine\/usr\/lib\/\" -- $(pwd)\/alpine\/opt\/cfx-server\/FXServer +set citizen_dir $(pwd)\/alpine\/opt\/cfx-server\/citizen\/ +set sv_licenseKey {{FIVEM_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} $( [ \"$TXADMIN_ENABLE\" == \"1\" ] || printf %s '+exec server.cfg' )",
     "config": {
         "files": "{\r\n    \"server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.build.default.port}}\\\"\",\r\n            \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.build.default.port}}\\\"\",\r\n            \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\",\r\n            \"set sv_licenseKey\": \"set sv_licenseKey {{server.build.env.FIVEM_LICENSE}}\",\r\n            \"set steam_webApiKey\": \"set steam_webApiKey {{server.build.env.STEAM_WEBAPIKEY}}\",\r\n            \"sv_maxclients\": \"sv_maxclients {{server.build.env.MAX_PLAYERS}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"succeeded. Welcome!\"\r\n}",
@@ -22,7 +22,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\n# FiveM Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p \/mnt\/server\/resources\r\n\r\ncd \/mnt\/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https:\/\/github.com\/citizenfx\/cfx-server-data.git \/tmp\r\ncp -Rf \/tmp\/resources\/* resources\/\r\n\r\nRELEASE_PAGE=$(curl -sSL https:\/\/runtime.fivem.net\/artifacts\/fivem\/build_proot_linux\/master\/)\r\nCHANGELOGS_PAGE=$(curl -sSL https:\/\/changelogs-live.fivem.net\/api\/changelog\/versions\/linux\/server)\r\n\r\nif [[ \"${FIVEM_VERSION}\" == \"recommended\" ]] || [[ -z ${FIVEM_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${FIVEM_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*\/*.tar.xz\"' | grep -Eo '\".*\/*.tar.xz\"' | sed 's\/\\\"\/\/g'  | sed 's\/\\.\\\/\/\/1' | grep -i \"${FIVEM_VERSION}\" | grep -o =.* |  tr -d '=')\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https:\/\/runtime.fivem.net\/artifacts\/fivem\/build_proot_linux\/master\/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output \/dev\/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*\/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*\/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*\/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*\/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*\/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*\/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*\/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"Skipping downloading default server config file as one already exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https:\/\/raw.githubusercontent.com\/ptero-eggs\/game-eggs\/main\/gta\/fivem\/server.cfg >>server.cfg\r\nfi\r\n\r\nmkdir -p logs\/\r\n\r\necho \"install complete\"",
+            "script": "#!\/bin\/bash\r\n# FiveM Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p \/mnt\/server\/resources\r\n\r\ncd \/mnt\/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https:\/\/github.com\/citizenfx\/cfx-server-data.git \/tmp\r\ncp -Rf \/tmp\/resources\/* resources\/\r\n\r\nRELEASE_PAGE=$(curl -sSL https:\/\/runtime.fivem.net\/artifacts\/fivem\/build_proot_linux\/master\/)\r\nCHANGELOGS_PAGE=$(curl -sSL https:\/\/changelogs-live.fivem.net\/api\/changelog\/versions\/linux\/server)\r\n\r\nif [[ \"${FIVEM_VERSION}\" == \"recommended\" ]] || [[ -z ${FIVEM_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${FIVEM_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*\/*.tar.xz\"' | grep -Eo '\".*\/*.tar.xz\"' | sed 's\/\\\"\/\/g'  | sed 's\/\\.\\\/\/\/1' | grep -i \"${FIVEM_VERSION}\" | grep -o =.* |  tr -d '=')\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https:\/\/runtime.fivem.net\/artifacts\/fivem\/build_proot_linux\/master\/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output \/dev\/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*\/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*\/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*\/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*\/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*\/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*\/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*\/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"Skipping downloading default server config file as one already exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https:\/\/raw.githubusercontent.com\/ptero-eggs\/game-eggs\/main\/gta\/fivem\/server.cfg >>server.cfg\r\nfi\r\n\r\n# Map GAME_NAME to GAME_TYPE before writing to server.cfg\r\nif [ \"${TXHOST_GAME_NAME}\" == \"fivem\" ]; then\r\n    GAME_TYPE=\"gta5\"\r\nelif [ \"${TXHOST_GAME_NAME}\" == \"redm\" ]; then\r\n    GAME_TYPE=\"rdr3\"\r\nelse\r\n    echo \"Invalid GAME_NAME specified: ${TXHOST_GAME_NAME}\"\r\n    exit 1\r\nfi    \r\n\r\nCFG_FILE=\"server.cfg\"\r\n\r\n# Only proceed if server.cfg exists\r\nif [ -f \"$CFG_FILE\" ]; then\r\n    # Remove old gamename block: comment and actual line\r\n    sed -i '\/^# set gamename\/,+1d' \"$CFG_FILE\"\r\n\r\n    # Append clean new block\r\n    {\r\n        echo \"# set gamename\"\r\n        echo \"set gamename \\\"${GAME_TYPE}\\\"\"\r\n    } >> \"$CFG_FILE\"\r\nelse\r\n    echo \"Warning: $CFG_FILE not found. Skipping gamename insertion.\"\r\nfi\r\n\r\nmkdir -p logs\/\r\n\r\necho \"install complete\"",
             "container": "ghcr.io\/ptero-eggs\/installers:debian",
             "entrypoint": "bash"
         }
@@ -30,7 +30,7 @@
     "variables": [
         {
             "name": "fivem license",
-            "description": "Required to start the service. Get your keys at https:\/\/keymaster.fivem.net\/",
+            "description": "Required to start the service. Get your keys at https:\/\/portal.cfx.re\/",
             "env_variable": "FIVEM_LICENSE",
             "default_value": "",
             "user_viewable": true,
@@ -44,7 +44,7 @@
             "env_variable": "MAX_PLAYERS",
             "default_value": "48",
             "user_viewable": true,
-            "user_editable": false,
+            "user_editable": true,
             "rules": "required|integer|between:1,48",
             "field_type": "text"
         },
@@ -91,7 +91,7 @@
         {
             "name": "txAdmin Port",
             "description": "The port for the txAdmin panel",
-            "env_variable": "TXADMIN_PORT",
+            "env_variable": "TXHOST_TXA_PORT",
             "default_value": "40120",
             "user_viewable": true,
             "user_editable": false,
@@ -106,6 +106,36 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Name",
+            "description": "Restricts to only running either FiveM or RedM servers.\r\nThe setup page will only show recipes for the game specified below !\r\nOptions are : fivem or redm",
+            "env_variable": "TXHOST_GAME_NAME",
+            "default_value": "fivem",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:fivem,redm",
+            "field_type": "text"
+        },
+        {
+            "name": "Game type",
+            "description": "Value to be used : gta5 for FiveM and rdr3 for RedM\r\n! Dont fill in any value it reads the game name variable and set the correct value for it !",
+            "env_variable": "GAME_TYPE",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "TXHOST DATA PATH",
+            "description": "Location for TX Admin",
+            "env_variable": "TXHOST_DATA_PATH",
+            "default_value": "\/home\/container\/txData",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
             "field_type": "text"
         }
     ]
