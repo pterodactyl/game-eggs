@@ -199,6 +199,7 @@ Below is a categorized list of games with links to their respective server confi
   * [CurseForge](./minecraft/java/curseforge)
   * [Fabric](./minecraft/java/fabric)
   * [Forge](./minecraft/java/forge)
+  * [GT:NH](./minecraft/java/gtnh)
   * [Technic](./minecraft/java/technic)
 
 #### [Minetest](./minetest)
