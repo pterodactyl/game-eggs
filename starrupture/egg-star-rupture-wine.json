@@ -1,0 +1,212 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-01-31T16:28:24+01:00",
+    "name": "StarRupture Wine",
+    "author": "brainshead@gmail.com",
+    "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters.",
+    "features": [],
+    "docker_images": {
+        "Wine Latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "wine \/home\/container\/StarRupture\/Binaries\/Win64\/StarRuptureServerEOS-Win64-Shipping.exe  -Log -Port=${SERVER_PORT} -RCWebControlDisable -RCWebInterfaceDisable  & SR_PID=$!; tail -c0 -F \/home\/container\/StarRupture\/Saved\/Logs\/StarRupture.log --pid=$SR_PID | grep -v -E \"LogCore: Warning|LogUObjectBase: Error\"",
+    "config": {
+        "files": "{\r\n    \"DSSettings.txt\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"SessionName\": \"{{server.build.env.SESSION_NAME}}\",\r\n            \"SaveGameInterval\": \"{{server.build.env.SAVE_INTERVAL}}\",\r\n            \"StartNewGame\": \"{{server.build.env.START_NEW}}\",\r\n            \"LoadSavedGame\": \"{{server.build.env.LOAD_SAVE}}\",\r\n            \"SaveGameName\": \"{{server.build.env.SAVEGAME_NAME}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"OnUpdateSessionComplete\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n#Custom Commands\r\n\r\n## create DSSettings.txt\r\nif [ ! -f \/mnt\/server\/DSSettings.txt ]; then\r\n    echo \"Creating default DSSettings.txt\"\r\n    cat << EOF > \/mnt\/server\/DSSettings.txt\r\n    {\r\n        \"SessionName\": \"StarRuptureServer\",\r\n        \"SaveGameInterval\": \"300\",\r\n        \"StartNewGame\": \"false\",\r\n        \"LoadSavedGame\": \"true\",\r\n        \"SaveGameName\": \"AutoSave0.sav\"\r\n    }\r\nEOF\r\nfi\r\n\r\n## create .pteroignore to only back up necessary files\r\nif [ ! -f \/mnt\/server\/.pteroignore ]; then\r\n    echo \"Creating default .pteroignore\"\r\n    cat << EOF > \/mnt\/server\/.pteroignore\r\n    *\r\n    !Password.json\r\n    !PlayerPassword.json\r\n    !DSSettings.txt\r\n    !StarRupture\/Saved\/SaveGames\/*\/AutoSave0.met\r\n    !StarRupture\/Saved\/SaveGames\/*\/AutoSave0.sav\r\n    !StarRupture\/Saved\/SaveGames\/SaveData.dat\r\nEOF\r\nfi\r\n\r\n## Generate password files if passwords are set\r\nif [[ -n \"${ADMIN_PASSWORD}\" ]] || [[ -n \"${PLAYER_PASSWORD}\" ]]; then\r\n    # Only generate if at least one password file is missing\r\n    if [[ ! -f \/mnt\/server\/Password.json ]] || [[ ! -f \/mnt\/server\/PlayerPassword.json ]]; then\r\n        echo \"Generating password files...\"\r\n\r\n        RESPONSE=$(curl -s --request POST \\\r\n            --url https:\/\/starrupture-utilities.com\/passwords\/ \\\r\n            --header 'Content-Type: multipart\/form-data' \\\r\n            --form \"adminpassword=${ADMIN_PASSWORD}\" \\\r\n            --form \"playerpassword=${PLAYER_PASSWORD}\")\r\n\r\n        if [[ -n \"${RESPONSE}\" ]]; then\r\n            # Extract and save admin password if set and file doesn't exist\r\n            if [[ -n \"${ADMIN_PASSWORD}\" ]] && [[ ! -f \/mnt\/server\/Password.json ]]; then\r\n                echo \"${RESPONSE}\" | jq '{password: .adminpassword}' > \/mnt\/server\/Password.json\r\n                echo \"Password.json created successfully\"\r\n            fi\r\n\r\n            # Extract and save player password if set and file doesn't exist\r\n            if [[ -n \"${PLAYER_PASSWORD}\" ]] && [[ ! -f \/mnt\/server\/PlayerPassword.json ]]; then\r\n                echo \"${RESPONSE}\" | jq '{password: .playerpassword}' > \/mnt\/server\/PlayerPassword.json\r\n                echo \"PlayerPassword.json created successfully\"\r\n            fi\r\n        else\r\n            echo \"Warning: Failed to generate password files\"\r\n        fi\r\n    fi\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "[STEAM] Steam User",
+            "description": "Steam User Account",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3809400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINEPREFIX",
+            "description": "Wine root directory for the container",
+            "env_variable": "WINEPREFIX",
+            "default_value": "\/home\/container\/.wine",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "[STEAM] WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+        },
+        {
+            "name": "[SYSTEM] WINEDLLOVERRIDES",
+            "description": "",
+            "env_variable": "WINEDLLOVERRIDES",
+            "default_value": "mscoree,mshtml=",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+		{
+            "name": "[SERVER] Start new Savegame",
+            "description": "Setting this to `true` forces the creation of a new world. Be careful!",
+            "env_variable": "START_NEW",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Load saved Game",
+            "description": "true -> Loads an existing save; false -> Skips loading saved data",
+            "env_variable": "LOAD_SAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Save Interval",
+            "description": "Time between automatic saves (in seconds)\r\n\r\n300 = 5 minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Savegame Name",
+            "description": "Filename of the save to load; Must exist in the server save directory under `\/StarRupture\/Saved\/SaveGames\/{SESSION_NAME}`",
+            "env_variable": "SAVEGAME_NAME",
+            "default_value": "AutoSave0.sav",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Session Name",
+            "description": "Name of the save game sessionName of the save game session",
+            "env_variable": "SESSION_NAME",
+            "default_value": "StarRuptureServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },       
+        {
+            "name": "[SERVER] Admin Password",
+            "description": "The admin password used for \"Manage Server\"  In-Game",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Player Password",
+            "description": "The password used to join the server",
+            "env_variable": "PLAYER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+        }
+    ]
+}
