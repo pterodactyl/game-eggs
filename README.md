@@ -268,6 +268,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Sunkenland](./sunkenland)
 
+#### [Trackmania (Nations|United) Forever](./trackmaniaforever)
+
 ### [Voyager of Nera](./voyagers_of_nera)
 
 ---
