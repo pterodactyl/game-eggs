@@ -266,6 +266,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Soldat 2](./soldat_2)
 
+#### [StarRupture](./starrupture)
+
 #### [Sunkenland](./sunkenland)
 
 ### [Voyager of Nera](./voyagers_of_nera)
