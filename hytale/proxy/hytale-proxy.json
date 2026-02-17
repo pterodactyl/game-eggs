@@ -6,7 +6,7 @@
     },
     "exported_at": "2026-02-17T23:18:01+00:00",
     "name": "Hytale - Numdrassl Proxy",
-    "author": "parker@parkervcp.com",
+    "author": "me@logikoz.net",
     "description": "Runs Numdrassl Proxy for Hytale using Java 21. Downloads the proxy jar on install.",
     "features": [
         "java_version"
@@ -52,3 +52,4 @@
         }
     ]
 }
+
