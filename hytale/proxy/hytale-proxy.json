@@ -1,0 +1,55 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-02-17T23:18:01+00:00",
+    "name": "Hytale - Numdrassl Proxy",
+    "author": "me@logikoz.net",
+    "description": "Runs Numdrassl Proxy for Hytale using Java 21. Downloads the proxy jar on install.",
+    "features": [
+        "java_version"
+    ],
+    "docker_images": {
+        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:+ParallelRefProcEnabled -jar {{SERVER_JARFILE}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Console ready\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\nset -eu\n\ncd \/mnt\/server\n\nif [ -z \"${DOWNLOAD_URL}\" ]; then\n  echo \"ERROR: DOWNLOAD_URL is empty.\"\n  exit 1\nfi\n\necho \"Downloading Numdrassl proxy jar...\"\necho \"URL: ${DOWNLOAD_URL}\"\necho \"Output: ${SERVER_JARFILE}\"\n\nrm -f \"${SERVER_JARFILE}\" || true\n\n# GitHub releases may redirect\ncurl -L --fail --retry 5 --retry-delay 2 -o \"${SERVER_JARFILE}\" \"${DOWNLOAD_URL}\"\n\necho \"Download completed.\"\nls -lah \"${SERVER_JARFILE}\"\n",
+            "container": "ghcr.io\/parkervcp\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Jar File",
+            "description": "The jar file name used to start the proxy.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "proxy-1.2.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64|regex:\/^([\\w\\d._-]+)(\\.jar)$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Download URL",
+            "description": "Direct URL to the Numdrassl proxy jar. Used during installation.",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "https:\/\/github.com\/Numdrassl\/proxy\/releases\/download\/2026.02.06-aa1b071c2-build.8\/proxy-1.2.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|url",
+            "field_type": "text"
+        }
+    ]
+}
+
