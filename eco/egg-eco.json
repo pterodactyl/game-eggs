@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": "https:\/\/pterodactyleggs.com\/egg\/6735ff474924a4e9bbcb97fb\/download\/egg-eco.json"
     },
-    "exported_at": "2026-02-21T17:42:28+00:00",
+    "exported_at": "2026-02-21T18:21:15+00:00",
     "name": "Eco",
     "author": "eggs@goover.dev",
     "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
@@ -195,7 +195,7 @@
             "description": "Generate a token in your Strange Loop Games account under your Eco account at https:\/\/play.eco\/account and copy it here. This will override username and password login!",
             "env_variable": "SLG_TOKEN",
             "default_value": "",
-            "user_viewable": false,
+            "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|string",
             "field_type": "text"
@@ -215,7 +215,7 @@
             "description": "Use your Strange Loop Games password with your Strange Loop Account username.",
             "env_variable": "SLG_PW",
             "default_value": "",
-            "user_viewable": false,
+            "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|string|max:20",
             "field_type": "text"
@@ -225,7 +225,7 @@
             "description": "Players wishing to connect to a server in offline mode will also need to set their game client to offline mode.",
             "env_variable": "OFFLINE_MODE",
             "default_value": "",
-            "user_viewable": false,
+            "user_viewable": true,
             "user_editable": true,
             "rules": "boolean",
             "field_type": "text"
