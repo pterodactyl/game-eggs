@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": "https:\/\/pterodactyleggs.com\/egg\/6735ff474924a4e9bbcb97fb\/download\/egg-eco.json"
     },
-    "exported_at": "2025-10-19T10:54:32+00:00",
+    "exported_at": "2026-02-21T17:42:28+00:00",
     "name": "Eco",
     "author": "eggs@goover.dev",
     "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
@@ -15,7 +15,7 @@
         "ghcr.io\/ptero-eggs\/steamcmd:dotnet": "ghcr.io\/ptero-eggs\/steamcmd:dotnet"
     },
     "file_denylist": [],
-    "startup": "cmd=(.\/EcoServer); \r\nif [ -n \"$SLG_TOKEN\" ]; then \r\n    cmd+=(--userToken=\"\\\"$SLG_TOKEN\\\"\"); \r\nelif [ -n \"$SLG_USER\" ] && [ -n \"$SLG_PW\" ]; then \r\n    cmd+=(--username=\"\\\"$SLG_USER\\\"\" --password=\"\\\"$SLG_PW\\\"\"); \r\nfi; \r\nexec \"${cmd[@]}\"",
+    "startup": ".\/EcoServer \\\r\n$([ -n \"$SERVER_PASSWORD\" ] && echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\") \\\r\n$([ -n \"$SLG_TOKEN\" ] && echo \"-userToken=\\\"${SLG_TOKEN}\\\"\") \\\r\n$([ -n \"$SLG_USER\" ] && echo \"-username=\\\"${SLG_USER}\\\"\") \\\r\n$([ -n \"$OFFLINE_MODE\" ]  && echo \"-offline\") \\",
     "config": {
         "files": "{\r\n    \"Configs\/Network.eco\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"GameServerPort\": \"{{server.build.default.port}}\",\r\n            \"WebServerPort\": \"{{server.build.env.WEB_PORT}}\",\r\n            \"PublicServer\": \"{{server.build.env.PUB_SRV}}\",\r\n            \"Password\": \"{{server.build.env.SRV_PW}}\",\r\n            \"UPnPEnabled\": \"{{server.build.env.UPNP}}\",\r\n            \"Description\": \"{{server.build.env.SRV_NAME}}\",\r\n            \"DetailedDescription\": \"{{server.build.env.DEDES}}\",\r\n            \"Playtime\": \"{{server.build.env.PLAYTIME}}\",\r\n            \"MaxConnections\": \"{{server.build.env.MAX_CON}}\",\r\n            \"DiscordAddress\": \"{{server.build.env.DISCORD_SRV}}\",\r\n            \"RconServerPort\": \"{{server.build.env.RCON_PORT}}\",\r\n            \"RconPassword\": \"{{server.build.env.RCON_PW}}\",\r\n            \"ServerCategory\": \"{{server.build.env.SRV_CAT}}\"\r\n        }\r\n    },\r\n    \"Configs\/Localization.eco\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"Language\": \"{{server.build.env.LANGUAGE}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Web Server now listening on:\"\r\n}",
@@ -218,6 +218,16 @@
             "user_viewable": false,
             "user_editable": true,
             "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "[SERVER] Offline Mode",
+            "description": "Players wishing to connect to a server in offline mode will also need to set their game client to offline mode.",
+            "env_variable": "OFFLINE_MODE",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "boolean",
             "field_type": "text"
         }
     ]
