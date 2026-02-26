@@ -46,13 +46,13 @@
     },
     {
       "name": "Auto Update",
-      "description": "Enable automatic updates on boot",
+      "description": "Enable automatic updates on boot, checked = on",
       "env_variable": "AUTO_UPDATE",
       "default_value": "1",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "[REQUIRED] Steam Beta Branch",
@@ -152,7 +152,7 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "RCON Port",
@@ -176,33 +176,33 @@
     },
     {
       "name": "No Death Feedback",
-      "description": "If set to true notification about dead players will be disabled. Admins will still be able to see them.",
+      "description": "If checked notification about dead players will be disabled. Admins will still be able to see them.",
       "env_variable": "NoDeathFeedback",
       "default_value": "false",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "No Join Feedback",
-      "description": "If set to true notification about players joining and leaving the server will be disabled. Admins will still be able to see them.",
+      "description": "If checked notification about players joining and leaving the server will be disabled. Admins will still be able to see them.",
       "env_variable": "NoJoinFeedback",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Limited Spawns",
-      "description": "When set to true players will only have access to random coast spawns and spawn point if available",
+      "description": "When checked players will only have access to random coast spawns and spawn point if available",
       "env_variable": "LimitedSpawns",
       "default_value": "false",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Save Interval Seconds",
@@ -216,13 +216,13 @@
     },
     {
       "name": "Perma Death",
-      "description": "When set to true the player that died will lose their character and have to create a a new one",
+      "description": "When checked the player that died will lose their character and have to create a a new one",
       "env_variable": "PermaDeath",
       "default_value": "false",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "On Death Mode",
@@ -246,13 +246,13 @@
     },
     {
       "name": "PVP",
-      "description": "false/true=Off/On. This will also affect the ability to interact with player items such as cars and containers",
+      "description": "unchecked=off checked=On. This will also affect the ability to interact with player items such as cars and containers",
       "env_variable": "PVP",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Air Drop",
@@ -262,7 +262,7 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Air Drop Interval",
@@ -276,13 +276,13 @@
     },
     {
       "name": "Weapon Break",
-      "description": "If true when weapon durability reaches 0%, the weapon will break and be removed from the player's inventory. Set to false to disable weapon breaking.",
+      "description": "If checked and weapon durability reaches 0%, the weapon will break and be removed from the player's inventory. Un-check to disable weapon breaking.",
       "env_variable": "WeaponBreak",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Max Owned Cars",
@@ -296,23 +296,23 @@
     },
     {
       "name": "Multiplayer Sleep",
-      "description": "When true time passes if eveyone performs the sleep emote at the same time, false=Passing time is disabled",
+      "description": "When checked time passes if eveyone performs the sleep emote at the same time, un-checked=Passing time is disabled",
       "env_variable": "MultiplayerSleep",
       "default_value": "false",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Loot Respawn",
-      "description": "Loot does respawn, false=Never respawn",
+      "description": "Cheked loot does respawn, un-checked=Never respawn",
       "env_variable": "LootRespawn",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Loot Respawn Timer",
@@ -596,23 +596,23 @@
     },
     {
       "name": "DogEnabled",
-      "description": "Enable finding dog companions you can recruit set to true to enable or false to disable",
+      "description": "If checked finding dog companions you can recruit, un-check to disable.",
       "env_variable": "DogEnabled",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "RecruitDog",
-      "description": "Allow players to recruit companion dogs by dropping food and claiming the dog. Set to false to disable.",
+      "description": "If checked allow players to recruit companion dogs by dropping food and claiming the dog. un-check to disable.",
       "env_variable": "RecruitDog",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "DogNum",
@@ -656,33 +656,33 @@
     },
     {
       "name": "AllowDismantle",
-      "description": "Enable players to dismantle their own buildings.",
+      "description": "If checked players can dismantle their own buildings.",
       "env_variable": "AllowDismantle",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "AllowHouseDismantle",
-      "description": "Enable Players are able to dismantle house props.",
+      "description": "If checked Players are able to dismantle house props.",
       "env_variable": "AllowHouseDismantle",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Territory",
-      "description": "If true You WILL NOT be allowed to build in someone's spawn point area. For clans only non recruit members can.",
+      "description": "If checked You WILL NOT be allowed to build in someone's spawn point area. For clans only non recruit members can.",
       "env_variable": "Territory",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Decay",
@@ -746,23 +746,23 @@
     },
     {
       "name": "Sleep",
-      "description": "Sleep deprivation effect false=Disabled true=Enabled",
+      "description": "Sleep deprivation effect, un-checked=Disabled checked=Enabled",
       "env_variable": "Sleep",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "FreezeTime",
-      "description": "When enabled and server is empty time doesn't pass.",
+      "description": "When checked and server is empty time doesn't pass.",
       "env_variable": "FreezeTime",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "Seg0",
@@ -796,13 +796,13 @@
     },
     {
       "name": "Voip",
-      "description": "When set to 1 or true voice chat will be enabled, set 0 or false to disable",
+      "description": "When checked voice chat will be enabled",
       "env_variable": "Voip",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
       "rules": "required|boolean",
-      "field_type": "text"
+      "field_type": "checkbox"
     },
     {
       "name": "AIEvent",
