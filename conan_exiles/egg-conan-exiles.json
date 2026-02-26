@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-02-01T03:48:16+00:00",
+    "exported_at": "2026-02-15T14:02:35+01:00",
     "name": "Conan Exiles",
     "author": "brycea@terrahost.cloud",
     "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
@@ -15,7 +15,7 @@
         "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
     },
     "file_denylist": [],
-    "startup": "wine \/home\/container\/ConanSandbox\/Binaries\/Win64\/ConanSandboxServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -ServerPassword=\"{{SRV_PW}}\" -console -log",
+    "startup": "wine \/home\/container\/ConanSandbox\/Binaries\/Win64\/ConanSandboxServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -ServerPassword=\"{{SRV_PW}}\" -console -log & CONAN_PID=$!; tail -c0 -F \/home\/container\/ConanSandbox\/Saved\/Logs\/ConanSandbox.log --pid=$CONAN_PID",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"Started SourceServerQueries\"\r\n}",
