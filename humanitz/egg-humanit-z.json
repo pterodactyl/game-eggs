@@ -764,36 +764,6 @@
       "rules": "required|boolean",
       "field_type": "text"
     },
-   # {
-   #   "name": "Seg0",
-   #   "description": "Map is divided into 3 segments, objects that need to spawmn reasonabiliy far are put in Seg0 like houses.",
-   #   "env_variable": "Seg0",
-   #   "default_value": "8",
-   #   "user_viewable": true,
-   #   "user_editable": true,
-   #  "rules": "required|numeric",
-   #  "field_type": "text"
-   #},
-   # {
-   #   "name": "Seg1",
-   #   "description": "Broken cars and other similar objects are put in Seg1.",
-   #   "env_variable": "Seg1",
-   #   "default_value": "12",
-   #   "user_viewable": true,
-   #   "user_editable": true,
-   #   "rules": "required|numeric",
-   #   "field_type": "text"
-   # },
-   # {
-   #   "name": "Seg2",
-   #   "description": "Spawn distance performance segment.",
-   #   "env_variable": "Seg2",
-   #   "default_value": "20",
-   #   "user_viewable": true,
-   #   "user_editable": true,
-   #   "rules": "required|numeric",
-   #   "field_type": "text"
-   # },
     {
       "name": "Voip",
       "description": "When set to 1 or true voice chat will be enabled, set 0 or false to disable",
