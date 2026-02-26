@@ -13,9 +13,9 @@
         "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
     },
     "file_denylist": [],
-    "startup": ".\/HumanitZServer\/Binaries\/Linux\/HumanitZServer-Linux-Shipping TSSGame -log -port={{SERVER_PORT}} -queryport={{QUERY_PORT}} -steamservername=\"{{SERVER_NAME}}\"",
+    "startup": ".\/HumanitZServer\/Binaries\/Linux\/HumanitZServer-Linux-Shipping HumanitZServer -log -port={{SERVER_PORT}} -queryport={{QUERY_PORT}} -steamservername=\"{{SERVER_NAME}}\"",
     "config": {
-        "files": "{\r\n    \"TSSGame\/GameServerSettings.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[Host Settings].ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[Host Settings].Password\": \"{{server.build.env.PASSWORD}}\",\r\n            \"[Host Settings].SaveName\": \"{{server.build.env.SAVE_NAME}}\",\r\n            \"[Host Settings].AdminPass\": \"{{server.build.env.ADMIN_PASS}}\",\r\n            \"[Host Settings].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"[Host Settings].OnlyAllowedPlayers\": \"{{server.build.env.ONLY_ALLOWED_PLAYERS}}\",\r\n            \"[World Settings].SaveIntervalSec\": \"{{server.build.env.SAVE_INTERVAL_SEC}}\",\r\n            \"[World Settings].NoDeathFeedback\": \"{{server.build.env.NO_DEATH_FEEDBACK}}\",\r\n            \"[World Settings].PermaDeath\": \"{{server.build.env.PERMA_DEATH}}\",\r\n            \"[World Settings].OnDeath\": \"{{server.build.env.ON_DEATH}}\",\r\n            \"[World Settings].PVP\": \"{{server.build.env.PVP}}\",\r\n            \"[World Settings].ClearInfection\": \"{{server.build.env.CLEAR_INFECTION}}\",\r\n            \"[World Settings].EagleEye\": \"{{server.build.env.EAGLE_EYE}}\",\r\n            \"[World Settings].AirDrop\": \"{{server.build.env.AIR_DROP}}\",\r\n            \"[World Settings].WeaponBreak\": \"{{server.build.env.WEAPON_BREAK}}\",\r\n            \"[World Settings].MultiplayerSleep\": \"{{server.build.env.MULTIPLAYER_SLEEP}}\",\r\n            \"[World Settings].LootRespawn\": \"{{server.build.env.LOOT_RESPAWN}}\",\r\n            \"[World Settings].LootRespawnTimer\": \"{{server.build.env.LOOT_RESPAWN_TIMER}}\",\r\n            \"[World Settings].PickupRespawnTimer\": \"{{server.build.env.PICKUP_RESPAWN_TIMER}}\",\r\n            \"[World Settings].LootRarity\": \"{{server.build.env.LOOT_RARITY}}\",\r\n            \"[World Settings].AirDropInterval\": \"{{server.build.env.AIR_DROP_INTERVAL}}\",\r\n            \"[World Settings].ZombieDiffHealth\": \"{{server.build.env.ZOMBIE_DIFF_HEALTH}}\",\r\n            \"[World Settings].ZombieDiffSpeed\": \"{{server.build.env.ZOMBIE_DIFF_SPEED}}\",\r\n            \"[World Settings].ZombieDiffDamage\": \"{{server.build.env.ZOMBIE_DIFF_DAMAGE}}\",\r\n            \"[World Settings].HumanDifficulty\": \"{{server.build.env.HUMAN_DIFFICULTY}}\",\r\n            \"[World Settings].ZombieAmountMulti\": \"{{server.build.env.ZOMBIE_AMOUNT_MULTI}}\",\r\n            \"[World Settings].HumanAmountMulti\": \"{{server.build.env.HUMAN_AMOUNT_MULTI}}\",\r\n            \"[World Settings].ZombieDogMulti\": \"{{server.build.env.ZOMBIE_DOG_MULTI}}\",\r\n            \"[World Settings].ZombieRespawnTimer\": \"{{server.build.env.ZOMBIE_RESPAWN_TIMER}}\",\r\n            \"[World Settings].HumanRespawnTimer\": \"{{server.build.env.HUMAN_RESPAWN_TIMER}}\",\r\n            \"[World Settings].AnimalRespawnTimer\": \"{{server.build.env.ANIMAL_RESPAWN_TIMER}}\",\r\n            \"[World Settings].StartingSeason\": \"{{server.build.env.STARTING_SEASON}}\",\r\n            \"[World Settings].DaysPerSeason\": \"{{server.build.env.DAYS_PER_SEASON}}\",\r\n            \"[World Settings].DayDur\": \"{{server.build.env.DAY_DUR}}\",\r\n            \"[World Settings].NightDur\": \"{{server.build.env.NIGHT_DUR}}\",\r\n            \"[World Settings].VitalDrain\": \"{{server.build.env.VITAL_DRAIN}}\",\r\n            \"[World Settings].DogEnabled\": \"{{server.build.env.DOG_ENABLED}}\",\r\n            \"[World Settings].DogNum\": \"{{server.build.env.DOG_NUM}}\",\r\n            \"[World Settings].RecruitDog\": \"{{server.build.env.RECRUIT_DOG}}\",\r\n            \"[World Settings].BuildingHealth\": \"{{server.build.env.BUILDING_HEALTH}}\",\r\n            \"[World Settings].CompanionHealth\": \"{{server.build.env.COMPANION_HEALTH}}\",\r\n            \"[World Settings].CompanionDmg\": \"{{server.build.env.COMPANION_DMG}}\",\r\n            \"[World Settings].AllowDismantle\": \"{{server.build.env.ALLOW_DISMANTLE}}\",\r\n            \"[World Settings].AllowHouseDismantle\": \"{{server.build.env.ALLOW_HOUSE_DISMANTLE}}\",\r\n            \"[World Settings].Territory\": \"{{server.build.env.TERRITORY}}\",\r\n            \"[World Settings].Decay\": \"{{server.build.env.DECAY}}\",\r\n            \"[World Settings].PickupCleanup\": \"{{server.build.env.PICKUP_CLEANUP}}\",\r\n            \"[World Settings].FakeBuildingCleanup\": \"{{server.build.env.FAKE_BUILDING_CLEANUP}}\"\r\n        }\r\n    }\r\n}",
+        "files": "{\r\n    \"HumanitZServer\/GameServerSettings.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[Host Settings].ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[Host Settings].Password\": \"{{server.build.env.PASSWORD}}\",\r\n            \"[Host Settings].SaveName\": \"{{server.build.env.SAVE_NAME}}\",\r\n            \"[Host Settings].AdminPass\": \"{{server.build.env.ADMIN_PASS}}\",\r\n            \"[Host Settings].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"[Host Settings].OnlyAllowedPlayers\": \"{{server.build.env.ONLY_ALLOWED_PLAYERS}}\",\r\n            \"[World Settings].SaveIntervalSec\": \"{{server.build.env.SAVE_INTERVAL_SEC}}\",\r\n            \"[World Settings].NoDeathFeedback\": \"{{server.build.env.NO_DEATH_FEEDBACK}}\",\r\n            \"[World Settings].PermaDeath\": \"{{server.build.env.PERMA_DEATH}}\",\r\n            \"[World Settings].OnDeath\": \"{{server.build.env.ON_DEATH}}\",\r\n            \"[World Settings].PVP\": \"{{server.build.env.PVP}}\",\r\n            \"[World Settings].ClearInfection\": \"{{server.build.env.CLEAR_INFECTION}}\",\r\n            \"[World Settings].EagleEye\": \"{{server.build.env.EAGLE_EYE}}\",\r\n            \"[World Settings].AirDrop\": \"{{server.build.env.AIR_DROP}}\",\r\n            \"[World Settings].WeaponBreak\": \"{{server.build.env.WEAPON_BREAK}}\",\r\n            \"[World Settings].MultiplayerSleep\": \"{{server.build.env.MULTIPLAYER_SLEEP}}\",\r\n            \"[World Settings].LootRespawn\": \"{{server.build.env.LOOT_RESPAWN}}\",\r\n            \"[World Settings].LootRespawnTimer\": \"{{server.build.env.LOOT_RESPAWN_TIMER}}\",\r\n            \"[World Settings].PickupRespawnTimer\": \"{{server.build.env.PICKUP_RESPAWN_TIMER}}\",\r\n            \"[World Settings].LootRarity\": \"{{server.build.env.LOOT_RARITY}}\",\r\n            \"[World Settings].AirDropInterval\": \"{{server.build.env.AIR_DROP_INTERVAL}}\",\r\n            \"[World Settings].ZombieDiffHealth\": \"{{server.build.env.ZOMBIE_DIFF_HEALTH}}\",\r\n            \"[World Settings].ZombieDiffSpeed\": \"{{server.build.env.ZOMBIE_DIFF_SPEED}}\",\r\n            \"[World Settings].ZombieDiffDamage\": \"{{server.build.env.ZOMBIE_DIFF_DAMAGE}}\",\r\n            \"[World Settings].HumanDifficulty\": \"{{server.build.env.HUMAN_DIFFICULTY}}\",\r\n            \"[World Settings].ZombieAmountMulti\": \"{{server.build.env.ZOMBIE_AMOUNT_MULTI}}\",\r\n            \"[World Settings].HumanAmountMulti\": \"{{server.build.env.HUMAN_AMOUNT_MULTI}}\",\r\n            \"[World Settings].ZombieDogMulti\": \"{{server.build.env.ZOMBIE_DOG_MULTI}}\",\r\n            \"[World Settings].ZombieRespawnTimer\": \"{{server.build.env.ZOMBIE_RESPAWN_TIMER}}\",\r\n            \"[World Settings].HumanRespawnTimer\": \"{{server.build.env.HUMAN_RESPAWN_TIMER}}\",\r\n            \"[World Settings].AnimalRespawnTimer\": \"{{server.build.env.ANIMAL_RESPAWN_TIMER}}\",\r\n            \"[World Settings].StartingSeason\": \"{{server.build.env.STARTING_SEASON}}\",\r\n            \"[World Settings].DaysPerSeason\": \"{{server.build.env.DAYS_PER_SEASON}}\",\r\n            \"[World Settings].DayDur\": \"{{server.build.env.DAY_DUR}}\",\r\n            \"[World Settings].NightDur\": \"{{server.build.env.NIGHT_DUR}}\",\r\n            \"[World Settings].VitalDrain\": \"{{server.build.env.VITAL_DRAIN}}\",\r\n            \"[World Settings].DogEnabled\": \"{{server.build.env.DOG_ENABLED}}\",\r\n            \"[World Settings].DogNum\": \"{{server.build.env.DOG_NUM}}\",\r\n            \"[World Settings].RecruitDog\": \"{{server.build.env.RECRUIT_DOG}}\",\r\n            \"[World Settings].BuildingHealth\": \"{{server.build.env.BUILDING_HEALTH}}\",\r\n            \"[World Settings].CompanionHealth\": \"{{server.build.env.COMPANION_HEALTH}}\",\r\n            \"[World Settings].CompanionDmg\": \"{{server.build.env.COMPANION_DMG}}\",\r\n            \"[World Settings].AllowDismantle\": \"{{server.build.env.ALLOW_DISMANTLE}}\",\r\n            \"[World Settings].AllowHouseDismantle\": \"{{server.build.env.ALLOW_HOUSE_DISMANTLE}}\",\r\n            \"[World Settings].Territory\": \"{{server.build.env.TERRITORY}}\",\r\n            \"[World Settings].Decay\": \"{{server.build.env.DECAY}}\",\r\n            \"[World Settings].PickupCleanup\": \"{{server.build.env.PICKUP_CLEANUP}}\",\r\n            \"[World Settings].FakeBuildingCleanup\": \"{{server.build.env.FAKE_BUILDING_CLEANUP}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"LogKaiHelper: Session created!\"\r\n}",
         "logs": "{}",
         "stop": "^C"
@@ -27,7 +27,7 @@
             "entrypoint": "bash"
         }
     },
-    "variables": [
+"variables": [
         {
             "name": "[REQUIRED] Steam App ID",
             "description": "Steam App ID of HumanitZ Server",
@@ -71,7 +71,7 @@
         {
             "name": "Server Name",
             "description": "Name of the server",
-            "env_variable": "SERVER_NAME",
+            "env_variable": "ServerName",
             "default_value": "HumanitZ [Dedicated]",
             "user_viewable": true,
             "user_editable": true,
@@ -80,8 +80,8 @@
         },
         {
             "name": "Server Password",
-            "description": "Server password (if any)",
-            "env_variable": "PASSWORD",
+            "description": "Server password",
+            "env_variable": "Password",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -90,8 +90,8 @@
         },
         {
             "name": "Save Name",
-            "description": "Name of the save-file for the server",
-            "env_variable": "SAVE_NAME",
+            "description": "Save file name",
+            "env_variable": "SaveName",
             "default_value": "DedicatedSaveMP",
             "user_viewable": true,
             "user_editable": true,
@@ -99,9 +99,19 @@
             "field_type": "text"
         },
         {
+            "name": "Search ID",
+            "description": "Use this to place your server in a specific bucket and use it when searching. Changing this will make your server not show up in the default server list.",
+            "env_variable": "SearchID",
+            "default_value": "HumanitZ_Dedicated",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
             "name": "Admin Password",
-            "description": "Password for the admin",
-            "env_variable": "ADMIN_PASS",
+            "description": "Used for admin access, you can use /adminaccess <password> in game to access admin commands.",
+            "env_variable": "AdminPass",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -111,7 +121,7 @@
         {
             "name": "Max Players",
             "description": "Maximum number of players allowed",
-            "env_variable": "MAX_PLAYERS",
+            "env_variable": "MaxPlayers",
             "default_value": "16",
             "user_viewable": true,
             "user_editable": true,
@@ -119,19 +129,69 @@
             "field_type": "text"
         },
         {
-            "name": "Only Allowed Players",
-            "description": "Restrict server to allowed players only",
-            "env_variable": "ONLY_ALLOWED_PLAYERS",
-            "default_value": "0",
+            "name": "RCON Enabled",
+            "description": "Use it to execute remote command, use any rcon compatible program. Enabling this will allow server ping being displayed in server browser",
+            "env_variable": "RCONEnabled",
+            "default_value": "false",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
             "field_type": "text"
         },
         {
-            "name": "Saving World Interval",
-            "description": "Save game every x seconds.",
-            "env_variable": "SAVE_INTERVAL_SEC",
+            "name": "RCON Port",
+            "description": "TCP port for rcon",
+            "env_variable": "RConPort",
+            "default_value": "8888",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Password",
+            "description": "RCON password",
+            "env_variable": "RCONPass",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "No Death Feedback",
+            "description": "If set to true notification about dead players will be disabled. Admins will still be able to see them.",
+            "env_variable": "NoDeathFeedback",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "No Join Feedback",
+            "description": "If set to true notification about players joining and leaving the server will be disabled. Admins will still be able to see them.",
+            "env_variable": "NoJoinFeedback",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Limited Spawns",
+            "description": "When set to true players will only have access to random coast spawns and spawn point if available",
+            "env_variable": "LimitedSpawns",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Interval Seconds",
+            "description": "The interval in seconds at which the server saves the world. Set to 0 to disable auto-saving.",
+            "env_variable": "SaveIntervalSec",
             "default_value": "300",
             "user_viewable": true,
             "user_editable": true,
@@ -139,19 +199,19 @@
             "field_type": "text"
         },
         {
-            "name": "Permanent Death",
-            "description": "0=Off, 1=Individual perma-death, 2=All players experience perma-death",
-            "env_variable": "PERMA_DEATH",
-            "default_value": "0",
+            "name": "Perma Death",
+            "description": "When set to true the player that died will lose their character and have to create a a new one",
+            "env_variable": "PermaDeath",
+            "default_value": "false",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|numeric",
+            "rules": "required|boolean",
             "field_type": "text"
         },
         {
-            "name": "On Death",
-            "description": "0=Only lose backpack, and weapon in hand, 1=Previous + pockets, and backpack, 2=All previous + Equipment",
-            "env_variable": "ON_DEATH",
+            "name": "On Death Mode",
+            "description": "0=Lose nothing, 1=Lose backpack and weapon in hand, 2=Previous + pockets and backpack, 3=All previous + Equipment",
+            "env_variable": "OnDeath",
             "default_value": "2",
             "user_viewable": true,
             "user_editable": true,
@@ -159,30 +219,20 @@
             "field_type": "text"
         },
         {
-            "name": "PvP",
-            "description": "0\/1 Off\/On. Enable or disable Player vs Player.",
+            "name": "Respawn Timer",
+            "description": "Time in second to be able to spawn again after death",
+            "env_variable": "RespawnTimer",
+            "default_value": "15",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "PVP",
+            "description": "false/true=Off/On. This will also affect the ability to interact with player items such as cars and containers",
             "env_variable": "PVP",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Clear Infection",
-            "description": "0=Respawning does not rid you of the infection, 1=You lose it upon respawning",
-            "env_variable": "CLEAR_INFECTION",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Eagle Eye",
-            "description": "1=Able to purchase the eagle eye skill, 0=You can't",
-            "env_variable": "EAGLE_EYE",
-            "default_value": "1",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
@@ -190,38 +240,18 @@
         },
         {
             "name": "Air Drop",
-            "description": "1=Enabled, 0=Disabled. Controls whether air drops are enabled.",
-            "env_variable": "AIR_DROP",
-            "default_value": "1",
+            "description": "Set whether air drops are enabled or not",
+            "env_variable": "AirDrop",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
             "field_type": "text"
         },
         {
-            "name": "Weapon Durability",
-            "description": "1=Weapons break when reaching 0% durability except crowbar, 0=Only improvised weapons break at 0% durability",
-            "env_variable": "WEAPON_BREAK",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Multiplayer Sleep",
-            "description": "1=Time passes if everyone performs the sleep emote at the same time, 0=Passing time is disabled",
-            "env_variable": "MULTIPLAYER_SLEEP",
-            "default_value": "0",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Building Health",
-            "description": "Health multiplier of player placed buildings. By default set to \"1\".",
-            "env_variable": "BUILDING_HEALTH",
+            "name": "Air Drop Interval",
+            "description": "How many game days between each AirDrop",
+            "env_variable": "AirDropInterval",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -229,10 +259,40 @@
             "field_type": "text"
         },
         {
+            "name": "Weapon Break",
+            "description": "If true when weapon durability reaches 0%, the weapon will break and be removed from the player's inventory. Set to false to disable weapon breaking.",
+            "env_variable": "WeaponBreak",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Owned Cars",
+            "description": "How many cars you are allowed to own. Non owned cars can't be driven but can be looted.",
+            "env_variable": "MaxOwnedCars",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Multiplayer Sleep",
+            "description": "When true time passes if eveyone performs the sleep emote at the same time, false=Passing time is disabled",
+            "env_variable": "MultiplayerSleep",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
             "name": "Loot Respawn",
-            "description": "1=Loot does respawn, 0=Never respawn",
-            "env_variable": "LOOT_RESPAWN",
-            "default_value": "1",
+            "description": "Loot does respawn, false=Never respawn",
+            "env_variable": "LootRespawn",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
@@ -240,8 +300,8 @@
         },
         {
             "name": "Loot Respawn Timer",
-            "description": "If loot respawns how long does it take in minutes",
-            "env_variable": "LOOT_RESPAWN_TIMER",
+            "description": "If loot respawn is enabled, this is the time in minutes it takes for loot containers to respawn.",
+            "env_variable": "LootRespawnTimer",
             "default_value": "60",
             "user_viewable": true,
             "user_editable": true,
@@ -250,8 +310,8 @@
         },
         {
             "name": "Pickup Respawn Timer",
-            "description": "Time in minutes it takes to respawn pickups, 0 to disable.",
-            "env_variable": "PICKUP_RESPAWN_TIMER",
+            "description": "If loot respawn is enabled, this is the time in minutes it takes for pickup items to respawn.",
+            "env_variable": "PickupRespawnTimer",
             "default_value": "90",
             "user_viewable": true,
             "user_editable": true,
@@ -259,9 +319,9 @@
             "field_type": "text"
         },
         {
-            "name": "Loot Rarity",
-            "description": "0=Scarce, 1=Low, 2=Default, 3=Plentiful, 4=Abundant",
-            "env_variable": "LOOT_RARITY",
+            "name": "Rarity Food",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityFood",
             "default_value": "2",
             "user_viewable": true,
             "user_editable": true,
@@ -269,29 +329,9 @@
             "field_type": "text"
         },
         {
-            "name": "Air Drop Interval",
-            "description": "Air drop every X day",
-            "env_variable": "AIR_DROP_INTERVAL",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|numeric",
-            "field_type": "text"
-        },
-        {
-            "name": "Zombie Difficulty (Health)",
-            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
-            "env_variable": "ZOMBIE_DIFF_HEALTH",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|numeric",
-            "field_type": "text"
-        },
-        {
-            "name": "Zombie Difficulty (Speed)",
-            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
-            "env_variable": "ZOMBIE_DIFF_SPEED",
+            "name": "Rarity Drink",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityDrink",
             "default_value": "2",
             "user_viewable": true,
             "user_editable": true,
@@ -299,9 +339,89 @@
             "field_type": "text"
         },
         {
-            "name": "Zombie Difficulty (Damage)",
-            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
-            "env_variable": "ZOMBIE_DIFF_DAMAGE",
+            "name": "Rarity Melee",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityMelee",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Rarity Ranged",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityRanged",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Rarity Ammo",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityAmmo",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Rarity Armor",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityArmor",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Rarity Resources",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityResources",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Rarity Other",
+            "description": "From 0 to 4 (Scarce, low, default, Plentiful, abundant)",
+            "env_variable": "RarityOther",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "ZombieDiffHealth",
+            "description": "Health difficulty where 0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "ZombieDiffHealth",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "ZombieDiffSpeed",
+            "description": "Speed difficulty where 0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "ZombieDiffSpeed",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "ZombieDiffDamage",
+            "description": "Damage difficulty where 0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "ZombieDiffDamage",
             "default_value": "3",
             "user_viewable": true,
             "user_editable": true,
@@ -309,19 +429,9 @@
             "field_type": "text"
         },
         {
-            "name": "Human Difficulty",
-            "description": "0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
-            "env_variable": "HUMAN_DIFFICULTY",
-            "default_value": "3",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|numeric",
-            "field_type": "text"
-        },
-        {
-            "name": "Zombie Amount Multiplier",
-            "description": "Zombie spawn count multiplier",
-            "env_variable": "ZOMBIE_AMOUNT_MULTI",
+            "name": "ZombieAmountMulti",
+            "description": "Zombie amount multiplier 2 for example would mean twice as many zombies. 0.5 would mean half as many zombies.",
+            "env_variable": "ZombieAmountMulti",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -329,9 +439,9 @@
             "field_type": "text"
         },
         {
-            "name": "Human Amount Multiplier",
-            "description": "Hostile humans spawn count multiplier",
-            "env_variable": "HUMAN_AMOUNT_MULTI",
+            "name": "HumanAmountMulti",
+            "description": "Human bandit amount multiplier 2 for example would mean twice as many human bandits. 0.5 would mean half as many human bandits.",
+            "env_variable": "HumanAmountMulti",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -339,9 +449,9 @@
             "field_type": "text"
         },
         {
-            "name": "Zombie Dog Multiplier",
-            "description": "Zombie dog spawn count multiplier",
-            "env_variable": "ZOMBIE_DOG_MULTI",
+            "name": "ZombieDogMulti",
+            "description": "Zombie dog mainly appear at night. 2 for example would mean twice as many zombie dogs. 0.5 would mean half as many zombie dogs.",
+            "env_variable": "ZombieDogMulti",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -349,9 +459,9 @@
             "field_type": "text"
         },
         {
-            "name": "Zombie Respawn Timer",
-            "description": "Time in minutes for zombies to respawn",
-            "env_variable": "ZOMBIE_RESPAWN_TIMER",
+            "name": "ZombieRespawnTimer",
+            "description": "The time in minutes it takes for zombies to respawn, set to 0 to disable zombie respawning.",
+            "env_variable": "ZombieRespawnTimer",
             "default_value": "90",
             "user_viewable": true,
             "user_editable": true,
@@ -359,9 +469,9 @@
             "field_type": "text"
         },
         {
-            "name": "Human Respawn Timer",
-            "description": "Time in minutes for hostile humans to respawn",
-            "env_variable": "HUMAN_RESPAWN_TIMER",
+            "name": "HumanRespawnTimer",
+            "description": "The time in minutes it takes for human bandits to respawn, set to 0 to disable human bandit respawning.",
+            "env_variable": "HumanRespawnTimer",
             "default_value": "90",
             "user_viewable": true,
             "user_editable": true,
@@ -369,9 +479,49 @@
             "field_type": "text"
         },
         {
-            "name": "Animal Respawn Timer",
-            "description": "Time in minutes for animals to respawn",
-            "env_variable": "ANIMAL_RESPAWN_TIMER",
+            "name": "HumanHealth",
+            "description": "Human bandit difficulty where 0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "HumanHealth",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "HumanSpeed",
+            "description": "Human bandit speed difficulty where 0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "HumanSpeed",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "HumanDamage",
+            "description": "Human bandit damage difficulty where 0=Very Easy, 1=Easy, 2=Default, 3=Hard, 4=Very Hard, 5=Nightmare",
+            "env_variable": "HumanDamage",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "AnimalMulti",
+            "description": "Animal spawn multiplier, default 1",
+            "env_variable": "AnimalMulti",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "AnimalRespawnTimer",
+            "description": "The time in minutes it takes for animals to respawn, set to 0 to disable animal respawning.",
+            "env_variable": "AnimalRespawnTimer",
             "default_value": "90",
             "user_viewable": true,
             "user_editable": true,
@@ -379,9 +529,9 @@
             "field_type": "text"
         },
         {
-            "name": "Starting Season",
+            "name": "StartingSeason",
             "description": "0=Summer, 1=Autum, 2=Winter, 3=Spring",
-            "env_variable": "STARTING_SEASON",
+            "env_variable": "StartingSeason",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -389,9 +539,9 @@
             "field_type": "text"
         },
         {
-            "name": "Days Per Season",
-            "description": "How many days each season lasts",
-            "env_variable": "DAYS_PER_SEASON",
+            "name": "DaysPerSeason",
+            "description": "How many game days each season lasts",
+            "env_variable": "DaysPerSeason",
             "default_value": "5",
             "user_viewable": true,
             "user_editable": true,
@@ -399,9 +549,9 @@
             "field_type": "text"
         },
         {
-            "name": "Day Duration",
+            "name": "DayDur",
             "description": "Day duration in minutes",
-            "env_variable": "DAY_DUR",
+            "env_variable": "DayDur",
             "default_value": "40",
             "user_viewable": true,
             "user_editable": true,
@@ -409,9 +559,9 @@
             "field_type": "text"
         },
         {
-            "name": "Night Duration",
+            "name": "NightDur",
             "description": "Night duration in minutes",
-            "env_variable": "NIGHT_DUR",
+            "env_variable": "NightDur",
             "default_value": "20",
             "user_viewable": true,
             "user_editable": true,
@@ -419,9 +569,9 @@
             "field_type": "text"
         },
         {
-            "name": "Vital Drain",
+            "name": "VitalDrain",
             "description": "How fast your vitals drain 0=Slow, 1=Normal, 2=Fast",
-            "env_variable": "VITAL_DRAIN",
+            "env_variable": "VitalDrain",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -429,19 +579,29 @@
             "field_type": "text"
         },
         {
-            "name": "Dog Companions Enabled",
-            "description": "Enable finding dog companions you can recruit",
-            "env_variable": "DOG_ENABLED",
-            "default_value": "1",
+            "name": "DogEnabled",
+            "description": "Enable finding dog companions you can recruit set to true to enable or false to disable",
+            "env_variable": "DogEnabled",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
             "field_type": "text"
         },
         {
-            "name": "Dog Companion Amount",
-            "description": "Number of companion dogs that could spawn randomly",
-            "env_variable": "DOG_NUM",
+            "name": "RecruitDog",
+            "description": "Allow players to recruit companion dogs by dropping food and claiming the dog. Set to false to disable.",
+            "env_variable": "RecruitDog",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "DogNum",
+            "description": "The maximum amount of companion dogs you can find in the world. Dogs will respawn when needed.",
+            "env_variable": "DogNum",
             "default_value": "8",
             "user_viewable": true,
             "user_editable": true,
@@ -449,19 +609,9 @@
             "field_type": "text"
         },
         {
-            "name": "Recruit Companion Dogs",
-            "description": "Allow players to recruit companion dog",
-            "env_variable": "RECRUIT_DOG",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Companion Health",
-            "description": "Dog companion health - 0=Low 1=Default 2=High",
-            "env_variable": "COMPANION_HEALTH",
+            "name": "BuildingHealth",
+            "description": "Health multiplier of player placed buildings. By default set to 1.",
+            "env_variable": "BuildingHealth",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -469,9 +619,9 @@
             "field_type": "text"
         },
         {
-            "name": "Companion Damage",
-            "description": "Dog companion damage - 0=Low 1=Default 2=High",
-            "env_variable": "COMPANION_DMG",
+            "name": "CompanionHealth",
+            "description": "Dog companion health 0=Low 1=Default 2=High This is not a multiplier, it is a set value for dog companion health.",
+            "env_variable": "CompanionHealth",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
@@ -479,30 +629,30 @@
             "field_type": "text"
         },
         {
-            "name": "No Death Feedback",
-            "description": "0 to enable player died notification in chat - 1 to disable player died notification in chat.",
-            "env_variable": "NO_DEATH_FEEDBACK",
-            "default_value": "0",
+            "name": "CompanionDmg",
+            "description": "Dog companion damage 0=Low 1=Default 2=High This is not a multiplier, it is a set value for dog companion damage.",
+            "env_variable": "CompanionDmg",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "AllowDismantle",
+            "description": "Enable players to dismantle their own buildings.",
+            "env_variable": "AllowDismantle",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
             "field_type": "text"
         },
         {
-            "name": "Allow Dismantle",
-            "description": "1 = Enable players to dismantle their own buildings, 0 = Disable",
-            "env_variable": "ALLOW_DISMANTLE",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Allow House Dismantle",
-            "description": "1 = Players are able to dismantle house props, 0 = Disable",
-            "env_variable": "ALLOW_HOUSE_DISMANTLE",
-            "default_value": "1",
+            "name": "AllowHouseDismantle",
+            "description": "Enable Players are able to dismantle house props.",
+            "env_variable": "AllowHouseDismantle",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
@@ -510,9 +660,9 @@
         },
         {
             "name": "Territory",
-            "description": "1 = Enabled. In PVE you are not allowed to build in someone's spawn point area. Only non recruit clan members can. 0 = Disable",
-            "env_variable": "TERRITORY",
-            "default_value": "1",
+            "description": "If true You WILL NOT be allowed to build in someone's spawn point area. For clans only non recruit members can.",
+            "env_variable": "Territory",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
@@ -520,18 +670,38 @@
         },
         {
             "name": "Decay",
-            "description": "By default 3600, the crafted \"Spawn Point\" loses 1 durability every 1 hour. This is used to deal with territory build restrictions, so players have to repair their spawn point.",
-            "env_variable": "DECAY",
-            "default_value": "3600",
+            "description": "How many real days it takes for a spawn point to go from 100% health to being destroyed.",
+            "env_variable": "Decay",
+            "default_value": "7",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|numeric",
             "field_type": "text"
         },
         {
-            "name": "Pickup Cleanup",
-            "description": "How long in minutes it takes for dropped pickups to be destroyed (Pickups part of the world will not be considered), a value of 0 means no cleanup is done.",
-            "env_variable": "PICKUP_CLEANUP",
+            "name": "BuildingDecay",
+            "description": "How many real days it takes for player built buildings to fully decay. 0 to disable.",
+            "env_variable": "BuildingDecay",
+            "default_value": "7",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "PickupCleanup",
+            "description": "How long in game days it takes for dropped pickups to be destroyed.",
+            "env_variable": "PickupCleanup",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "FakeBuildingCleanup",
+            "description": "How long in minutes it takes for the white blueprint building to be destroyed.",
+            "env_variable": "FakeBuildingCleanup",
             "default_value": "3000",
             "user_viewable": true,
             "user_editable": true,
@@ -539,10 +709,180 @@
             "field_type": "text"
         },
         {
-            "name": "Fake Building Cleanup",
-            "description": "How long in minutes it takes for the white blueprint building to be destroyed, a value of 0 means no cleanup is done.",
-            "env_variable": "FAKE_BUILDING_CLEANUP",
-            "default_value": "3000",
+            "name": "FoodDecay",
+            "description": "Contols how fast food decays 0=Disabled 1=Default. It's a multiplier so if you need to slow down decay by half the value would be 0.5. Values greater than 1 will speed it up.",
+            "env_variable": "FoodDecay",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "GenFuel",
+            "description": "Controls how fast house generator consumes fuel. 0.01 to 4. It's a multiplier where 1 is default and less than 1 will slows it down.",
+            "env_variable": "GenFuel",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Sleep",
+            "description": "Sleep deprivation effect false=Disabled true=Enabled",
+            "env_variable": "Sleep",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "FreezeTime",
+            "description": "When enabled and server is empty time doesn't pass.",
+            "env_variable": "FreezeTime",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Seg0",
+            "description": "Map is divided into 3 segments, objects that need to spawmn reasonabiliy far are put in Seg0 like houses.",
+            "env_variable": "Seg0",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Seg1",
+            "description": "Broken cars and other similar objects are put in Seg1.",
+            "env_variable": "Seg1",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Seg2",
+            "description": "Spawn distance performance segment.",
+            "env_variable": "Seg2",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Voip",
+            "description": "When set to 1 or true voice chat will be enabled, set 0 or false to disable",
+            "env_variable": "Voip",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "AIEvent",
+            "description": "The game will sometimes spawn AI event such as zombies or human raiding your location. How frequence the event is where 0 = Disabled, 1 Low, 2 = Default, 3 = High, 4 = Insane",
+            "env_variable": "AIEvent",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_ClearSky",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_ClearSky",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_Cloudy",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_Cloudy",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_Foggy",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_Foggy",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_LightRain",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_LightRain",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_Rain",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_Rain",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_Thunderstorm",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_Thunderstorm",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_LightSnow",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_LightSnow",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_Snow",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_Snow",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Weather_Blizzard",
+            "description": "Below you can tweak the odds of each weather type. The current season will still dictate which weather types can spawn.",
+            "env_variable": "Weather_Blizzard",
+            "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|numeric",
