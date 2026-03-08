@@ -2,9 +2,9 @@
     "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
     "meta": {
         "version": "PTDL_v2",
-        "update_url": null
+    "update_url": "https://raw.githubusercontent.com/pterodactyl/game-eggs/refs/heads/main/hytale/egg-hytale.json"
     },
-    "exported_at": "2026-01-13T05:17:28+00:00",
+  "exported_at": "2026-03-08T12:00:00+00:00",
     "name": "Hytale",
     "author": "hello@pterodactyl.io",
     "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox with the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a variety of creatures, then shape it block by block.",
@@ -15,45 +15,35 @@
         "ghcr.io/pterodactyl/games:hytale": "ghcr.io/pterodactyl/games:hytale"
     },
     "file_denylist": [],
-    "startup": "java $( ((USE_AOT_CACHE)) && printf %s \"-XX:AOTCache=Server\/HytaleServer.aot\" ) -Xms128M $( ((SERVER_MEMORY)) && printf %s \"-Xmx${SERVER_MEMORY}M\" ) -jar Server\/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) $( ((HYTALE_ACCEPT_EARLY_PLUGINS)) && printf %s \"--accept-early-plugins\" ) $( ((DISABLE_SENTRY)) && printf %s \"--disable-sentry\" ) --auth-mode ${HYTALE_AUTH_MODE} --assets Assets.zip --bind 0.0.0.0:${SERVER_PORT}",
+  "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 {{AOT_FLAG}} {{COMPACT_HEADERS_FLAG}} -Djava.io.tmpdir=/home/container/.tmp -Dterminal.jline=false -Dterminal.ansi=true -jar HytaleServer.jar {{ALLOW_OP_FLAG}} {{ACCEPT_EARLY_PLUGINS_FLAG}} {{DISABLE_SENTRY_FLAG}} {{SKIP_MOD_VALIDATION_FLAG}} {{TRANSPORT_FLAG}} --bind 0.0.0.0:{{SERVER_PORT}} --assets ../Assets.zip {{BACKUP_FLAG}}",
     "config": {
-        "files": "{}",
-        "startup": "{\n    \"done\": \"Hytale Server Booted\"\n}",
-        "logs": "{}",
+    "files": "[]",
+    "startup": "{\n    \"done\": \"Hytale Server Booted!\"\n}",
+    "logs": "[]",
         "stop": "/stop"
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/ash\nset -e\n\nmkdir -p \/mnt\/server\ncd \/mnt\/server\n\necho -e \"Downloading Hytale Downloader CLI...\"\n\nDOWNLOAD_URL=\"https:\/\/downloader.hytale.com\/hytale-downloader.zip\"\n\nrm -f hytale-downloader.zip\ncurl -o hytale-downloader.zip $DOWNLOAD_URL\nunzip -o hytale-downloader.zip -d hytale-downloader\nmv hytale-downloader\/hytale-downloader-linux-amd64 hytale-downloader\/hytale-downloader-linux\nchmod 555 hytale-downloader\/hytale-downloader-linux\n\necho -e \"Verifying Hytale Downloader installation...\"\n\necho -e \"Hytale Downloader version: `.\/hytale-downloader\/hytale-downloader-linux -version`\"\n\necho -e \"Hytale Downloader installed successfully.\"",
-            "container": "ghcr.io/pterodactyl/installers:alpine",
-            "entrypoint": "ash"
+      "script": "#!/bin/bash\nset -e\n\necho '============================================'\necho 'Hytale Server Installation'\necho '============================================'\n\necho '[1/2] Creating directories...'\nmkdir -p /mnt/server/.tmp\nmkdir -p /mnt/server/Backups\nmkdir -p /mnt/server/Server/mods\nmkdir -p /mnt/server/Server/earlyplugins\nmkdir -p /mnt/server/.server-backups/release\nmkdir -p /mnt/server/.server-backups/pre-release\necho '  \u2713 Directories created'\n\necho '[2/2] Creating config.json...'\ncat > /mnt/server/Server/config.json << 'EOF'\n{\n  \"Version\": 4,\n  \"ServerName\": \"Hytale Server\",\n  \"MOTD\": \"\",\n  \"Password\": \"\",\n  \"MaxPlayers\": 20,\n  \"MaxViewRadius\": 12,\n  \"Defaults\": {\n    \"World\": \"default\",\n    \"GameMode\": \"Adventure\"\n  },\n  \"ConnectionTimeouts\": {\n    \"InitialTimeout\": \"PT1M\",\n    \"AuthTimeout\": \"PT1M30S\"\n  },\n  \"RateLimit\": {},\n  \"Modules\": {},\n  \"LogLevels\": {\n    \"AssetModule|P\": \"SEVERE\",\n    \"AssetRegistryLoader\": \"SEVERE\",\n    \"AssetStore|AssignmentsAsset\": \"SEVERE\",\n    \"AssetStore|BiomeAsset\": \"SEVERE\",\n    \"AssetStore|BlockType\": \"SEVERE\",\n    \"AssetStore|CustomConnectedBlockTemplateAsset\": \"SEVERE\",\n    \"AssetStore|EntityEffect\": \"SEVERE\",\n    \"AssetStore|Environment\": \"SEVERE\",\n    \"AssetStore|GameplayConfig\": \"SEVERE\",\n    \"AssetStore|Interaction\": \"SEVERE\",\n    \"AssetStore|Item\": \"SEVERE\",\n    \"AssetStore|ModelVFX\": \"SEVERE\",\n    \"AssetStore|ParticleSystem\": \"SEVERE\",\n    \"AssetStore|PrefabListAsset\": \"SEVERE\",\n    \"AssetStore|ScriptedBrushAsset\": \"SEVERE\",\n    \"AssetStore|WorldStructureAsset\": \"SEVERE\",\n    \"BarterShopState\": \"SEVERE\",\n    \"BlockSetModule|P\": \"SEVERE\",\n    \"BuilderToolsPacketHandler\": \"SEVERE\",\n    \"CertificateUtil\": \"SEVERE\",\n    \"CollisionModule|P\": \"SEVERE\",\n    \"CommonAssetModule|P\": \"SEVERE\",\n    \"ConsoleModule|P\": \"SEVERE\",\n    \"EncryptedAuthCredentialStore\": \"SEVERE\",\n    \"Entity\": \"SEVERE\",\n    \"HandshakeHandler\": \"SEVERE\",\n    \"Hytale\": \"SEVERE\",\n    \"HytaleGenerator\": \"SEVERE\",\n    \"HytaleGenerator|P\": \"SEVERE\",\n    \"HytaleServer\": \"INFO\",\n    \"I18nModule|P\": \"SEVERE\",\n    \"JWTValidator\": \"SEVERE\",\n    \"LoginTiming\": \"SEVERE\",\n    \"MacroCommandBase\": \"SEVERE\",\n    \"NPC|P\": \"SEVERE\",\n    \"PasswordPacketHandler\": \"SEVERE\",\n    \"PathWatcherThread\": \"SEVERE\",\n    \"PlayerSavingSystems\": \"SEVERE\",\n    \"PluginExample|P\": \"INFO\",\n    \"PluginManager\": \"INFO\",\n    \"QUICTransport\": \"SEVERE\",\n    \"SERR\": \"SEVERE\",\n    \"ServerAuthManager\": \"SEVERE\",\n    \"ServerManager|P\": \"SEVERE\",\n    \"SessionServiceClient\": \"SEVERE\",\n    \"Shop|P\": \"SEVERE\",\n    \"Spawning|P\": \"SEVERE\",\n    \"Teleport|P\": \"SEVERE\",\n    \"Universe|P\": \"SEVERE\",\n    \"World|default\": \"SEVERE\",\n    \"World|default|M\": \"SEVERE\",\n    \"WorldGenerator\": \"SEVERE\",\n    \"WorldMapTracker\": \"SEVERE\"\n  },\n  \"Mods\": {},\n  \"DisplayTmpTagsInStrings\": false,\n  \"PlayerStorage\": {\n    \"Type\": \"Hytale\"\n  },\n  \"Update\": {}\n}\nEOF\necho '  \u2713 config.json created'\n\necho 'Installation complete!'\necho '============================================'\necho 'Installed components:'\necho '  - Base directories'\necho '  - config.json'\necho '============================================'",
+      "container": "ghcr.io/pterodactyl/installers:debian",
+      "entrypoint": "bash"
         }
     },
     "variables": [
         {
-            "name": "Accept Early Plugins",
-            "description": "Hytale warns that loading early plugins is unsupported and may cause stability issues.",
-            "env_variable": "HYTALE_ACCEPT_EARLY_PLUGINS",
-            "default_value": "0",
+      "name": "Auto Update",
+      "description": "Automatically update game files on startup.",
+      "env_variable": "AUTO_UPDATE",
+      "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Auth Mode",
-            "description": "Authentication mode.",
-            "env_variable": "HYTALE_AUTH_MODE",
-            "default_value": "authenticated",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|string|in:authenticated,offline",
+      "rules": "boolean",
             "field_type": "text"
         },
         {
             "name": "Patchline",
-            "description": "The branch of Hytale to install.",
-            "env_variable": "HYTALE_PATCHLINE",
+      "description": "Server branch preference, Update.Patchline inside the config.json overrides this.",
+      "env_variable": "PATCHLINE",
             "default_value": "release",
             "user_viewable": true,
             "user_editable": true,
@@ -61,38 +51,178 @@
             "field_type": "text"
         },
         {
-            "name": "Disable Sentry",
-            "description": "Hytale uses Sentry to track crashes. Disable Sentry during active plugin development.",
-            "env_variable": "DISABLE_SENTRY",
+      "name": "Server Version",
+      "description": "Version to run: latest, previous or a specific version.",
+      "env_variable": "SERVER_VERSION",
+      "default_value": "latest",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Pre-Authentication",
+      "description": "Pre-authenticate via OAuth2 before server start.",
+      "env_variable": "HYTALE_API_AUTH",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Enable World Backups",
+      "description": "Enable automatic world backups by the game server.",
+      "env_variable": "ENABLE_WORLD_BACKUP",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Enable Server Backup",
+      "description": "Store a backup of the previous server version on update or patchline change.",
+      "env_variable": "ENABLE_SERVER_BACKUP",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Server Backup Retention",
+      "description": "Number of server version backups to retain per patchline.",
+      "env_variable": "SERVER_BACKUP_RETENTION",
+      "default_value": "2",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "integer|required|min:1",
+      "field_type": "text"
+    },
+    {
+      "name": "Backup Directory",
+      "description": "Directory for world backups.",
+      "env_variable": "BACKUP_DIR",
+      "default_value": "Backups",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Backup Frequency",
+      "description": "Backup interval in minutes.",
+      "env_variable": "BACKUP_FREQUENCY",
+      "default_value": "30",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "integer|required",
+      "field_type": "text"
+    },
+    {
+      "name": "Backup Max Count",
+      "description": "Maximum number of world backups.",
+      "env_variable": "BACKUP_MAX_COUNT",
+      "default_value": "5",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "integer",
+      "field_type": "text"
+    },
+    {
+      "name": "Backup Archive Max Count",
+      "description": "Maximum number of backup archives to retain.",
+      "env_variable": "BACKUP_ARCHIVE_MAX_COUNT",
+      "default_value": "5",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "integer",
+      "field_type": "text"
+    },
+    {
+      "name": "Use AOT Cache",
+      "description": "Enable Ahead-Of-Time compilation cache for faster startup.",
+      "env_variable": "USE_AOT_CACHE",
             "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|boolean",
+      "rules": "boolean",
             "field_type": "text"
         },
         {
-            "name": "Use Ahead-of-Time Cache",
-            "description": "Hytale provides a pre-trained AOT Java cache which can significantly improve boot times.",
-            "env_variable": "USE_AOT_CACHE",
+      "name": "Compact Object Headers",
+      "description": "Enable JVM compact object headers for reduced memory usage.",
+      "env_variable": "USE_COMPACT_HEADERS",
             "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|boolean",
+      "rules": "boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Allow Self-OP",
+      "description": "Allow players to use /op self to grant themselves operator permissions.",
+      "env_variable": "ALLOW_OP",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Load Early Plugins",
+      "description": "Loads binary injection plugins for the server, enable only if you understand the stability risks.",
+      "env_variable": "ACCEPT_EARLY_PLUGINS",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Disable Sentry",
+      "description": "Disable Sentry error reporting and telemetry.",
+      "env_variable": "DISABLE_SENTRY",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "boolean",
             "field_type": "text"
         },
         {
-            "name": "Allow operators",
-            "description": "Allow operators",
-            "env_variable": "HYTALE_ALLOW_OP",
+      "name": "Skip Mod Validation",
+      "description": "Skip mod validation, allowing the server to boot even if a mod fails to load.",
+      "env_variable": "SKIP_MOD_VALIDATION",
             "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|boolean",
+      "rules": "boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Transport",
+      "description": "Network transport protocol. QUIC (UDP) is default; use TCP if UDP/QUIC is blocked by your host or network.",
+      "env_variable": "TRANSPORT",
+      "default_value": "QUIC",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|in:QUIC,TCP",
+      "field_type": "text"
+    },
+    {
+      "name": "Profile UUID",
+      "description": "Specify a specific Hytale profile UUID for the servers session.",
+      "env_variable": "HYTALE_PROFILE_UUID",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
             "field_type": "text"
         },
         {
-            "name": "Install Source Query plugin",
-            "description": "Installs the Soruce Query plugin, so that your server responds to Source Query A2S requests (player count, server name, etc.)",
+      "name": "Install Source Query Plugin",
+      "description": "Installs the Source Query plugin, so that your server responds to Source Query A2S requests (player count, server name, etc.)",
             "env_variable": "INSTALL_SOURCEQUERY_PLUGIN",
             "default_value": "1",
             "user_viewable": true,
