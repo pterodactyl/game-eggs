@@ -8,19 +8,17 @@
     "name": "Hytale",
     "author": "hello@pterodactyl.io",
     "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox with the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a variety of creatures, then shape it block by block.",
-    "features": [
-        "java_version"
-    ],
+    "features": null,
     "docker_images": {
-        "ghcr.io/pterodactyl/games:hytale": "ghcr.io/pterodactyl/games:hytale"
+        "Hytale": "ghcr.io/pelican-eggs/games:hytale"
     },
     "file_denylist": [],
-  "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 {{AOT_FLAG}} {{COMPACT_HEADERS_FLAG}} -Djava.io.tmpdir=/home/container/.tmp -Dterminal.jline=false -Dterminal.ansi=true -jar HytaleServer.jar {{ALLOW_OP_FLAG}} {{ACCEPT_EARLY_PLUGINS_FLAG}} {{DISABLE_SENTRY_FLAG}} {{SKIP_MOD_VALIDATION_FLAG}} {{TRANSPORT_FLAG}} --bind 0.0.0.0:{{SERVER_PORT}} --assets ../Assets.zip {{BACKUP_FLAG}}",
+  "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar HytaleServer.jar --bind 0.0.0.0:{{SERVER_PORT}} --assets ../Assets.zip",
     "config": {
     "files": "[]",
     "startup": "{\n    \"done\": \"Hytale Server Booted!\"\n}",
     "logs": "[]",
-        "stop": "/stop"
+        "stop": "stop"
     },
     "scripts": {
         "installation": {
@@ -144,7 +142,7 @@
       "name": "Use AOT Cache",
       "description": "Enable Ahead-Of-Time compilation cache for faster startup.",
       "env_variable": "USE_AOT_CACHE",
-            "default_value": "0",
+            "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
       "rules": "boolean",
@@ -218,26 +216,6 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
-      "name": "Install Source Query Plugin",
-      "description": "Installs the Source Query plugin, so that your server responds to Source Query A2S requests (player count, server name, etc.)",
-            "env_variable": "INSTALL_SOURCEQUERY_PLUGIN",
-            "default_value": "1",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "Source Query Port",
-            "description": "The port that the Source Query plugin will use to respond to A2S requests. This should be different from the main server port. Defaults to the game port + 1.",
-            "env_variable": "QUERY_PORT",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "nullable|integer|between:1,65535",
             "field_type": "text"
         }
     ]
