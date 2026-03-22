@@ -27,7 +27,7 @@ Default port required to run the server.
 
 ## Verification
 
-The server must be verified with the SCP:SL developers in order for it to be visible in the server browser.
+The server must be verified in order for it to be visible in the server browser.
 Make sure your server complies with the [Community Server Guidelines](https://scpslgame.com/CSG.pdf).
 
 ### Automatic Verification
