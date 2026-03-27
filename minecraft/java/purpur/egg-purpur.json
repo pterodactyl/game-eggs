@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2024-12-24T13:32:40+00:00",
+    "exported_at": "2026-03-27T14:40:52+01:00",
     "name": "Purpur",
     "author": "purpur@birdflop.com",
     "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
@@ -14,15 +14,16 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 8": "ghcr.io\/ptero-eggs\/yolks:java_8",
-        "Java 11": "ghcr.io\/ptero-eggs\/yolks:java_11",
-        "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
+        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25",
+        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
+        "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
         "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
-        "java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
-        "java 22": "ghcr.io\/ptero-eggs\/yolks:java_22"
+        "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
+        "Java 11": "ghcr.io\/ptero-eggs\/yolks:java_11",
+        "Java 8": "ghcr.io\/ptero-eggs\/yolks:java_8"
     },
     "file_denylist": [],
-    "startup": "java --add-modules=jdk.incubator.vector -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+    "startup": "java --add-modules=jdk.incubator.vector -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
     "config": {
         "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
