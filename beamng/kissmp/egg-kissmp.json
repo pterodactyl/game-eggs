@@ -4,11 +4,11 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2024-04-02T11:01:56+02:00",
+    "exported_at": "2026-03-29T18:40:20+02:00",
     "name": "KissMP Server",
-    "author": "me@weilbyte.dev",
-    "description": "Server for the KISS Multiplayer BeamNG.drive mod",
-    "features": null,
+    "author": "antoinebecquet93@gmail.com",
+    "description": "Server for the KISS Multiplayer BeamNG.drive mod\r\nUpdated by @AntoineAvecUnF\r\nScript by @Zeit and @Valid (Vlad118)\r\n\r\nIf you have any questions, ask on discord : https:\/\/discord.gg\/ap6kj7Hq2n",
+    "features": [],
     "docker_images": {
         "ghcr.io\/ptero-eggs\/yolks:debian": "ghcr.io\/ptero-eggs\/yolks:debian"
     },
@@ -22,7 +22,7 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\n# Server Files: \/mnt\/server\r\napt update \r\napt install -y wget unzip \r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\nLATEST_RELEASE=$(wget -qO- https:\/\/api.github.com\/repos\/TheHellBox\/KISS-multiplayer\/releases\/latest | grep browser_download_url | cut -d '\"' -f 4)\r\necho -e Install repo set to ${INSTALL_REPO}\r\necho -e \"\/mnt\/server is empty.\\nDownloading latest release ${LATEST_RELEASE}\"\r\n\r\nwget $LATEST_RELEASE -O kissmp.zip\r\nunzip -j kissmp.zip '*\/kissmp-server'\r\n\r\nrm -rf kissmp.zip\r\n\r\nif [ -f \/mnt\/server\/kissmp-server ]; then\r\n    echo -e \"Install complete\"\r\n    chmod +x \/mnt\/server\/kissmp-server\r\n    \r\n    # Generate config\r\n    .\/kissmp-server & serverpid=$! \r\n    sleep 1\r\n    kill $serverpid\r\n    \r\n    exit 0\r\nelse \r\n    echo -e \"Install failed (no \/mnt\/server\/kissmp-server file present)\"\r\n    exit 1\r\nfi",
+            "script": "#!\/bin\/bash\r\n# Server Files: \/mnt\/server\r\napt update \r\napt install -y wget unzip \r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\nLATEST_RELEASE=$(wget -qO- https:\/\/api.github.com\/repos\/Vlad118\/KISS-multiplayer\/releases\/latest | grep browser_download_url | cut -d '\"' -f 4)\r\necho -e Install repo set to ${INSTALL_REPO}\r\necho -e \"\/mnt\/server is empty.\\nDownloading latest release ${LATEST_RELEASE}\"\r\n\r\nwget $LATEST_RELEASE -O kissmp.zip\r\nunzip -j kissmp.zip '*\/kissmp-server'\r\n\r\nrm -rf kissmp.zip\r\n\r\nif [ -f \/mnt\/server\/kissmp-server ]; then\r\n    echo -e \"Install complete\"\r\n    chmod +x \/mnt\/server\/kissmp-server\r\n    \r\n    # Generate config\r\n    .\/kissmp-server & serverpid=$! \r\n    sleep 1\r\n    kill $serverpid\r\n    \r\n    exit 0\r\nelse \r\n    echo -e \"Install failed (no \/mnt\/server\/kissmp-server file present)\"\r\n    exit 1\r\nfi",
             "container": "ghcr.io\/ptero-eggs\/installers:debian",
             "entrypoint": "bash"
         }
