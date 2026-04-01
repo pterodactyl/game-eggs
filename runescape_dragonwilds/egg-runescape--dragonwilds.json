@@ -1,0 +1,102 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-03-31T19:50:59-04:00",
+    "name": "Runescape: Dragonwilds",
+    "author": "euno@spacebarservers.com",
+    "description": "A Runescape: Dragonwilds Server",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/RSDragonwilds\/Binaries\/Linux\/*-Linux-Shipping RSDragonwilds -Port={{SERVER_PORT}}",
+    "config": {
+        "files": "{\r\n    \"RSDragonwilds\/Saved\/Config\/LinuxServer\/DedicatedServer.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[\/Script\/Dominion.DedicatedServerSettings].OwnerId\": \"{{server.build.env.OWNER_ID}}\",\r\n            \"[\/Script\/Dominion.DedicatedServerSettings].WorldPassword\": \"{{server.build.env.WORLD_PASSWORD}}\",\r\n            \"[\/Script\/Dominion.DedicatedServerSettings].AdminPassword\": \"{{server.build.env.ADMIN_PASWORD}}\",\r\n            \"[\/Script\/Dominion.DedicatedServerSettings].ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[\/Script\/Dominion.DedicatedServerSettings].DefaultWorldName\": \"{{server.build.env.WORLD_NAME}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Engine Initialization\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n\r\n# File: Pterodactyl Runescape: Dragonwilds Egg - egg-rsdragonwilds.json\r\n# Authors: Euno, Red-Thirten, Kubi, matthewp, Software-Noob, and Zarklord\r\n# Date: 2026\/03\/31\r\n# License: MIT License\r\n\r\n## Download and install SteamCMD\r\ncd \/tmp\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\nmkdir -p \/mnt\/server\/steamcmd\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n# Install game server using SteamCMD\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login anonymous +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +exit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk{32,64}\r\ncp -v linux32\/steamclient.so \/mnt\/server\/.steam\/sdk32\/steamclient.so\r\ncp -v linux64\/steamclient.so \/mnt\/server\/.steam\/sdk64\/steamclient.so\r\n\r\n## Runescape: Dragonwilds setup\r\n# Check for successful installation and make the server binary executable.\r\n# Use `find` to see if a valid server binary exists using a wildcard, because\r\n# the binary name may change in the future.\r\n# (eg. it changed when the engine was updated from UE4 to UE5)\r\ncd \/mnt\/server\/RSDragonwilds\/Binaries\/Linux\r\ncount=$(find . -maxdepth 1 -name '*-Linux-Shipping' -type f -executable | wc -l)\r\nif [[ $count -eq 0 ]]; then\r\n    echo -e \"\\n\\nSteamCMD failed to install the Runescape: Dragonwilds Dedicated Server!\"\r\n    echo -e \"\\tTry reinstalling the server again.\\n\"\r\n    exit 1\r\nelse\r\n    chmod +x *-Linux-Shipping\r\nfi\r\n\r\nmkdir -p \/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\r\ntouch \/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\/DedicatedServer.ini\r\n\r\necho -e \"\\nRunescape: Dragonwilds Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Runescape: Dragonwilds Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "4019830",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:4019830",
+            "field_type": "text"
+        },
+        {
+            "name": "Branch Name",
+            "description": "[Accepted Values: \"public\", \"experimental\", or leave empty to use the primary branch of the server] Used to download or switch to a non-primary branch of the game server. \"Automatic Updates\" and \"Validate Server Files\" must be set to \"1\" to switch branches if the server is already installed. NOTE: Any non-primary branches may not be fully compatible\/stable!",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable|in:public,experimental",
+            "field_type": "text"
+        },
+        {
+            "name": "Owner ID",
+            "description": "this is your RuneScape: Dragonwilds Player ID. It can be found in game at the bottom of the Settings Menu. Don't hesitate to use the copy button to add it to your clipboard. The server will not start without your owner ID.",
+            "env_variable": "OWNER_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "this is the password for players to connect to the game",
+            "env_variable": "WORLD_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "this is the password that allows you to connect to the admin management tab of the server",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "name that shows up for your listed server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "pterodactyl server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "World Name",
+            "description": "upon startup, your Dedicated Server will create a default world. This configuration value allows you to decide how you want it to be named.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}
