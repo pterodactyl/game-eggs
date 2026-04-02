@@ -8,5 +8,5 @@ A survival and exploration game set in the world of RuneScape, developed by Jage
 
 | Port | Default | Protocol |
 |------|---------|----------|
-| Game | 25565 | UDP |
+| Game | 7777 | UDP |
 | Query | 27015 | UDP |
