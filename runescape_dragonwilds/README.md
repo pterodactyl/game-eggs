@@ -23,11 +23,11 @@ The server can support up to 6 players.
 To find your dedicated server, go to the Public tab of the Worlds screen, then in the search tab, enter your exact World name, case sensitive.
 
 ## Network & Ports
-By default, the server uses the following ports. If you are using Pterodactyl, ensure you have allocated these to your server instance.
+By default, the server uses the following ports.
+
+However, Pterodactyl ensures that the **Game** Port will automatically use the port assigned by your server's primary allocation.
+
 | Port | Default | Protocol | Purpose |
 |------|---------|----------|---------|
 | Game | 7777 | UDP | Main game traffic |
 | Query | 27015 | UDP | Steam Server Browser traffic |
-
-**Note on Allocations:**
-The **Game** Port will automatically use the port assigned to your server's primary allocation if you configure it in the Pterodactyl panel. If you do not, it will default to 7777.
