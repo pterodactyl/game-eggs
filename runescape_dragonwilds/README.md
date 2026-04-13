@@ -2,10 +2,10 @@
 
 A Pterodactyl egg for the RuneScape: Dragonwilds dedicated server.
 
-## Resources
-RAM required is 2Gb + 1Gb per player. 
-
-The server can support up to 6 players.
+## Resources & Requirements
+- **RAM**: 2GB base + 1GB per player. 
+- **CPU**: Requires **AVX instruction support**.
+- **Players**: The server can support up to 6 players.
 
 
 ## Mandatory configuration values
@@ -18,6 +18,10 @@ The server can support up to 6 players.
 **Admin password**: Anyone who knows this password can enter the Server Management tab in the Pause Menu > Settings menu. 
 
 **World Password**: (Optional) The password required to join the world. Leave empty for public access.
+
+**Extra Arguments**: If you need to pass additional startup flags (such as `-multihome`), you can add them here. 
+
+Only use `-multihome` if you specifically need to bind to a specific IP and your networking environment supports it.
 
 ## Find your world
 To find your dedicated server, go to the Public tab of the Worlds screen, then in the search tab, enter your exact World name, case sensitive.
