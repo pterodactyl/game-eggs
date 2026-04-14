@@ -8,7 +8,6 @@ Embark on a PvE survival adventure in the Age of Piracy. Fight on land and sea, 
 # Connecting to the server
 Players can connect by
 - Using the InviteCode provided by the server (and password if set)
-- Using Direct Connect and entering the IP:Port and password if set
 - The InviteCode can be found and changed in /home/container/R5/ServerDescription.json
 
 ## Server Ports
