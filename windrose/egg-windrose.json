@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-04-14T13:31:04+02:00",
+    "exported_at": "2026-04-14T18:38:03+02:00",
     "name": "Windrose",
     "author": "ptero@redbananaofficial.com",
     "description": "Embark on a PvE survival adventure in the Age of Piracy. Fight on land and sea, solo or with friends. Build, craft and explore vast open world filled with dark secrets. Master soulslite combat and take on challenging bosses, command your ship and plunder unspoken treasures!",
@@ -17,7 +17,7 @@
     "file_denylist": [],
     "startup": "wine \/home\/container\/R5\/Binaries\/Win64\/WindroseServer-Win64-Shipping.exe -log & WINDROSE_PID=$!; tail -c0 -F \/home\/container\/R5\/Saved\/Logs\/R5.log --pid=$WINDROSE_PID",
     "config": {
-        "files": "{\r\n    \"R5\/ServerDescription.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"ServerDescription_Persistent.ServerName\": \"{{server.build.env.SRV_NAME}}\",\r\n            \"ServerDescription_Persistent.IsPasswordProtected\": \"{{server.build.env.SRV_PASSWORD_PROTECTED}}\",\r\n            \"ServerDescription_Persistent.Password\": \"{{server.build.env.SRV_PASSWORD}}\",\r\n            \"ServerDescription_Persistent.MaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"ServerDescription_Persistent.P2pProxyAddress\": \"{{server.build.env.P2P_PROXY}}\"\r\n        }\r\n    }\r\n}",
+        "files": "{\r\n    \"R5\/ServerDescription.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"ServerDescription_Persistent.ServerName\": \"{{server.build.env.SRV_NAME}}\",\r\n            \"ServerDescription_Persistent.InviteCode\": \"{{server.build.env.INVITE_CODE}}\",\r\n            \"ServerDescription_Persistent.IsPasswordProtected\": \"{{server.build.env.SRV_PASSWORD_PROTECTED}}\",\r\n            \"ServerDescription_Persistent.Password\": \"{{server.build.env.SRV_PASSWORD}}\",\r\n            \"ServerDescription_Persistent.WorldIslandId\": \"{{server.build.env.ISLAND_ID}}\",\r\n            \"ServerDescription_Persistent.MaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"ServerDescription_Persistent.P2pProxyAddress\": \"{{server.build.env.P2P_PROXY}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Bringing up level for play took\"\r\n}",
         "logs": "{}",
         "stop": "^C"
@@ -44,10 +44,10 @@
             "name": "Server Password",
             "description": "Server password",
             "env_variable": "SRV_PASSWORD",
-            "default_value": "Change Me",
+            "default_value": "",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|max:30",
+            "rules": "nullable|string|max:30",
             "field_type": "text"
         },
         {
@@ -61,16 +61,6 @@
             "field_type": "text"
         },
         {
-            "name": "Query Port",
-            "description": "Server Query port",
-            "env_variable": "QUERY_PORT",
-            "default_value": "7778",
-            "user_viewable": true,
-            "user_editable": false,
-            "rules": "required|numeric|max:65535",
-            "field_type": "text"
-        },
-        {
             "name": "Auto Update",
             "description": "Decide if you want to update your server",
             "env_variable": "AUTO_UPDATE",
@@ -78,6 +68,36 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Invite code",
+            "description": "Invite code (0-9, a-z, A-Z). Min 6 chars, case sensitive.",
+            "env_variable": "INVITE_CODE",
+            "default_value": "123456",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|min:6|max:32|regex:\/^[a-zA-Z0-9]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Password Protected",
+            "description": "",
+            "env_variable": "SRV_PASSWORD_PROTECTED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "WorldIslandID",
+            "description": "The world ID to load on server start. Must match the ID in one of the server's WorldDescription.json files",
+            "env_variable": "ISLAND_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|size:32|regex:\/^[a-fA-F0-9]{32}$\/",
             "field_type": "text"
         },
         {
