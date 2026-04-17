@@ -1,0 +1,112 @@
+{
+  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY - Created by c4rl0s | GamzyHost",
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": null
+  },
+  "exported_at": "2026-04-02T23:23:00+02:00",
+  "name": "RuneScape: Dragonwilds",
+  "author": "c4rl0s@gamzyhost",
+  "description": "RuneScape: Dragonwilds Dedicated Server. A survival and exploration game developed by Jagex. | Egg created by c4rl0s @ GamzyHost",
+  "features": [],
+  "docker_images": {
+    "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+  },
+  "file_denylist": [],
+  "startup": "./RSDragonwilds/Binaries/Linux/*-Linux-Shipping RSDragonwilds -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}}",
+  "config": {
+    "files": "{\r\n    \"RSDragonwilds/Saved/Config/LinuxServer/DedicatedServer.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[/Script/Dominion.DedicatedServerSettings].OwnerId\": \"{{server.build.env.OWNER_ID}}\",\r\n            \"[/Script/Dominion.DedicatedServerSettings].WorldPassword\": \"{{server.build.env.WORLD_PASSWORD}}\",\r\n            \"[/Script/Dominion.DedicatedServerSettings].AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\",\r\n            \"[/Script/Dominion.DedicatedServerSettings].ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"[/Script/Dominion.DedicatedServerSettings].DefaultWorldName\": \"{{server.build.env.DEFAULT_WORLD_NAME}}\",\r\n            \"[/Script/Dominion.DedicatedServerSettings].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\"\r\n        }\r\n    }\r\n}",
+    "startup": "{\r\n    \"done\": \"Engine Initialization\"\r\n}",
+    "logs": "{}",
+    "stop": "^C"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/bash\r\n# RuneScape: Dragonwilds - Install Script\r\n# Egg created by c4rl0s @ GamzyHost\r\n# SteamCMD AppID: 4019830\r\n\r\n## Download and install SteamCMD\r\ncd /tmp\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\nmkdir -p /mnt/server/steamcmd\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## Install game server\r\n./steamcmd.sh \\\r\n    +force_install_dir /mnt/server \\\r\n    +login anonymous \\\r\n    +app_update 4019830 \\\r\n    $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) \\\r\n    validate \\\r\n    +exit\r\n\r\n## Copy steamclient libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Verify installation and make binary executable\r\ncd /mnt/server/RSDragonwilds/Binaries/Linux\r\ncount=$(find . -maxdepth 1 -name '*-Linux-Shipping' -type f -executable | wc -l)\r\nif [[ $count -eq 0 ]]; then\r\n    echo -e \"\\n\\nSteamCMD failed to install the RuneScape: Dragonwilds Dedicated Server!\"\r\n    echo -e \"\\tTry reinstalling the server again.\\n\"\r\n    exit 1\r\nelse\r\n    chmod +x *-Linux-Shipping\r\nfi\r\n\r\n## Create config directory and file\r\nmkdir -p /mnt/server/RSDragonwilds/Saved/Config/LinuxServer\r\ntouch /mnt/server/RSDragonwilds/Saved/Config/LinuxServer/DedicatedServer.ini\r\n\r\necho -e \"\\nRuneScape: Dragonwilds installation complete.\"\r\necho -e \"Egg created by c4rl0s @ GamzyHost\\n\"",
+      "container": "ghcr.io/parkervcp/installers:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Owner ID",
+      "description": "Your RuneScape: Dragonwilds Player ID. Find it in-game at the bottom of the Settings menu. The server WILL NOT start without this value.",
+      "env_variable": "OWNER_ID",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:32",
+      "field_type": "text"
+    },
+    {
+      "name": "Server Name",
+      "description": "The name of your server as it appears in the server browser.",
+      "env_variable": "SERVER_NAME",
+      "default_value": "My Dragonwilds Server",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:32",
+      "field_type": "text"
+    },
+    {
+      "name": "Default World Name",
+      "description": "Name of the world created on first launch. Cannot be changed after the first start.",
+      "env_variable": "DEFAULT_WORLD_NAME",
+      "default_value": "My World",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:20",
+      "field_type": "text"
+    },
+    {
+      "name": "World Password",
+      "description": "Optional. Password required to join the world. Leave empty for a public server.",
+      "env_variable": "WORLD_PASSWORD",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:64",
+      "field_type": "text"
+    },
+    {
+      "name": "Admin Password",
+      "description": "Any player who enters this password in Server Management will be granted admin privileges.",
+      "env_variable": "ADMIN_PASSWORD",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:64",
+      "field_type": "text"
+    },
+    {
+      "name": "Max Players",
+      "description": "Maximum number of simultaneous players. Recommended maximum: 6.",
+      "env_variable": "MAX_PLAYERS",
+      "default_value": "6",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|min:1|max:6",
+      "field_type": "text"
+    },
+    {
+      "name": "Query Port",
+      "description": "UDP port used by Steam for server queries.",
+      "env_variable": "QUERY_PORT",
+      "default_value": "27015",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|min:1024|max:65535",
+      "field_type": "text"
+    },
+    {
+      "name": "Branch Name",
+      "description": "Leave empty for default branch. Use 'experimental' for the experimental branch.",
+      "env_variable": "SRCDS_BETAID",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|in:experimental",
+      "field_type": "text"
+    }
+  ]
+}
