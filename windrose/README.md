@@ -1,8 +1,11 @@
 # Windrose
 Embark on a PvE survival adventure in the Age of Piracy. Fight on land and sea, solo or with friends. Build, craft and explore vast open world filled with dark secrets. Master soulslite combat and take on challenging bosses, command your ship and plunder unspoken treasures!
 
-## Server Requirements
+## Warning
+- If running in a VM, set the CPU type to host/passthrough (or equivalent) to expose full CPU features and avoid crashes such as:
+Unhandled illegal instruction at address 000000014147C7F8 (thread 0154), starting debugger...
 
+## Server Requirements
 | Players | RAM  | Storage |
 |---------|------|---------|
 | 2       | 8GB  | 32GB SSD   |
