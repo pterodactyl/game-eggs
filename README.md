@@ -256,6 +256,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Renown](./renown)
 
+#### [RuneScape: Dragonwilds](./runescape_dragonwilds)
+
 #### [SCUM](./scum)
 
 #### [Plains of Pain](./plains_of_pain)
