@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-04-16T18:55:22+02:00",
+    "exported_at": "2026-04-18T17:43:34+02:00",
     "name": "Windrose",
     "author": "ptero@redbananaofficial.com",
     "description": "Embark on a PvE survival adventure in the Age of Piracy. Fight on land and sea, solo or with friends. Build, craft and explore vast open world filled with dark secrets. Master soulslite combat and take on challenging bosses, command your ship and plunder unspoken treasures!",
@@ -17,7 +17,7 @@
     "file_denylist": [],
     "startup": "wine \/home\/container\/R5\/Binaries\/Win64\/WindroseServer-Win64-Shipping.exe -log & WINDROSE_PID=$!; tail -c0 -F \/home\/container\/R5\/Saved\/Logs\/R5.log --pid=$WINDROSE_PID",
     "config": {
-        "files": "{\r\n    \"R5\/ServerDescription.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"ServerDescription_Persistent.ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"ServerDescription_Persistent.InviteCode\": \"{{server.build.env.INVITE_CODE}}\",\r\n            \"ServerDescription_Persistent.IsPasswordProtected\": \"{{server.build.env.SERVER_PASSWORD_PROTECTED}}\",\r\n            \"ServerDescription_Persistent.Password\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"ServerDescription_Persistent.WorldIslandId\": \"{{server.build.env.ISLAND_ID}}\",\r\n            \"ServerDescription_Persistent.MaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"ServerDescription_Persistent.P2pProxyAddress\": \"{{server.build.env.P2P_PROXY}}\"\r\n        }\r\n    }\r\n}",
+        "files": "{\r\n    \"R5\/ServerDescription.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"ServerDescription_Persistent.ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"ServerDescription_Persistent.InviteCode\": \"{{server.build.env.INVITE_CODE}}\",\r\n            \"ServerDescription_Persistent.IsPasswordProtected\": \"{{server.build.env.SERVER_PASSWORD_PROTECTED}}\",\r\n            \"ServerDescription_Persistent.Password\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"ServerDescription_Persistent.MaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"ServerDescription_Persistent.P2pProxyAddress\": \"{{server.build.env.P2P_PROXY}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Bringing up level for play took\"\r\n}",
         "logs": "{}",
         "stop": "^C"
@@ -88,16 +88,6 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|boolean",
-            "field_type": "text"
-        },
-        {
-            "name": "WorldIslandID",
-            "description": "The world ID to load on server start. Must match the ID in one of the server's WorldDescription.json files. Leaving it empty will default the server to a random generated WorldIslandID",
-            "env_variable": "ISLAND_ID",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "nullable|string|size:32|regex:\/^[A-F0-9]{32}$\/",
             "field_type": "text"
         },
         {
