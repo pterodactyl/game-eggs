@@ -94,7 +94,7 @@
             "name": "Password Protected",
             "description": "Off by default, enable this when using a server password",
             "env_variable": "SERVER_PASSWORD_PROTECTED",
-            "default_value": "true",
+            "default_value": "false",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|string|in:true,false",
