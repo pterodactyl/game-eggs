@@ -18,7 +18,7 @@
     "startup": "wine \/home\/container\/R5\/Binaries\/Win64\/WindroseServer-Win64-Shipping.exe -log & WINDROSE_PID=$!; tail -c0 -F \/home\/container\/R5\/Saved\/Logs\/R5.log --pid=$WINDROSE_PID",
     "config": {
         "files": "{\r\n    \"R5\/ServerDescription.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"ServerDescription_Persistent.ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"ServerDescription_Persistent.InviteCode\": \"{{server.build.env.INVITE_CODE}}\",\r\n            \"ServerDescription_Persistent.IsPasswordProtected\": \"{{server.build.env.SERVER_PASSWORD_PROTECTED}}\",\r\n            \"ServerDescription_Persistent.Password\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"ServerDescription_Persistent.MaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"ServerDescription_Persistent.P2pProxyAddress\": \"{{server.build.env.P2P_PROXY}}\",\r\n            \"ServerDescription_Persistent.UseDirectConnection\": \"{{server.build.env.USE_DIRECT_CONNECTION}}\",\r\n            \"ServerDescription_Persistent.DirectConnectionServerAddress\": \"{{server.build.default.ip}}\",\r\n            \"ServerDescription_Persistent.DirectConnectionServerPort\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
-        "startup": "{\r\n    \"done\": \"Bringing up level for play took\"\r\n}",
+        "startup": "{\r\n    \"done\": \"UEngine::LoadMap Load map complete\"\r\n}",
         "logs": "{}",
         "stop": "^C"
     },
@@ -42,12 +42,12 @@
         },
         {
             "name": "Use Direct Connection",
-            "description": "Enable direct connection instead of invite codes, when set to 1 (enabled) it will disable the use of the Invite Code.",
+            "description": "Enable or disable Direct IP connection mode for the server. Set to true to allow players to connect using the server IP and port instead of an invite code. When enabled, invite codes are not used.",
             "env_variable": "USE_DIRECT_CONNECTION",
-            "default_value": "0",
+            "default_value": "false",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|boolean",
+            "rules": "required|string|in:true,false",
             "field_type": "text"
         },
         {
@@ -62,22 +62,22 @@
         },
         {
             "name": "Max players",
-            "description": "Maximum allowed players",
+            "description": "The maximum number of players allowed on the server at the same time. Up to 4 players is recommended for smoother performance.",
             "env_variable": "MAX_PLAYERS",
-            "default_value": "8",
+            "default_value": "4",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|max:20",
+            "rules": "required|integer|min:1|max:32",
             "field_type": "text"
         },
         {
             "name": "Auto Update",
             "description": "Decide if you want to update your server",
             "env_variable": "AUTO_UPDATE",
-            "default_value": "1",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|boolean",
+            "rules": "required|string|in:true,false",
             "field_type": "text"
         },
         {
@@ -94,10 +94,10 @@
             "name": "Password Protected",
             "description": "Off by default, enable this when using a server password",
             "env_variable": "SERVER_PASSWORD_PROTECTED",
-            "default_value": "0",
+            "default_value": "true",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|boolean",
+            "rules": "required|string|in:true,false",
             "field_type": "text"
         },
         {
@@ -111,7 +111,7 @@
             "field_type": "text"
         },
         {
-            "name": "App id",
+            "name": "Steam App id",
             "description": "The ID corresponding to the game to download.",
             "env_variable": "SRCDS_APPID",
             "default_value": "4129620",
