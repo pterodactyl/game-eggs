@@ -101,7 +101,7 @@
             "field_type": "text"
         },
         {
-            "name": "P2P PROXY",
+            "name": "P2P Proxy Address",
             "description": "IP address used by Windrose for P2P/ICE listening sockets. For invite-code servers on host-network/VPS setups, set this to the server public or allocation IP. Use 127.0.0.1 only when the P2P proxy is intentionally internal.",
             "env_variable": "P2P_PROXY",
             "default_value": "127.0.0.1",
