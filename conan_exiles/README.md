@@ -6,7 +6,7 @@ Conan Exiles is online multiplayer survival game set in the lands of Conan the B
 
 ## Minimum RAM warning
 
-This server requires about 4096m to run properly.
+This server requires about 6GB to run properly.
 
 ## Server Ports
 

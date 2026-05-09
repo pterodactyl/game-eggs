@@ -268,7 +268,18 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Sunkenland](./sunkenland)
 
-### [Voyager of Nera](./voyagers_of_nera)
+#### [Voyager of Nera](./voyagers_of_nera)
+
+#### [Windrose](./windrose)
+
+#### [Wine Generic](./wine/generic)
+
+#### [Wolfenstein: Enemy Territory (ET Legacy)](./wolfenstein_enemy_territory/etlegacy)
+
+#### [Wurm Unlimited](./wurm_unlimited)
+
+#### [Xonotic](./xonotic)
+
 
 ---
 

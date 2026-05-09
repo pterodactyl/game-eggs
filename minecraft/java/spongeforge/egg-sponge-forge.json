@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2025-11-06T06:47:00+00:00",
+    "exported_at": "2026-04-26T20:16:38+02:00",
     "name": "SpongeForge",
     "author": "ptero@redbananaofficial.com",
     "description": "A community-driven open source Minecraft: Java Edition modding platform.",
@@ -19,7 +19,8 @@
         "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
         "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
         "java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
-        "java 22": "ghcr.io\/ptero-eggs\/yolks:java_22"
+        "java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
+        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar {{SERVER_JARFILE}}\" || printf %s \"@unix_args.txt\" )",

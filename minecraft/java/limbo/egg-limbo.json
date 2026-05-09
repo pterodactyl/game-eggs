@@ -4,13 +4,14 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2023-05-17T23:20:29+01:00",
+    "exported_at": "2026-04-26T20:16:38+02:00",
     "name": "Limbo",
     "author": "xEfinax@protonmail.com",
     "description": "Standalone server program Limbo.",
     "features": null,
     "docker_images": {
-        "ghcr.io\/pterodactyl\/yolks:java_17": "ghcr.io\/pterodactyl\/yolks:java_17"
+        "Java 17": "ghcr.io\/pterodactyl\/yolks:java_17",
+        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",

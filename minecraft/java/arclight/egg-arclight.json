@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2025-04-06T02:41:08+02:00",
+    "exported_at": "2026-04-26T20:16:38+02:00",
     "name": "Arclight",
     "author": "chredeur@pastanetwork.com",
     "description": "A Bukkit server implementation on common mod loaders.",
@@ -20,7 +20,8 @@
         "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
         "Java 19": "ghcr.io\/ptero-eggs\/yolks:java_19",
         "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
-        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22"
+        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
+        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}} nogui",

@@ -18,16 +18,26 @@ Ports required to run the server in a table format.
 
 ### Mods/Plugins may require additional ports to be added to the server
 
+## Documentation
+
+Official technical documentation is available at <https://techwiki.scpslgame.com>.
+
 ## Verification
 
-The server must be verified to be visible in the Server Browser.
+The server must be verified in order for it to be visible in the server browser.
+Make sure your server complies with the [Community Server Guidelines](https://scpslgame.com/CSG.pdf).
 
-Before requesting verification make sure your server follows the [Verified Server Rules](https://scpslgame.com/Verified_server_rules.pdf).
+### Automatic Verification
 
-### Requesting Verification
+Run one of the following commands in the server console:
 
-Once ready send an email to server.verification@scpslgame.com with the following info:
+* `!verify static` if you have a static IP address.
+* `!verify dynamic` if you have a dynamic IP address.
 
-* The server's external IPv4 address
-* The port used by the server
-* If the server IP is static or dynamic
+### Manual Verification
+
+Send an email to safety.compliance@scpslgame.com with the following info:
+
+* Your Public IPv4 (IPv6 or Domain Server Verification isn't supported).
+* Whether your IP is Static or Dynamic.
+* The port that your server is running on.

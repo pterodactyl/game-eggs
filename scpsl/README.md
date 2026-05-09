@@ -9,6 +9,10 @@ This Server is NOT compatible with ServerMod2 or MultiAdmin
 
 SCP: Secret Laboratory Pterodactyl egg with Exiled Plugin Framework <https://github.com/Exiled-Team/EXILED>
 
+## Documentation
+
+Official technical documentation is available at <https://techwiki.scpslgame.com>.
+
 ## Minimum RAM
 
 Minimum memory required to run the server: 3096 MB
@@ -23,11 +27,20 @@ Default port required to run the server.
 
 ## Verification
 
-The server must be verified with the SCP:SL developers in order for it to be visible in the server browser.
+The server must be verified in order for it to be visible in the server browser.
+Make sure your server complies with the [Community Server Guidelines](https://scpslgame.com/CSG.pdf).
 
-Instructions are as follows:
+### Automatic Verification
 
-* Make sure your server complies with the [Verified Server Rules](https://scpslgame.com/Verified_server_rules.pdf).
-* Send an email to `server.verification@scpslgame.com` from your configured contact email with the following information:
-  1. The **public** IPv4 address of your server, with port. e.g. `69.69.69.69:7777`
-  2. If the server's IP is static or dynamic.
+Run one of the following commands in the server console:
+
+* `!verify static` if you have a static IP address.
+* `!verify dynamic` if you have a dynamic IP address.
+
+### Manual Verification
+
+Send an email to safety.compliance@scpslgame.com with the following info:
+
+* Your Public IPv4 (IPv6 or Domain Server Verification isn't supported).
+* Whether your IP is Static or Dynamic.
+* The port that your server is running on.

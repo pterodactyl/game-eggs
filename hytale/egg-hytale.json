@@ -4,27 +4,27 @@
         "version": "PTDL_v2",
     "update_url": "https://raw.githubusercontent.com/pterodactyl/game-eggs/refs/heads/main/hytale/egg-hytale.json"
     },
-  "exported_at": "2026-03-08T12:00:00+00:00",
+    "exported_at": "2026-04-22T23:58:04+00:00",
     "name": "Hytale",
     "author": "hello@pterodactyl.io",
     "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox with the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a variety of creatures, then shape it block by block.",
     "features": null,
     "docker_images": {
-        "Hytale": "ghcr.io/pelican-eggs/games:hytale"
+        "ghcr.io\/pterodactyl\/games:hytale": "ghcr.io\/pterodactyl\/games:hytale"
     },
     "file_denylist": [],
   "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar HytaleServer.jar --bind 0.0.0.0:{{SERVER_PORT}} --assets ../Assets.zip",
     "config": {
-    "files": "[]",
-    "startup": "{\n    \"done\": \"Hytale Server Booted!\"\n}",
-    "logs": "[]",
-        "stop": "stop"
+        "files": "{}",
+        "startup": "{\n    \"done\": \"Hytale Server Booted\"\n}",
+        "logs": "{}",
+        "stop": "\/stop"
     },
     "scripts": {
         "installation": {
-      "script": "#!/bin/bash\nset -e\n\necho '============================================'\necho 'Hytale Server Installation'\necho '============================================'\n\necho '[1/2] Creating directories...'\nmkdir -p /mnt/server/.tmp\nmkdir -p /mnt/server/Backups\nmkdir -p /mnt/server/Server/mods\nmkdir -p /mnt/server/Server/earlyplugins\nmkdir -p /mnt/server/.server-backups/release\nmkdir -p /mnt/server/.server-backups/pre-release\necho '  \u2713 Directories created'\n\necho '[2/2] Creating config.json...'\ncat > /mnt/server/Server/config.json << 'EOF'\n{\n  \"Version\": 4,\n  \"ServerName\": \"Hytale Server\",\n  \"MOTD\": \"\",\n  \"Password\": \"\",\n  \"MaxPlayers\": 20,\n  \"MaxViewRadius\": 12,\n  \"Defaults\": {\n    \"World\": \"default\",\n    \"GameMode\": \"Adventure\"\n  },\n  \"ConnectionTimeouts\": {\n    \"InitialTimeout\": \"PT1M\",\n    \"AuthTimeout\": \"PT1M30S\"\n  },\n  \"RateLimit\": {},\n  \"Modules\": {},\n  \"LogLevels\": {\n    \"AssetModule|P\": \"SEVERE\",\n    \"AssetRegistryLoader\": \"SEVERE\",\n    \"AssetStore|AssignmentsAsset\": \"SEVERE\",\n    \"AssetStore|BiomeAsset\": \"SEVERE\",\n    \"AssetStore|BlockType\": \"SEVERE\",\n    \"AssetStore|CustomConnectedBlockTemplateAsset\": \"SEVERE\",\n    \"AssetStore|EntityEffect\": \"SEVERE\",\n    \"AssetStore|Environment\": \"SEVERE\",\n    \"AssetStore|GameplayConfig\": \"SEVERE\",\n    \"AssetStore|Interaction\": \"SEVERE\",\n    \"AssetStore|Item\": \"SEVERE\",\n    \"AssetStore|ModelVFX\": \"SEVERE\",\n    \"AssetStore|ParticleSystem\": \"SEVERE\",\n    \"AssetStore|PrefabListAsset\": \"SEVERE\",\n    \"AssetStore|ScriptedBrushAsset\": \"SEVERE\",\n    \"AssetStore|WorldStructureAsset\": \"SEVERE\",\n    \"BarterShopState\": \"SEVERE\",\n    \"BlockSetModule|P\": \"SEVERE\",\n    \"BuilderToolsPacketHandler\": \"SEVERE\",\n    \"CertificateUtil\": \"SEVERE\",\n    \"CollisionModule|P\": \"SEVERE\",\n    \"CommonAssetModule|P\": \"SEVERE\",\n    \"ConsoleModule|P\": \"SEVERE\",\n    \"EncryptedAuthCredentialStore\": \"SEVERE\",\n    \"Entity\": \"SEVERE\",\n    \"HandshakeHandler\": \"SEVERE\",\n    \"Hytale\": \"SEVERE\",\n    \"HytaleGenerator\": \"SEVERE\",\n    \"HytaleGenerator|P\": \"SEVERE\",\n    \"HytaleServer\": \"INFO\",\n    \"I18nModule|P\": \"SEVERE\",\n    \"JWTValidator\": \"SEVERE\",\n    \"LoginTiming\": \"SEVERE\",\n    \"MacroCommandBase\": \"SEVERE\",\n    \"NPC|P\": \"SEVERE\",\n    \"PasswordPacketHandler\": \"SEVERE\",\n    \"PathWatcherThread\": \"SEVERE\",\n    \"PlayerSavingSystems\": \"SEVERE\",\n    \"PluginExample|P\": \"INFO\",\n    \"PluginManager\": \"INFO\",\n    \"QUICTransport\": \"SEVERE\",\n    \"SERR\": \"SEVERE\",\n    \"ServerAuthManager\": \"SEVERE\",\n    \"ServerManager|P\": \"SEVERE\",\n    \"SessionServiceClient\": \"SEVERE\",\n    \"Shop|P\": \"SEVERE\",\n    \"Spawning|P\": \"SEVERE\",\n    \"Teleport|P\": \"SEVERE\",\n    \"Universe|P\": \"SEVERE\",\n    \"World|default\": \"SEVERE\",\n    \"World|default|M\": \"SEVERE\",\n    \"WorldGenerator\": \"SEVERE\",\n    \"WorldMapTracker\": \"SEVERE\"\n  },\n  \"Mods\": {},\n  \"DisplayTmpTagsInStrings\": false,\n  \"PlayerStorage\": {\n    \"Type\": \"Hytale\"\n  },\n  \"Update\": {}\n}\nEOF\necho '  \u2713 config.json created'\n\necho 'Installation complete!'\necho '============================================'\necho 'Installed components:'\necho '  - Base directories'\necho '  - config.json'\necho '============================================'",
-      "container": "ghcr.io/pterodactyl/installers:debian",
-      "entrypoint": "bash"
+            "script": "#!\/bin\/ash\nset -e\n\nmkdir -p \/mnt\/server\ncd \/mnt\/server\n\necho -e \"Downloading Hytale Downloader CLI...\"\n\nDOWNLOAD_URL=\"https:\/\/downloader.hytale.com\/hytale-downloader.zip\"\n\nrm -f hytale-downloader.zip\ncurl -o hytale-downloader.zip $DOWNLOAD_URL\nunzip -o hytale-downloader.zip -d hytale-downloader\nmv hytale-downloader\/hytale-downloader-linux-amd64 hytale-downloader\/hytale-downloader-linux\nchmod 555 hytale-downloader\/hytale-downloader-linux\n\necho -e \"Verifying Hytale Downloader installation...\"\n\necho -e \"Hytale Downloader version: `.\/hytale-downloader\/hytale-downloader-linux -version`\"\n\necho -e \"Hytale Downloader installed successfully.\"",
+            "container": "ghcr.io\/pterodactyl\/installers:alpine",
+            "entrypoint": "ash"
         }
     },
     "variables": [
@@ -35,7 +35,17 @@
       "default_value": "1",
             "user_viewable": true,
             "user_editable": true,
-      "rules": "boolean",
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Auth Mode",
+            "description": "Authentication mode.",
+            "env_variable": "HYTALE_AUTH_MODE",
+            "default_value": "authenticated",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:authenticated,offline,insecure",
             "field_type": "text"
         },
         {
