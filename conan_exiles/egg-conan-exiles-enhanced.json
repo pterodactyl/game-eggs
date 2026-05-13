@@ -4,18 +4,18 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-05-13T17:35:54-04:00",
+    "exported_at": "2026-05-13T22:00:00+00:00",
     "name": "Conan Exiles Enhanced",
     "author": "arrow816@gmail.com",
-    "description": "Conan Exiles Enhanced (UE5) dedicated server with Steam Workshop mod support. Native Linux server binary - no Wine required. Auto-updates game files on every boot when AUTO_UPDATE is 1.",
+    "description": "Conan Exiles Enhanced (UE5) dedicated server with Steam Workshop mod support. Native Linux server binary, no Wine required. Mods auto-sync on every boot when MOD_LIST is set.",
     "features": [
         "steam_disk_space"
     ],
     "docker_images": {
-        "ghcr.io\/parkervcp\/steamcmd:debian": "ghcr.io\/parkervcp\/steamcmd:debian"
+        "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
     },
     "file_denylist": [],
-    "startup": ".\/ConanSandbox\/Binaries\/Linux\/ConanSandboxServer-Linux-Shipping ConanSandbox -log -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -MaxPlayers={{MAX_PLAYERS}}",
+    "startup": "bash -c 'if [ -n \"${MOD_LIST}\" ]; then IFS=\",\" read -ra MODS <<< \"${MOD_LIST}\"; CMDS=\"\"; for id in \"${MODS[@]}\"; do id=$(echo \"$id\" | tr -d \"[:space:]\"); [ -n \"$id\" ] && CMDS=\"$CMDS +workshop_download_item ${WORKSHOP_APPID} $id validate\"; done; ./steamcmd/steamcmd.sh +force_install_dir /home/container +login anonymous $CMDS +quit; > ./ConanSandbox/Mods/modlist.txt; for id in \"${MODS[@]}\"; do id=$(echo \"$id\" | tr -d \"[:space:]\"); SRC=\"./steamapps/workshop/content/${WORKSHOP_APPID}/$id\"; [ -d \"$SRC\" ] && for pak in \"$SRC\"/*.pak; do [ -f \"$pak\" ] && cp -f \"$pak\" ./ConanSandbox/Mods/ && echo \"*$(basename $pak)\" >> ./ConanSandbox/Mods/modlist.txt; done; done; fi && ./ConanSandbox/Binaries/Linux/ConanSandboxServer-Linux-Shipping ConanSandbox -log -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -MaxPlayers={{MAX_PLAYERS}}'",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"Log file open\"\r\n}",
@@ -24,15 +24,15 @@
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\n# Conan Exiles Enhanced install script - native Linux\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/parkervcp\/installers:debian'\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n\techo -e \"steam user is not set.\\n\"\r\n\techo -e \"Using anonymous user.\\n\"\r\n\tSTEAM_USER=anonymous\r\n\tSTEAM_PASS=\"\"\r\n\tSTEAM_AUTH=\"\"\r\nelse\r\n\techo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\n\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## ensure Linux binary is executable\r\nif [ -f \/mnt\/server\/ConanSandbox\/Binaries\/Linux\/ConanSandboxServer-Linux-Shipping ]; then\r\n\tchmod +x \/mnt\/server\/ConanSandbox\/Binaries\/Linux\/ConanSandboxServer-Linux-Shipping\r\nfi\r\n\r\n## seed directories and config files\r\nmkdir -p \/mnt\/server\/ConanSandbox\/Saved\/Config\/LinuxServer\r\nmkdir -p \/mnt\/server\/ConanSandbox\/Mods\r\n\r\n## seed ServerSettings.ini with the password (blank = no password)\r\nSS_INI=\"\/mnt\/server\/ConanSandbox\/Saved\/Config\/LinuxServer\/ServerSettings.ini\"\r\nif [ ! -f \"${SS_INI}\" ]; then\r\n\t{\r\n\t\techo \"[ServerSettings]\"\r\n\t\techo \"ServerName=${SRV_NAME}\"\r\n\t\techo \"ServerPassword=${SRV_PW}\"\r\n\t\techo \"MaxPlayers=${MAX_PLAYERS:-40}\"\r\n\t} > \"${SS_INI}\"\r\nfi\r\n\r\n## download workshop mods\r\nif [ -n \"${MOD_LIST}\" ]; then\r\n\techo \"Downloading workshop mods: ${MOD_LIST}\"\r\n\tIFS=',' read -ra MODS <<< \"${MOD_LIST}\"\r\n\tMOD_CMDS=\"\"\r\n\tfor id in \"${MODS[@]}\"; do\r\n\t\tid=$(echo \"${id}\" | tr -d '[:space:]')\r\n\t\tif [ -n \"${id}\" ]; then\r\n\t\t\tMOD_CMDS=\"${MOD_CMDS} +workshop_download_item 440900 ${id} validate\"\r\n\t\tfi\r\n\tdone\r\n\tif [ -n \"${MOD_CMDS}\" ]; then\r\n\t\t.\/steamcmd.sh +force_install_dir \/mnt\/server +login anonymous ${MOD_CMDS} +quit || echo \"Some mods failed.\"\r\n\tfi\r\n\t: > \/mnt\/server\/ConanSandbox\/Mods\/modlist.txt\r\n\tfor id in \"${MODS[@]}\"; do\r\n\t\tid=$(echo \"${id}\" | tr -d '[:space:]')\r\n\t\tif [ -n \"${id}\" ]; then\r\n\t\t\tSRC=\"\/mnt\/server\/steamapps\/workshop\/content\/440900\/${id}\"\r\n\t\t\tif [ -d \"${SRC}\" ]; then\r\n\t\t\t\tfor pak in \"${SRC}\"\/*.pak; do\r\n\t\t\t\t\tif [ -f \"${pak}\" ]; then\r\n\t\t\t\t\t\tNAME=$(basename \"${pak}\")\r\n\t\t\t\t\t\tcp -fv \"${pak}\" \"\/mnt\/server\/ConanSandbox\/Mods\/${NAME}\"\r\n\t\t\t\t\t\techo \"*${NAME}\" >> \/mnt\/server\/ConanSandbox\/Mods\/modlist.txt\r\n\t\t\t\t\tfi\r\n\t\t\t\tdone\r\n\t\t\tfi\r\n\t\tfi\r\n\tdone\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
-            "container": "ghcr.io\/parkervcp\/installers:debian",
+            "script": "#!/bin/bash\r\n# Conan Exiles Enhanced install script - native Linux\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n\techo -e \"steam user is not set.\\n\"\r\n\techo -e \"Using anonymous user.\\n\"\r\n\tSTEAM_USER=anonymous\r\n\tSTEAM_PASS=\"\"\r\n\tSTEAM_AUTH=\"\"\r\nelse\r\n\techo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps\r\ncd /mnt/server/steamcmd\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## ensure Linux binary is executable\r\nif [ -f /mnt/server/ConanSandbox/Binaries/Linux/ConanSandboxServer-Linux-Shipping ]; then\r\n\tchmod +x /mnt/server/ConanSandbox/Binaries/Linux/ConanSandboxServer-Linux-Shipping\r\nfi\r\n\r\n## seed directories and config files\r\nmkdir -p /mnt/server/ConanSandbox/Saved/Config/LinuxServer\r\nmkdir -p /mnt/server/ConanSandbox/Mods\r\n\r\n## seed ServerSettings.ini with the password (blank = no password)\r\nSS_INI=\"/mnt/server/ConanSandbox/Saved/Config/LinuxServer/ServerSettings.ini\"\r\nif [ ! -f \"${SS_INI}\" ]; then\r\n\t{\r\n\t\techo \"[ServerSettings]\"\r\n\t\techo \"ServerName=${SRV_NAME}\"\r\n\t\techo \"ServerPassword=${SRV_PW}\"\r\n\t\techo \"MaxPlayers=${MAX_PLAYERS:-40}\"\r\n\t} > \"${SS_INI}\"\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
             "entrypoint": "bash"
         }
     },
     "variables": [
         {
             "name": "App id",
-            "description": "The ID corresponding to the game to download.",
+            "description": "The Steam App ID for the dedicated server. Do not change.",
             "env_variable": "SRCDS_APPID",
             "default_value": "443030",
             "user_viewable": false,
@@ -41,8 +41,18 @@
             "field_type": "text"
         },
         {
+            "name": "Workshop App id",
+            "description": "The Steam App ID for workshop content. Do not change.",
+            "env_variable": "WORKSHOP_APPID",
+            "default_value": "440900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:440900",
+            "field_type": "text"
+        },
+        {
             "name": "Auto Update",
-            "description": "Update server files on every boot. 1 = on, 0 = off. Adds 15-60s to startup.",
+            "description": "Decide if you want to update your server",
             "env_variable": "AUTO_UPDATE",
             "default_value": "1",
             "user_viewable": true,
@@ -102,7 +112,7 @@
         },
         {
             "name": "Mod List",
-            "description": "Comma separated Steam Workshop mod IDs",
+            "description": "Comma separated Steam Workshop mod IDs. Mods are downloaded and synced on every server boot.",
             "env_variable": "MOD_LIST",
             "default_value": "",
             "user_viewable": true,
