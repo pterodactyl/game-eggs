@@ -64,7 +64,9 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Colony Survival](./colony_survival)
 
-#### [Conan Exiles](./conan_exiles)
+#### Conan Exiles
+* [Conan Exiles](./conan_exiles)
+* [Conan Exiles Enhanced (UE5)](./conan_exiles)
 
 #### [Contagion)](./contagion)
 
