@@ -45,16 +45,11 @@ UE5's Lumen and Nanite increase baseline memory usage 15–25% over UE4. Plan fo
 
 ## Server Ports
 
-| Port            | default |
-|-----------------|---------|
-| Game            | 7777    |
-| Game +1         | 7778    |
-| UDP Server query| 27015   |
-| RCON            | 25575   |
+Same as the original Conan Exiles ports above (7777, 7778, 27015, 25575).
 
 ## Steam Workshop mods
 
-Set the `MOD_LIST` egg variable to a comma-separated list of Steam Workshop IDs (e.g. `1369743238,2287499941`). The install script downloads each anonymously via SteamCMD, copies the `.pak` files into `ConanSandbox/Mods/` without renaming them (renaming breaks loading per Inflexion), and writes `modlist.txt`.
+Unlike the original egg, the Enhanced egg downloads Steam Workshop mods automatically. Set the `MOD_LIST` egg variable to a comma-separated list of Steam Workshop IDs (e.g. `1369743238,2287499941`). The install script downloads each anonymously via SteamCMD, copies the `.pak` files into `ConanSandbox/Mods/` without renaming them (renaming breaks loading per Inflexion), and writes `modlist.txt`.
 
 UE4 mods are silently ignored by Enhanced — only UE5-rebuilt mods will load. Most popular mods (Pippi, Fashionist, Hosav's UI) had Enhanced-compatible re-uploads available within hours of launch.
 
