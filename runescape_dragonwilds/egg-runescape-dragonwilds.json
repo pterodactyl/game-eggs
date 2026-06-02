@@ -1,0 +1,134 @@
+{
+  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": ""
+  },
+  "exported_at": "2026-04-13T21:57:12+01:00",
+  "name": "RuneScape: Dragonwilds",
+  "author": "brad@saintyfx.com",
+  "description": "On RuneScape\u2019s forgotten continent of Ashenfall, dragons have awoken. Gather, build, skill and craft to survive in this co-operative survival crafting game.",
+  "features": [
+    "steam_disk_space"
+  ],
+  "docker_images": {
+    "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+  },
+  "file_denylist": [],
+  "startup": ".\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -Port={{SERVER_PORT}} -QueryPort={{DV_QUERY_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId={{DV_OWNER_ID}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword={{DV_ADMIN_PASSWORD}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{DV_SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{DV_WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{DV_WORLD_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{DV_MAX_PLAYERS}} {{EXTRA_ARGS}}",
+  "config": {
+    "files": "{}",
+    "startup": "{\r\n    \"done\": \"START SESSION - Success\"\r\n}",
+    "logs": "{}",
+    "stop": "^C"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!\/bin\/bash\n# SteamCMD Base Installation Script\n\napt -y update\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\n\n# Variables\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"Using anonymous Steam login\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nfi\n\ncd \/tmp\nmkdir -p \/mnt\/server\/steamcmd\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\n\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\nmkdir -p \/mnt\/server\/steamapps\ncd \/mnt\/server\/steamcmd\n\nexport HOME=\/mnt\/server\n\n# Install server\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\n\n# Fix steam libraries\nmkdir -p \/mnt\/server\/.steam\/sdk32\ncp -v linux32\/steamclient.so \/mnt\/server\/.steam\/sdk32\/steamclient.so\n\nmkdir -p \/mnt\/server\/.steam\/sdk64\ncp -v linux64\/steamclient.so \/mnt\/server\/.steam\/sdk64\/steamclient.so\n\n# Permissions for Sentry Crash Handler\nchmod +x \/mnt\/server\/RSDragonwilds\/Plugins\/Developer\/Sentry\/Binaries\/Linux\/crashpad_handler 2>\/dev\/null || true\n\n# Seed DedicatedServer.ini\nmkdir -p \/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\ncat <<'EOF' > \/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\/DedicatedServer.ini\n[SectionsToSave]\nbCanSaveAllSections=true\n\n[\/Script\/Dominion.DedicatedServerSettings]\nAdminPassword=\nOwnerId=\nWorldPassword=\nServerName=\nDefaultWorldName=\nServerGuid=\nEOF\n\necho \"-----------------------------------------\"\necho \"Installation completed\"\necho \"-----------------------------------------\"",
+      "container": "ghcr.io\/ptero-eggs\/installers:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Owner ID",
+      "description": "Your RuneScape: Dragonwilds Player ID (Required for server startup)",
+      "env_variable": "DV_OWNER_ID",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Server Name",
+      "description": "The name of your server",
+      "env_variable": "DV_SERVER_NAME",
+      "default_value": "A Dragonwilds Server",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Admin Password",
+      "description": "The password used to access server management in-game",
+      "env_variable": "DV_ADMIN_PASSWORD",
+      "default_value": "ChangeMe",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Default World Name",
+      "description": "The name of the world to create\/load",
+      "env_variable": "DV_WORLD_NAME",
+      "default_value": "MyWorld",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "World Password",
+      "description": "Optional world password. Leave empty for public access.",
+      "env_variable": "DV_WORLD_PASSWORD",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Query Port",
+      "description": "Steam query port (UDP)",
+      "env_variable": "DV_QUERY_PORT",
+      "default_value": "27015",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|numeric",
+      "field_type": "text"
+    },
+    {
+      "name": "Max Players",
+      "description": "Maximum number of players allowed on the server",
+      "env_variable": "DV_MAX_PLAYERS",
+      "default_value": "6",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|numeric",
+      "field_type": "text"
+    },
+    {
+      "name": "Auto Update",
+      "description": "Enable automatic updates on server startup",
+      "env_variable": "AUTO_UPDATE",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|numeric",
+      "field_type": "text"
+    },
+    {
+      "name": "Extra Arguments",
+      "description": "Additional server startup arguments",
+      "env_variable": "EXTRA_ARGS",
+      "default_value": "-log -unattended -NoCrashDialog",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Steam App ID",
+      "description": "Steam App ID for Dragonwilds server",
+      "env_variable": "SRCDS_APPID",
+      "default_value": "4019830",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": "required|string",
+      "field_type": "text"
+    }
+  ]
+}
