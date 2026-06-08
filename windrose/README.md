@@ -21,3 +21,15 @@ Players can connect by:
 ## Server Ports
 - With the Invite Code, ports are dynamically assigned via NAT punch-through. Ensure your router supports UPnP. Disable proxy/VPN temporarily if connections fail.
 - With Direct Connect it will use your servers allocated Game Port instead.
+
+### Invite code / ICE troubleshooting
+
+If invite-code connections fail with errors similar to:
+
+```text
+Cannot resolve addresses for host <hostname>. Status message Host not found.
+Error on getting local ICE candidates for BL.
+
+set the P2P Proxy Address variable to the server public IP or allocation IP instead of 127.0.0.1.
+
+Windrose uses P2pProxyAddress as the IP address for P2P/ICE listening sockets. 127.0.0.1 may work only when the P2P proxy is intentionally internal.
