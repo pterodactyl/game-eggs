@@ -272,6 +272,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Soldat 2](./soldat_2)
 
+#### [Subnautica: Nitrox Mod](./subnautica_nitrox_mod)
+
 #### [Sunkenland](./sunkenland)
 
 #### [Voyager of Nera](./voyagers_of_nera)
