@@ -1,0 +1,56 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-04-05T21:16:28+02:00",
+    "name": "GregTech:New Horizons",
+    "author": "DJSchaffner@outlook.com",
+    "description": "Minecraft GregTech:New Horizons Server",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "ghcr.io\/pterodactyl\/yolks:java_21": "ghcr.io\/pterodactyl\/yolks:java_21"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dfml.readTimeout=180 @java9args.txt -jar lwjgl3ify-forgePatches.jar nogui",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server || exit 1\r\n\r\nGTNH_VERSION=\"${GTNH_VERSION\/\/ \/}\"\r\nAVAILABLE_VERSIONS=$(curl -s https:\/\/downloads.gtnewhorizons.com\/ServerPacks\/?raw)\r\nFILTERED_VERSIONS=$(echo -e \"$AVAILABLE_VERSIONS\" | grep -v -e 'Java_8.zip' | grep $([[ ${IS_BETA_VERSION:-0} -ne 1 ]] && echo \"-v \") -e '\/betas\/')\r\n\r\nif [[ \"$GTNH_VERSION\" != \"latest\" ]]; then\r\n  echo -e \"Constructing download link for specified version $GTNH_VERSION\"\r\n  # Use tail just to make sure there are not multiple versions matching\r\n  DOWNLOAD_LINK=\"$(echo -e \"$FILTERED_VERSIONS\" | grep -e _\"$GTNH_VERSION\"_)\"\r\nelse\r\n  echo -e \"No version specified. Getting latest available version\"\r\n  DOWNLOAD_LINK=\"$(echo -e \"$FILTERED_VERSIONS\" | tail -n 1)\"\r\nfi\r\n\r\necho -e \"Download link: $DOWNLOAD_LINK\"\r\nZIP_FILE=GTNH_${GTNH_VERSION}.zip\r\n\r\nif curl --output \/dev\/null --silent --head --fail \"$DOWNLOAD_LINK\"; then\r\n  echo -e \"Download link is valid\"\r\nelse\r\n  echo -e \"Invalid download link - Check provided GT:NH version. Exiting now!\"\r\n  exit 1\r\nfi\r\n\r\n# Space separated blacklist for files to keep (limitation of ash)\r\nBLACKLIST=\"backups world server.properties whitelist.json banned-players.json banned-ips.json ops.json\"\r\necho -e \"Removing files from previous installation (Keeping world, backups, properties, whitelist, banned players and ops)\"\r\n\r\n# Loop all files in base directory and remove files\/folders not in blacklist\r\nfor file in .\/*; do\r\n  filename=$(basename \"$file\")\r\n  match=false\r\n  \r\n  for pattern in $BLACKLIST; do\r\n    if [[ \"$(echo \"$filename\" | tr '[:upper:]' '[:lower:]')\" = \"$(echo \"$pattern\" | tr '[:upper:]' '[:lower:]')\" ]]; then\r\n      match=true\r\n      break\r\n    fi\r\n  done\r\n  \r\n  if [ \"$match\" != true ]; then\r\n    echo -e \"Removing: $filename\"\r\n    rm -rf \"$file\"\r\n  else\r\n    echo -e \"Keeping: $filename\"\r\n  fi\r\ndone\r\n\r\necho -e \"Downloading archive\"\r\ncurl -o \"$ZIP_FILE\" \"$DOWNLOAD_LINK\"\r\n\r\necho -e \"Start extracting archive\"\r\ntimeout 60s unzip -nq \"$ZIP_FILE\"\r\nif [ $? -ge 124 ]; then\r\n    echo \"Extraction was unsuccessful or timed out!\"\r\n    exit 1\r\nfi\r\n\r\nchmod +x lwjgl3ify-forgePatches.jar\r\nchmod +x forge-*.jar\r\n\r\necho -e \"Deleting zip file\"\r\nrm -f \"$ZIP_FILE\"\r\n\r\necho -e \"Installation process is completed\"",
+            "container": "ghcr.io\/pterodactyl\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "GT:NH Version",
+            "description": "The version of GregTech:New Horizons to use. Set to \"latest\" for latest version, or specify a version number.\r\nExample: 2.7.0",
+            "env_variable": "GTNH_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Use Beta Version",
+            "description": "Enable if you want to use a beta version",
+            "env_variable": "IS_BETA_VERSION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}
