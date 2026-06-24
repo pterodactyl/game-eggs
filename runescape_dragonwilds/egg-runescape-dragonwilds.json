@@ -15,7 +15,7 @@
     "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
   },
   "file_denylist": [],
-  "startup": ".\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -Port={{SERVER_PORT}} -QueryPort={{DV_QUERY_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId={{DV_OWNER_ID}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword={{DV_ADMIN_PASSWORD}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{DV_SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{DV_WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{DV_WORLD_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{DV_MAX_PLAYERS}} {{EXTRA_ARGS}}",
+  "startup": ".\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId={{OWNER_ID}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword={{ADMIN_PASSWORD}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{SERVER_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}} {{EXTRA_ARGS}}",
   "config": {
     "files": "{}",
     "startup": "{\r\n    \"done\": \"START SESSION - Success\"\r\n}",
@@ -33,7 +33,7 @@
     {
       "name": "Owner ID",
       "description": "Your RuneScape: Dragonwilds Player ID (Required for server startup)",
-      "env_variable": "DV_OWNER_ID",
+      "env_variable": "OWNER_ID",
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
@@ -43,7 +43,7 @@
     {
       "name": "Server Name",
       "description": "The name of your server",
-      "env_variable": "DV_SERVER_NAME",
+      "env_variable": "SERVER_NAME",
       "default_value": "A Dragonwilds Server",
       "user_viewable": true,
       "user_editable": true,
@@ -53,7 +53,7 @@
     {
       "name": "Admin Password",
       "description": "The password used to access server management in-game",
-      "env_variable": "DV_ADMIN_PASSWORD",
+      "env_variable": "ADMIN_PASSWORD",
       "default_value": "ChangeMe",
       "user_viewable": true,
       "user_editable": true,
@@ -63,7 +63,7 @@
     {
       "name": "Default World Name",
       "description": "The name of the world to create\/load",
-      "env_variable": "DV_WORLD_NAME",
+      "env_variable": "WORLD_NAME",
       "default_value": "MyWorld",
       "user_viewable": true,
       "user_editable": true,
@@ -73,7 +73,7 @@
     {
       "name": "World Password",
       "description": "Optional world password. Leave empty for public access.",
-      "env_variable": "DV_WORLD_PASSWORD",
+      "env_variable": "SERVER_PASSWORD",
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
@@ -83,7 +83,7 @@
     {
       "name": "Query Port",
       "description": "Steam query port (UDP)",
-      "env_variable": "DV_QUERY_PORT",
+      "env_variable": "QUERY_PORT",
       "default_value": "27015",
       "user_viewable": true,
       "user_editable": true,
@@ -93,7 +93,7 @@
     {
       "name": "Max Players",
       "description": "Maximum number of players allowed on the server",
-      "env_variable": "DV_MAX_PLAYERS",
+      "env_variable": "MAX_PLAYERS",
       "default_value": "6",
       "user_viewable": true,
       "user_editable": true,
