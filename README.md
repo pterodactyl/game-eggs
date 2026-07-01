@@ -274,6 +274,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Sunkenland](./sunkenland)
 
+#### [Team Fortress 2](./team_fortress_2)
+
 #### [Voyager of Nera](./voyagers_of_nera)
 
 #### [Windrose](./windrose)
