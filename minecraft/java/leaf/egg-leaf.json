@@ -1,0 +1,71 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-07-02T00:00:00+02:00",
+    "name": "Leaf",
+    "author": "admin@disasterlimited.tech",
+    "description": "LeafMC - performant fork of Paper focused on balancing performance, vanilla mechanics, and stability.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 25": "ghcr.io\/pterodactyl\/yolks:java_25",
+        "Java 24": "ghcr.io\/pterodactyl\/yolks:java_24",
+        "Java 23": "ghcr.io\/pterodactyl\/yolks:java_23",
+        "Java 22": "ghcr.io\/pterodactyl\/yolks:java_22",
+        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21",
+        "Java 17": "ghcr.io\/pterodactyl\/yolks:java_17"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{MAINFILE}}",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\r\n# Leaf Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# API docs: https:\/\/api.leafmc.one\/docs\/swagger-ui\/index.html\r\nPROJECT=leaf\r\nUSER_AGENT=\"Pterodactyl (https:\/\/Pterodactyl.io)\"\r\nAPI_BASE=\"https:\/\/api.leafmc.one\/v2\/projects\/${PROJECT}\"\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's\/{{\/${\/g' -e 's\/}}\/}\/g')`\r\nelse\r\n\tVERSIONS_JSON=`curl --user-agent \"${USER_AGENT}\" -s ${API_BASE}`\r\n\tVER_EXISTS=`echo ${VERSIONS_JSON} | jq -r --arg VERSION \"$VERSION\" '.versions | index($VERSION) != null'`\r\n\tLATEST_VERSION=`echo ${VERSIONS_JSON} | jq -r '.versions[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${VERSION}\"\r\n\telse\r\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\r\n\t\tVERSION=${LATEST_VERSION}\r\n\tfi\r\n\r\n\t# NOTE: the builds list lives under \/versions\/{version}\/builds, and each\r\n\t# entry is an OBJECT ({\"build\": <number>, ...}), not a bare number.\r\n\tBUILDS_JSON=`curl --user-agent \"${USER_AGENT}\" -s ${API_BASE}\/versions\/${VERSION}\/builds`\r\n\tBUILD_EXISTS=`echo ${BUILDS_JSON} | jq -r --arg BUILD \"$BUILD_NUMBER\" '[.builds[].build] | index($BUILD | tonumber) != null'`\r\n\tLATEST_BUILD=`echo ${BUILDS_JSON} | jq -r '.builds[-1].build'`\r\n\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"Project: ${PROJECT}\"\r\n\techo -e \"MC Version: ${VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\r\n\t# NOTE: the runnable jar is under .downloads.primary.name, not\r\n\t# .downloads.application.name (that key does not exist in the v2 API).\r\n\tJAR_NAME=`curl --user-agent \"${USER_AGENT}\" -s ${API_BASE}\/versions\/${VERSION}\/builds\/${BUILD_NUMBER} | jq -r '.downloads.primary.name'`\r\n\tDOWNLOAD_URL=\"${API_BASE}\/versions\/${VERSION}\/builds\/${BUILD_NUMBER}\/downloads\/${JAR_NAME}\"\r\nfi\r\n\r\ncd \/mnt\/server\r\n\r\necho -e \"Running curl --user-agent \\\"${USER_AGENT}\\\"  -o ${MAINFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${MAINFILE} ]; then\r\n\tmv ${MAINFILE} ${MAINFILE}.old\r\nfi\r\n\r\ncurl --user-agent \"${USER_AGENT}\"  -o ${MAINFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl --user-agent \"${USER_AGENT}\"  -o server.properties https:\/\/raw.githubusercontent.com\/pterodactyl\/game-eggs\/main\/minecraft\/java\/server.properties\r\nfi",
+            "container": "ghcr.io\/pterodactyl\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "JAR file name",
+            "description": "The name of the .jar file that the server should run.",
+            "env_variable": "MAINFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:\/^([\\w\\d._-]+)(\\.jar)$\/|max:80",
+            "field_type": "text"
+        },
+        {
+            "name": "Minecraft Version",
+            "description": "The Minecraft version the server should run on. Leave as latest to always use the newest version.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Build Number",
+            "description": "The LeafMC build number for the selected version. Leave as latest to use the newest build.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}
