@@ -1,0 +1,42 @@
+{
+  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+  "meta": {
+    "version": "PTDL_v2"
+  },
+  "name": "SteelMC",
+  "author": "AshuraV1",
+  "uuid": "e394d967-ddda-4c74-80bc-cf798150d4bc",
+  "description": "Steel is a lightweight Rust implementation of the Minecraft server.",
+  "features": [
+    "pid_limit"
+  ],
+  "docker_images": {
+    "Debian": "ghcr.io/pterodactyl/yolks:debian"
+  },
+  "startup": "./steel",
+  "config": {
+    "files": "{}",
+    "startup": "{\r\n    \"done\": \"Started Steel Server\"\r\n}",
+    "logs": "{}",
+    "stop": "stop"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/usr/bin/env bash\nset -euo pipefail\necho \"Downloading Steel\"\n\ncd /mnt/server\n\nSTEEL_VERSION=\"${STEEL_VERSION}\"\n\nif [ \"$STEEL_VERSION\" = \"latest\" ]; then\n  URL=\"https://github.com/Steel-Foundation/SteelMC/releases/latest/download/steel-linux\"\nelse\n  URL=\"https://github.com/Steel-Foundation/SteelMC/releases/download/${STEEL_VERSION}/steel-linux\"\nfi\n\nif ! curl -sS -L --connect-timeout 10 --max-time 120 --fail \"$URL\" -o steel; then\n  echo \"ERROR: Failed to download Steel binary from GitHub.\"\n  exit 1\nfi\n\nchmod +x steel\n\necho \"Installation successful\"\nexit 0",
+      "container": "ghcr.io/pterodactyl/installers:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Steel Version",
+      "description": "The version from the release page in github: https://github.com/Steel-Foundation/SteelMC/releases",
+      "env_variable": "STEEL_VERSION",
+      "default_value": "latest",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string",
+      "field_type": "text"
+    }
+  ]
+}
