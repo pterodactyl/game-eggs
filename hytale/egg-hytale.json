@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-02-18T01:01:35+01:00",
+    "exported_at": "2026-07-07T18:44:29+02:00",
     "name": "Hytale",
     "author": "hello@pterodactyl.io",
     "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox with the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a variety of creatures, then shape it block by block.",
@@ -47,7 +47,7 @@
             "default_value": "authenticated",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|in:authenticated,offline",
+            "rules": "required|string|in:authenticated,offline,insecure",
             "field_type": "text"
         },
         {
@@ -112,7 +112,7 @@
         },
         {
             "name": "Skip Update",
-            "description": "Adds a basic toggle that forces the server to not update. Can be useful if you want to stay on a fixed version.",
+            "description": "Adds a basic bool that forces the server to not update. Can be useful if you want to stay on a fixed version.",
             "env_variable": "SKIP_UPDATE",
             "default_value": "0",
             "user_viewable": true,

@@ -1,0 +1,154 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-05-24T17:33:10+02:00",
+    "name": "Conan Exiles Enhanced",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/pterodactyl\/games:conan_exiles": "ghcr.io\/pterodactyl\/games:conan_exiles"
+    },
+    "file_denylist": [],
+    "startup": "ConanSandbox\/Binaries\/Linux\/ConanSandboxServer-Linux-Shipping -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -MaxPlayers={{MAX_PLAYERS}} -ServerName=\"{{SERVER_NAME}}\" ${SERVER_PASSWORD:+-ServerPassword=\"$SERVER_PASSWORD\"} -Multihome=0.0.0.0 -console -log",
+    "config": {
+        "files": "{\r\n    \"ConanSandbox\/Saved\/Config\/LinuxServer\/ServerSettings.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"ServerSettings.AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\"\r\n        }\r\n    },\r\n    \"ConanSandbox\/Saved\/Config\/LinuxServer\/Game.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"RconPlugin.RconEnabled\": \"{{server.build.env.RCON_ENABLED}}\",\r\n            \"RconPlugin.RconPassword\": \"{{server.build.env.RCON_PASSWORD}}\",\r\n            \"RconPlugin.RconPort\": \"{{server.build.env.RCON_PORT}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Started SourceServerQueries\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/pterodactyl\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\ncd \/mnt\/server\r\n\r\nmkdir -p \/mnt\/server\/ConanSandbox\/Saved\/Config\/LinuxServer\r\n\r\ncat > \/mnt\/server\/ConanSandbox\/Saved\/Config\/LinuxServer\/Game.ini <<EOF\r\n[RconPlugin]\r\nRconEnabled=${RCON_ENABLED}\r\nRconPassword=${RCON_PASSWORD}\r\nRconPort=${RCON_PORT}\r\nEOF\r\n\r\ncat > \/mnt\/server\/ConanSandbox\/Saved\/Config\/LinuxServer\/ServerSettings.ini <<EOF\r\n[ServerSettings]\r\nAdminPassword=${ADMIN_PASSWORD}\r\nEOF\r\n\r\n## create the Mods folder and empty modlist.txt\r\nmkdir -p \/mnt\/server\/ConanSandbox\/Mods\r\ntouch \/mnt\/server\/ConanSandbox\/Mods\/modlist.txt\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/pterodactyl\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Query Port",
+            "description": "The server Query port used by the server",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed to connect to the server at the same time",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Mod IDs",
+            "description": "The list of Mods you want installed on your server.\r\nFormat examples: 123456,234567 or 123456, 2345678\r\n\r\nYou can also drop unpacked mods directly into ConanSandbox\/Mods\/<modname> they will be auto-added to modlist.txt. Custom added mods are not removed by default, only mods downloaded via this variable are",
+            "env_variable": "MOD_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update Mods",
+            "description": "Enable auto-updating of mods",
+            "env_variable": "UPDATE_MODS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update Server",
+            "description": "Auto-update the server during startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Rcon Port",
+            "description": "The port for remote administrative access, this is optional",
+            "env_variable": "RCON_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "App ID",
+            "description": "The ID corresponding to the game to download",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:443030",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable\/Disable RCON",
+            "description": "Enable RCON",
+            "env_variable": "RCON_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name used by the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "The password used by the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "The admin password, used to change server settings in-game",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Rcon Password",
+            "description": "The RCON password used by the server, disabled when left empty",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
+}

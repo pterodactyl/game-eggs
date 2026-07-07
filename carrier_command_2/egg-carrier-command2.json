@@ -1,0 +1,202 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-05-12T00:10:18+10:00",
+    "name": "Carrier Command 2",
+    "author": "88603725+norto22@users.noreply.github.com",
+    "description": "Carrier Command 2 dedicated server (Windows binary, runs on Linux via Wine). Requires Steam ownership of CC2 to install. Uses 4 consecutive UDP ports (default 25565-25568).",
+    "features": ["steam_disk_space"],
+    "docker_images": {
+        "Wine": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "cd \/home\/container && sed -i -e 's%port=\"[^\"]*\"%port=\"'\"${SERVER_PORT}\"'\"%' -e 's%max_players=\"[^\"]*\"%max_players=\"'\"${MAX_PLAYERS}\"'\"%' -e 's%server_name=\"[^\"]*\"%server_name=\"'\"${SERVER_NAME}\"'\"%' -e 's%password=\"[^\"]*\"%password=\"'\"${SERVER_PASSWORD}\"'\"%' -e 's%save_name=\"[^\"]*\"%save_name=\"'\"${SAVE_NAME}\"'\"%' -e 's%island_count=\"[^\"]*\"%island_count=\"'\"${ISLAND_COUNT}\"'\"%' -e 's%island_count_per_team=\"[^\"]*\"%island_count_per_team=\"'\"${ISLAND_COUNT_PER_TEAM}\"'\"%' -e 's%carrier_count_per_team=\"[^\"]*\"%carrier_count_per_team=\"'\"${CARRIER_COUNT_PER_TEAM}\"'\"%' -e 's%team_count_ai=\"[^\"]*\"%team_count_ai=\"'\"${TEAM_COUNT_AI}\"'\"%' -e 's%team_count_human=\"[^\"]*\"%team_count_human=\"'\"${TEAM_COUNT_HUMAN}\"'\"%' -e 's%base_difficulty=\"[^\"]*\"%base_difficulty=\"'\"${BASE_DIFFICULTY}\"'\"%' -e 's%loadout_type=\"[^\"]*\"%loadout_type=\"'\"${LOADOUT_TYPE}\"'\"%' -e 's%blueprints=\"[^\"]*\"%blueprints=\"'\"${BLUEPRINTS}\"'\"%' server_config.xml && WINEPREFIX=\/home\/container\/.wine WINEARCH=win32 WINEDEBUG=-all LD_LIBRARY_PATH=\/home\/container\/linux64:$LD_LIBRARY_PATH SteamAppId=1489630 wine \/home\/container\/dedicated_server.exe",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"connected to Steam\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# Carrier Command 2 dedicated server install (Wine + AMP recipe)\r\n# Server Files: \/mnt\/server\r\n# Install image: ghcr.io\/ptero-eggs\/installers:debian\r\n#\r\n# Required env vars: STEAM_USER, STEAM_PASS (Steam ownership required, no anon install)\r\n# Optional: STEAM_AUTH (Steam Guard code on first login)\r\n#\r\n# Two SteamCMD downloads:\r\n# 1. App 1489630 (CC2 dedicated server, requires login)\r\n# 2. App 1007 (Steamworks SDK Redistributables, anonymous) - provides\r\n#    steamclient.dll\/tier0_s.dll\/vstdlib_s.dll that CC2 needs but Geometa\r\n#    didn't ship. This is Valve's official redistributable package.\r\n\r\nif [[ -z \"${STEAM_USER}\" || -z \"${STEAM_PASS}\" ]]; then\r\n    echo \"Carrier Command 2 requires Steam credentials (ownership required).\"\r\n    echo \"Set STEAM_USER and STEAM_PASS on the server before install.\"\r\n    exit 1\r\nfi\r\n\r\n# Fetch SteamCMD\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n# Step 1: Install CC2 (App 1489630, requires login, ownership)\r\necho \"===== Installing Carrier Command 2 (App 1489630) =====\"\r\n.\/steamcmd.sh \\\r\n  +force_install_dir \/mnt\/server \\\r\n  +login \"${STEAM_USER}\" \"${STEAM_PASS}\" \"${STEAM_AUTH}\" \\\r\n  +@sSteamCmdForcePlatformType windows \\\r\n  +app_update 1489630 validate \\\r\n  +quit\r\n\r\nif [[ ! -f \/mnt\/server\/dedicated_server.exe ]]; then\r\n    echo \"ERROR: dedicated_server.exe missing after SteamCMD install.\"\r\n    echo \"Likely cause: SteamCMD segfault during client config. Retry the install.\"\r\n    exit 1\r\nfi\r\n\r\n# Step 2: Install Steamworks SDK Redistributables (App 1007, anonymous)\r\n# into a TEMP directory, copy out only the 3 DLLs we need, then delete the\r\n# temp dir. This prevents the runtime image's auto-update from re-validating\r\n# app 1007 against the logged-in account, which pulls the Linux variant and\r\n# wipes the Windows DLLs (causing \"failed to initialise SteamGameServer\").\r\necho \"===== Installing Steamworks SDK Redistributables (App 1007, isolated) =====\"\r\n.\/steamcmd.sh \\\r\n  +force_install_dir \/tmp\/sdk_redist \\\r\n  +login anonymous \\\r\n  +@sSteamCmdForcePlatformType windows \\\r\n  +app_update 1007 validate \\\r\n  +quit\r\n\r\necho \"Copying Steamworks SDK DLLs into \/mnt\/server\/...\"\r\nfor dll in steamclient.dll tier0_s.dll vstdlib_s.dll; do\r\n    found=$(find \/tmp\/sdk_redist -name \"$dll\" -print -quit 2>\/dev\/null)\r\n    if [[ -n \"$found\" ]]; then\r\n        cp -v \"$found\" \/mnt\/server\/\r\n    else\r\n        echo \"WARN: $dll not found in app 1007 install\"\r\n    fi\r\ndone\r\n\r\n# Clean up temp install dir so no appmanifest_1007.acf exists in\r\n# \/home\/container\/steamapps\/ \u2014 keeps auto-update away from these DLLs.\r\nrm -rf \/tmp\/sdk_redist\r\n\r\n# Make Linux steamclient.so available via LD_LIBRARY_PATH at runtime\r\n# (AMP's trick - lets Wine use the .so for SteamGameServer auth)\r\nmkdir -p \/mnt\/server\/linux64\r\ncp -v linux64\/steamclient.so \/mnt\/server\/linux64\/ 2>\/dev\/null || true\r\n\r\n# Create server_config.xml with CC2's exact native format so it isn't regenerated.\r\n# Values are placeholders - the startup command's sed updates them on every start.\r\ncat > \/mnt\/server\/server_config.xml <<'EOF'\r\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<data port=\"25565\" max_players=\"4\" server_name=\"A Pterodactyl Hosted Server\" password=\"\" save_name=\"\" island_count=\"16\" island_count_per_team=\"1\" carrier_count_per_team=\"1\" team_count_ai=\"1\" team_count_human=\"1\" base_difficulty=\"1\" loadout_type=\"0\" blueprints=\"0\" game_data_path=\"rom_0\">\r\n    <permissions\/>\r\n    <active_mod_folders\/>\r\n<\/data>\r\nEOF\r\n\r\necho \"-----------------------------------------\"\r\necho \"Carrier Command 2 install complete.\"\r\necho \"Server will listen on UDP ${SERVER_PORT} through $((SERVER_PORT + 3)).\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "The display name shown to players in the server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Optional password players must enter to join. Leave blank for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum simultaneous players (1-16).",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,16",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Name",
+            "description": "Folder name under saved_games\/ for the save the server loads on launch. Leave blank to start a fresh game. NOTE: CC2 dedicated server cannot WRITE saves \u2014 progress is lost on stop.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Island Count",
+            "description": "Number of islands generated in the world (4-32).",
+            "env_variable": "ISLAND_COUNT",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:4,32",
+            "field_type": "text"
+        },
+        {
+            "name": "AI Team Count",
+            "description": "Number of AI-controlled enemy teams (0-4).",
+            "env_variable": "TEAM_COUNT_AI",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,4",
+            "field_type": "text"
+        },
+        {
+            "name": "Human Team Count",
+            "description": "Number of human-controlled teams (1-4).",
+            "env_variable": "TEAM_COUNT_HUMAN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,4",
+            "field_type": "text"
+        },
+        {
+            "name": "Carriers per Team",
+            "description": "Number of carriers each team gets (1-4).",
+            "env_variable": "CARRIER_COUNT_PER_TEAM",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,4",
+            "field_type": "text"
+        },
+        {
+            "name": "Starting Islands per Team",
+            "description": "Number of islands each team controls at game start (1-8).",
+            "env_variable": "ISLAND_COUNT_PER_TEAM",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+        },
+        {
+            "name": "Base Difficulty",
+            "description": "Difficulty of capturing enemy bases. 0 = easy, 1 = normal, 2 = hard.",
+            "env_variable": "BASE_DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,2",
+            "field_type": "text"
+        },
+        {
+            "name": "Loadout Type",
+            "description": "Starting carrier loadout. 0 = default, 1 = minimal, 2 = full.",
+            "env_variable": "LOADOUT_TYPE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2",
+            "field_type": "text"
+        },
+        {
+            "name": "Blueprints",
+            "description": "Blueprint unlock state. 0 = default (research required), 1 = all unlocked.",
+            "env_variable": "BLUEPRINTS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Username",
+            "description": "Steam account that owns Carrier Command 2. Required \u2014 CC2 does not allow anonymous SteamCMD install.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Password for the Steam account above. The password is stored encrypted but visible in cleartext to anyone with\r\nedit access to the server.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Guard Code",
+            "description": "Steam Guard 2FA code. Required on first install only; can be left blank after the account is trusted.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam App ID",
+            "description": "Steam App ID for Carrier Command 2.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1489630",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1489630",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Re-run SteamCMD app_update on every server start. 0 = off, 1 = on.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}

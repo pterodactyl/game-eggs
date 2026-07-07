@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2025-11-06T06:47:00+00:00",
+    "exported_at": "2026-04-26T20:16:38+02:00",
     "name": "FTB Server",
     "author": "runemaster580@gmail.com",
     "description": "FTB modpacks are now distributed through their own API. This egg was developed for support for modpacks that are distributed through this.",
@@ -21,7 +21,8 @@
         "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
         "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
         "Java 23": "ghcr.io\/ptero-eggs\/yolks:java_23",
-        "Java 24": "ghcr.io\/ptero-eggs\/yolks:java_24"
+        "Java 24": "ghcr.io\/ptero-eggs\/yolks:java_24",
+        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25"
     },
     "file_denylist": [],
     "startup": "java $( [[ -f log4jfix\/Log4jPatcher.jar ]] && printf %s \"-javaagent:log4jfix\/Log4jPatcher.jar \" ) -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[ ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )",

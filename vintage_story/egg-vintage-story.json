@@ -4,14 +4,15 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2025-08-25T22:18:56+02:00",
+    "exported_at": "2026-03-03T16:39:53+01:00",
     "name": "Vintage Story",
     "author": "mail@wuffy.eu",
     "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
-    "features": null,
+    "features": [],
     "docker_images": {
-        "Dotnet 7": "ghcr.io\/ptero-eggs\/yolks:dotnet_7",
-        "Dotnet 8": "ghcr.io\/ptero-eggs\/yolks:dotnet_8"
+        "Dotnet 8": "ghcr.io\/ptero-eggs\/yolks:dotnet_8",
+        "Dotnet 9": "ghcr.io\/ptero-eggs\/yolks:dotnet_9",
+        "Dotnet 10": "ghcr.io\/ptero-eggs\/yolks:dotnet_10"
     },
     "file_denylist": [],
     "startup": ".\/VintagestoryServer --dataPath .\/data --port={{SERVER_PORT}} --maxclients={{MAX_CLIENTS}} {{OPTIONS}}",

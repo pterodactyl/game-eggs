@@ -4,10 +4,10 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-05-06T20:53:16+02:00",
-    "name": "Conan Exiles",
-    "author": "brycea@terrahost.cloud",
-    "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+    "exported_at": "2026-04-19T15:11:15+02:00",
+    "name": "Windrose",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Embark on a PvE survival adventure in the Age of Piracy. Fight on land and sea, solo or with friends. Build, craft and explore vast open world filled with dark secrets. Master soulslite combat and take on challenging bosses, command your ship and plunder unspoken treasures!",
     "features": [
         "steam_disk_space"
     ],
@@ -15,12 +15,12 @@
         "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
     },
     "file_denylist": [],
-    "startup": "wine \/home\/container\/ConanSandbox\/Binaries\/Win64\/ConanSandboxServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -ServerPassword=\"{{SRV_PW}}\" -console -log & CONAN_PID=$!; tail -c0 -F \/home\/container\/ConanSandbox\/Saved\/Logs\/ConanSandbox.log --pid=$CONAN_PID",
+    "startup": "wine \/home\/container\/R5\/Binaries\/Win64\/WindroseServer-Win64-Shipping.exe -log & WINDROSE_PID=$!; tail -c0 -F \/home\/container\/R5\/Saved\/Logs\/R5.log --pid=$WINDROSE_PID",
     "config": {
-        "files": "{}",
-        "startup": "{\r\n    \"done\": \"Started SourceServerQueries\"\r\n}",
+        "files": "{\r\n    \"R5\/ServerDescription.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"ServerDescription_Persistent.ServerName\": \"{{server.build.env.SERVER_NAME}}\",\r\n            \"ServerDescription_Persistent.InviteCode\": \"{{server.build.env.INVITE_CODE}}\",\r\n            \"ServerDescription_Persistent.IsPasswordProtected\": \"{{server.build.env.SERVER_PASSWORD_PROTECTED}}\",\r\n            \"ServerDescription_Persistent.Password\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"ServerDescription_Persistent.MaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\",\r\n            \"ServerDescription_Persistent.P2pProxyAddress\": \"{{server.build.env.P2P_PROXY}}\",\r\n            \"ServerDescription_Persistent.UseDirectConnection\": \"{{server.build.env.USE_DIRECT_CONNECTION}}\",\r\n            \"ServerDescription_Persistent.DirectConnectionServerAddress\": \"{{server.build.default.ip}}\",\r\n            \"ServerDescription_Persistent.DirectConnectionServerPort\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Bringing up level for play took\"\r\n}",
         "logs": "{}",
-        "stop": "^^C"
+        "stop": "^C"
     },
     "scripts": {
         "installation": {
@@ -31,13 +31,43 @@
     },
     "variables": [
         {
-            "name": "App id",
-            "description": "The ID corresponding to the game to download.",
-            "env_variable": "SRCDS_APPID",
-            "default_value": "443030",
-            "user_viewable": false,
-            "user_editable": false,
-            "rules": "required|string|in:443030",
+            "name": "Server Name",
+            "description": "The server name",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Windrose Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+        },
+        {
+            "name": "Use Direct Connection",
+            "description": "Enable direct connection instead of invite codes, when set to 1 (enabled) it will disable the use of the Invite Code.",
+            "env_variable": "USE_DIRECT_CONNECTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "The server password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Max players",
+            "description": "Maximum allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
             "field_type": "text"
         },
         {
@@ -51,33 +81,43 @@
             "field_type": "text"
         },
         {
-            "name": "Query Port",
-            "description": "Server Query Port",
-            "env_variable": "QUERY_PORT",
-            "default_value": "27015",
-            "user_viewable": true,
-            "user_editable": false,
-            "rules": "required|numeric|max:65535",
-            "field_type": "text"
-        },
-        {
-            "name": "Server Name",
-            "description": "",
-            "env_variable": "SRV_NAME",
-            "default_value": "Pterodactyl hosted Server",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|string|max:40",
-            "field_type": "text"
-        },
-        {
-            "name": "Server Password",
-            "description": "",
-            "env_variable": "SRV_PW",
+            "name": "Invite code",
+            "description": "Invite code (0-9, a-z, A-Z). Min 6 chars, case sensitive. Leave empty to generate a random code on each server start. Ignored when Direct Connection is enabled.",
+            "env_variable": "INVITE_CODE",
             "default_value": "",
             "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string|min:6|max:32|regex:\/^[a-zA-Z0-9]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Password Protected",
+            "description": "Off by default, enable this when using a server password",
+            "env_variable": "SERVER_PASSWORD_PROTECTED",
+            "default_value": "0",
+            "user_viewable": true,
             "user_editable": true,
-            "rules": "nullable|string",
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "P2P PROXY",
+            "description": "Don't change this",
+            "env_variable": "P2P_PROXY",
+            "default_value": "127.0.0.1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:127.0.0.1",
+            "field_type": "text"
+        },
+        {
+            "name": "App id",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "4129620",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:4129620",
             "field_type": "text"
         },
         {
@@ -104,10 +144,10 @@
             "name": "WINETRICKS_RUN",
             "description": "",
             "env_variable": "WINETRICKS_RUN",
-            "default_value": "vcrun2022 corefonts",
+            "default_value": "",
             "user_viewable": false,
             "user_editable": false,
-            "rules": "required|string|",
+            "rules": "nullable|string|",
             "field_type": "text"
         },
         {
@@ -121,13 +161,13 @@
             "field_type": "text"
         },
         {
-            "name": "Rcon port",
-            "description": "Remote administrative access",
-            "env_variable": "RCON_PORT",
-            "default_value": "25575",
-            "user_viewable": true,
+            "name": "Winearch",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
             "user_editable": false,
-            "rules": "required|numeric",
+            "rules": "required|string|max:20",
             "field_type": "text"
         }
     ]

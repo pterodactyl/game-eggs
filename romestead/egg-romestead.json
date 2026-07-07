@@ -1,0 +1,94 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-06-05T18:05:41+02:00",
+    "name": "Romestead",
+    "author": "ptero@redbananaofficial.com",
+    "description": "Rome has fallen! Rebuild civilization in this action-adventure survival game for 1-8 players. Fight hordes of the walking dead, build settlements, restore the Roman gods... or kick back and farm with friends.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:dotnet_8": "ghcr.io\/ptero-eggs\/yolks:dotnet_8"
+    },
+    "file_denylist": [],
+    "startup": "sed -i -E 's\/^( )+\/\\1\/' config.json; export HOME=\/home\/container; export XDG_DATA_HOME=\/home\/container\/.local\/share; export XDG_CONFIG_HOME=\/home\/container\/.config; export LD_LIBRARY_PATH=\"\/home\/container:\/home\/container\/linux64:${LD_LIBRARY_PATH}\"; dotnet Server.dll 2>&1 | stdbuf -oL tr '\\r' '\\n' | tee \/home\/container\/logs\/latest.log",
+    "config": {
+        "files": "{\r\n    \"config.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"AutoStartWorldName\": \"{{server.build.env.WORLD_NAME}}\",\r\n            \"AutoCreateWorldSize\": \"{{server.build.env.WORLD_SIZE}}\",\r\n            \"Password\": \"{{server.build.env.PASSWORD}}\",\r\n            \"Port\": \"{{server.build.default.port}}\",\r\n            \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Server ready\"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/pterodactyl\/installers:debian'\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd + fix for the 'missing configuration' steamcmd bug\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +@sSteamCmdForcePlatformType linux +app_info_print ${SRCDS_APPID} +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n# Create the dirs here so the path resolves under \/home\/container (server won't start properly without it) + logging\r\nmkdir -p \/mnt\/server\/.local\/share \/mnt\/server\/.config\r\nmkdir -p \/mnt\/server\/logs\r\n\r\n# EnableCheats & seed\r\nCHEATS_BOOL=false\r\ncase \"${CHEATS,,}\" in 1|true|yes|on) CHEATS_BOOL=true ;; esac\r\nSEED=null\r\n[ -n \"${AUTO_CREATE_WORLD_SEED}\" ] && SEED=\"\\\"${AUTO_CREATE_WORLD_SEED}\\\"\"\r\ncat > \/mnt\/server\/config.json <<EOF\r\n{\r\n  \"AutoStartWorldName\": \"${WORLD_NAME}\",\r\n  \"AutoCreateAndLoadWorld\": true,\r\n  \"AutoCreateWorldSize\": ${WORLD_SIZE},\r\n  \"AutoCreateWorldSeed\": ${SEED},\r\n  \"Password\": \"${PASSWORD}\",\r\n  \"Port\": ${SERVER_PORT},\r\n  \"MaxPlayers\": ${MAX_PLAYERS},\r\n  \"EnableCheats\": ${CHEATS_BOOL},\r\n  \"SleepThresholdMs\": 10\r\n}\r\nEOF\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/pterodactyl\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "World Name",
+            "description": "Name of the world to create and load on start. Must not be blank",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "World Size",
+            "description": "Size of the world generated when auto-creating",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,10",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Optional password required to join. Leave blank for none",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum number of players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable Cheats",
+            "description": "Enable cheat commands on the server. true or false\r\nNeeds to be modified manually after first install, in \/home\/container\/config.json",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "App ID",
+            "description": "Steam App ID for the dedicated server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "4763510",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}
