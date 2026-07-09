@@ -1,12 +1,5 @@
 # Satisfactory
 
-> [!IMPORTANT]
-> ***Updating for v1.0?***
-> - Ensure any existing servers have the updated Startup Command applied!
-> - TCP is now required! (See [Server Ports](#server-ports) for details)
-> - While not required, it's recommended existing servers delete the `LinuxServer` directory under `~/FactoryGame/Saved/Config/` to remove depreciated settings, and reconfigure the settings via the in-game Server Manager.
-___
-
 ### Authors / Contributors
 
 <!-- prettier-ignore-start -->
@@ -83,86 +76,146 @@ ___
 
 ### Egg Capabilities
 
-- Configurable to automatically check for server updates on start via SteamCMD. Forcing validation is also configurable.
-- Configurable number of rotating autosaves.
-- [*Experimental*] Configurable maximum number of players.
-- [*Advanced*] Configurable networking and server branch settings.
+- Automatic update check on startup via SteamCMD, with optional file validation for repair.
+- Configurable max players, rotating autosave count, and client connection timeouts — values written to Game.ini / Engine.ini that the in-game Server Manager does **not** expose.
+- Steam branch + branch password support for switching to experimental or private builds.
+- Editable reliable messaging port to avoid collisions between Satisfactory servers running on the same host. The startup command wires the same value to both `-ReliablePort` (bind) and `-ExternalReliablePort` (advertised in the TLS handshake).
 
 > [!NOTE]
-> As of Satisfactory v1.0, most server settings have moved from being configured in the Egg to being configured via the in-game Server Manager.\
-> Please see [Server Initialization](#server-initialization) for what settings can be configured in-game.
+> As of Satisfactory 1.0, most gameplay-affecting settings are managed via the **in-game Server Manager**, not the egg.
+> See [Settings Worth Changing In-Game](#settings-worth-changing-in-game) for the ones that actually matter, and [Server Initialization](#server-initialization) for how to claim your server.
 
 ___
 
 ### Server Ports
 
-| Port          | Default | Protocol  | Required | Notes                                                                                                                                                  |
-|---------------|---------|-----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Primary**   | 7777    | UDP & TCP | **Yes** | Clients connect using this port. UDP is un-encrypted game traffic. TCP is also required for the in-game Server Manager & API, and it is TLS encrypted. |
-| **Reliable Messaging** | 8888    | TCP       | **Yes** | Reliable messaging port. Required for Satisfactory version 1.1 and above.                                                                    |
+Satisfactory 1.1 and 1.2 require **two** ports. The old beacon (15000) and query (15777) ports from pre-1.0 are no longer used — if a guide tells you to forward those, the guide is stale.
+
+| Port                   | Default | Protocol  | Required | Notes                                                                                                                                              |
+|------------------------|---------|-----------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Primary**            | 7777    | UDP & TCP | **Yes**  | Clients connect using this port. UDP carries game traffic; TCP carries the TLS-encrypted Server Manager / HTTPS API.                               |
+| **Reliable Messaging** | 8888    | TCP       | **Yes**  | Reliable messaging port. Required for Satisfactory 1.1 and 1.2.                                                                                    |
 
 > [!TIP]
-> \*Your internal ports **must match** your external ports on your network (ie. you can't have an external port of 7778 forwarded to your 7777 internal port; they must match).
+> Your internal ports **must match** your external ports — Satisfactory does not support port translation (e.g., you can't forward external 7778 → internal 7777). If you run multiple Satisfactory servers on one host, give each its own unique pair and forward both pairs unchanged.
 
 ___
 
 ### Installation/System Requirements
 
+Per the [official wiki](https://satisfactory.wiki.gg/wiki/Dedicated_servers#Requirements):
+
 |  | Bare Minimum | Recommended |
 |---------|---------|---------|
-| Processor | Recent x86/64 (AMD/Intel) processor that supports modern instructions (ie. AVX, AES, etc.). No 32 bit or ARM support. | Favours higher single-core performance over multiple cores. If you are running Wings via Proxmox, you may need to set the VM's CPU Type to "host" to avoid session save/load crashes. |
-| RAM | 4608 MiB | 8192-12288 MiB (especially for 4 players or large save files) |
-| Storage | 5120 MiB | 7168-10240 MiB (or more, depending on save size or frequency) |
-| Network | 1 Mbit/s | 1-5 Mbit/s ([may require server *and* client config tweaks](https://satisfactory.wiki.gg/wiki/Multiplayer#Temporary_lag_solution)) |
-| Host OS | Most stable Linux OS branches should work | Using the latest kernel version for your installed OS can prevent some edge-case installation/boot issues. |
-| Game Ownership | Not required to start. | Required to fully "initialize" (see [Server Initialization](#server-initialization) below) |
+| Processor | x86-64 Intel (i5-3570 or better) or AMD (Ryzen 5 3600 or better). No 32-bit or ARM support. Single-thread rating 2000+ ([cpubenchmark.net](https://www.cpubenchmark.net/singleThread.html)). | Heavily favours single-core performance over multiple cores. **If running Wings under Proxmox VE, the VM CPU type must be `host` — `kvm64` will crash the server on world creation or save load.** |
+| RAM | 8 GB | 16 GB (especially for 4+ players or large save files) |
+| Storage | 8 GB (game files ~4 GB plus headroom for saves, logs, and crash dumps) | 12-15 GB or more if you autosave frequently or keep many rotating slots |
+| Network | Broadband connection. Hosting from home requires port forwarding or a VPN. | 1-5 Mbit/s comfortable. Network *quality* setting in-game has more impact on perceived lag than raw bandwidth ([details below](#settings-worth-changing-in-game)). |
+| Host OS | Debian, Ubuntu, or another current major Linux distro. | Latest stable kernel for your distro. |
+| Game Ownership | Not required to start the server. | Required to claim and fully initialize the server (see [Server Initialization](#server-initialization)). |
 
 ___
 
 ### Server Initialization
 
 > [!WARNING]
-> The server cannot be joined for the first time via "Join Game -> Join game directly..." on the main menu due to the TLS certificate not being trusted yet. Instead, join via "Server Manager -> Add Server" and you will be prompted to trust the certificate and initialize the server.
+> Do not use "Join Game → Join game directly..." for the first connection. The server uses a self-signed TLS certificate that your client hasn't trusted yet; a direct join produces a **"Encryption token missing"** network error. Instead: open **Server Manager → Add Server**, enter your server's IP and port (default 7777), and you'll be prompted to trust the certificate and claim the server.
 
-For a server to be fully "initialized", a client who owns the game must log into the server to "claim" it and create an administrator password. Then, a new session can be created via the "Create Game" tab in-game, or an existing save file can be uploaded (see [Save Files](#save-files) below).
+To **claim** the server, a client who owns the game must connect through Server Manager and set an administrator password. A new game can then be created in-game, or an existing save uploaded (see [Save Files](#save-files)).
 
-Misc. settings listed below can be configured by an admin client via the Server Manager's "Server Settings" tab, and are currently **not** set via the Egg:
+Once claimed, the **in-game Server Manager** is the only place to configure the following settings — they are *not* set via the Egg:
 
+**Dedicated Server tab:**
 - Server Name
 - Admin Password
 - Player Password Protection
 - Auto-Load Session Name
-- Auto Pause (when no players are online)
+- Auto Pause (when no players are connected)
 - Auto-Save on Player Disconnect
-- Disable Seasonal Events
-- Autosave Interval
-- Server Restart Interval
-- Send Gameplay Data (Crash Reports)
+
+**Gameplay tab:**
+- Server Restart Interval — *hour of day* for the daily auto-restart (despite the name; e.g. set to `06` to restart at 06:00 daily). Not a rolling interval.
+- Autosave Interval (minutes)
+- Send Gameplay Data (telemetry/crash reports to Coffee Stain)
 - Network Quality
 
+**Weather (1.2+):** Satisfactory 1.2 added weather controls to the Server Manager. The exact menu is still being iterated across 1.2.x hotfixes (one shipped a fix for *"incorrect menus showing up for weather in the Dedicated Server settings"*), so the canonical list is whatever your running server shows — review it once on first launch after updating.
+
 > [!NOTE]
-> Currently, Tier 0 (Onboarding) is not possible to play on a dedicated server and it will be automatically unlocked, even if you upload a save in Tier 0. If you would like to play the beginning of the game with Onboarding, it is recommended you play local multiplayer first, and then upload your save after completing Tier 0.
+> A few settings are **not** in the in-game Server Manager UI and must be set elsewhere:
+> - **Number of Rotating Autosaves** — set via this egg's `NUM_AUTOSAVES` variable (writes to `Engine.ini`).
+> - **Max Players** — set via this egg's `MAX_PLAYERS` variable (writes to `Game.ini`). The Server Manager does not expose a player cap control.
+> - **Disable Seasonal Events** — CLI launch arg only (`-DisableSeasonalEvents`). Not exposed by this egg; if you need it, append the flag to your server's Startup command.
+
+> [!NOTE]
+> **Tier 0 (Onboarding) and Tier 1 are skipped on dedicated servers** — players spawn straight into Tier 2 functionality. This is intentional per Coffee Stain's [1.0 known issues post](https://steamcommunity.com/app/526870/discussions/0/4755326933232852983/). If you want to play the Onboarding tutorial, play a local game until you exit Tier 1, then upload that save to the dedicated server.
+
+> [!CAUTION]
+> Some Server Manager settings (Autosave Interval, Server Restart Interval, Send Gameplay Data) have been reported to revert on server restart. This appears to be an upstream game issue ([game-eggs #443](https://github.com/pterodactyl/game-eggs/issues/443)), not an egg bug — the egg does not write to any in-game Server Manager state. After changing settings in-game, verify they persisted after your next restart.
+
+___
+
+### Game Modes (1.2+)
+
+Satisfactory 1.2 added **Game Modes** — per-world toggles for Cost Multipliers (Space Elevator deliverables, recipe parts, power consumption), World Randomization (resource node placement, node purity), and a shareable World Seed. Dedicated servers fully support them.
+
+Two things to know before using them:
+
+- **Set only at new-world creation.** Game Modes are chosen when the *client* creates a new game via Server Manager → New Game. They cannot be enabled on an existing save and cannot be turned off once active — choices are permanent for that world.
+- **Not exposed by this egg.** There are no `GAME_MODE_*` variables to set on the panel. If you want a non-default Game Mode, create the world on the server from the in-game UI.
+
+___
+
+### Settings Worth Changing In-Game
+
+Once your server is initialized, open the in-game Server Manager and review these. They're the only Server Manager settings that meaningfully affect performance or play experience:
+
+| Setting                  | Where     | Recommended                                                          | Why                                                                                                                                                                                                                                          |
+|--------------------------|-----------|----------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Network Quality**      | Gameplay tab | Ultra (on server **and** every client)                            | Defaults to Low, which is the single biggest cause of perceived "server lag" — belt stuttering, vehicle teleports, build snapping. Each player must set their *own* client to Ultra too; one player on Low still rubber-bands for themselves. |
+| **Auto-Pause**           | Dedicated Server tab | Off if you want overnight production                       | Pauses production when no one is connected. Leave on for scheduled-session play; turn off if you want smelters running while everyone's offline.                                                                                             |
+| **Autosave Interval**    | Gameplay tab | 5 min default; raise to 10–15 min for large saves                  | The server briefly pauses to write the save. Saves over ~150 MB cause noticeable hitches every interval. Don't go below the 5-minute default — frequent saves don't meaningfully reduce data loss and they amplify the hitch.                  |
+| **Server Restart Interval** | Gameplay tab | Set to an off-hour (e.g. `06` for 06:00 daily) on long-running servers | Helps with long-uptime memory creep. Note: the field is *hour of day*, not a rolling interval, despite the name.                                                                                                                          |
+| **Number of Rotating Autosaves** | This egg's `NUM_AUTOSAVES` variable | 3–5                                  | How many autosave slots to keep before the oldest is overwritten. *Not in the in-game UI* — change it via the panel.                                                                                                                          |
+
+The other Server Manager settings (admin password, player password, server name, auto-save-on-disconnect, etc.) are about access control and identity, not performance. Set them once on first claim and move on.
 
 ___
 
 ### Save Files
 
 > [!CAUTION]
-> Stopping the server **does not** currently save your game! Ensure it is saved before stopping the server!
+> Stopping the server does **not** trigger a fresh save of your game world. Per the [official wiki](https://satisfactory.wiki.gg/wiki/Dedicated_servers), the `SIGINT` shutdown the egg uses lets the server flush its config and log files but does not force a new world save — only the most recent autosave is preserved. If players have built things since the last autosave, ensure the game has saved (via the in-game Server Manager → Save) before stopping.
 
-Save files are located in the following directory, but can be more easily downloaded to your local computer in-game via the Server Manager under the "Manage Saves" tab (admins only).
+The world save files for this server are at:
 
 ```md
 /home/container/.config/Epic/FactoryGame/Saved/SaveGames/server
 ```
 
-An existing save file (including single-player saves) can be uploaded to the server via the Server Manager as well and loaded under the same tab.
+The Server Manager's "Manage Saves" tab (admins only) is the easiest way to download, upload, and load saves — an existing single-player save can be uploaded there and loaded just like a session created on the server.
 
-If you have forgotten your administrator password or would generally like to reset your server as if it were new, you can delete the following file:
+Blueprints created in-game live alongside saves:
 
 ```md
-/home/container/.config/Epic/FactoryGame/Saved/SaveGames/ServerSettings.<your_server_query_port>.sav
+/home/container/.config/Epic/FactoryGame/Saved/SaveGames/blueprints
 ```
+
+If you forget your administrator password or want to reset the server to an unclaimed state, delete the ServerSettings file (replace `<your_server_port>` with whatever you set `SERVER_PORT` to — `7777` by default):
+
+```md
+/home/container/.config/Epic/FactoryGame/Saved/SaveGames/ServerSettings.<your_server_port>.sav
+```
+
+Your world saves are not affected by deleting this file.
+
+___
+
+### Updating to 1.2
+
+A 1.1 save will open fine in 1.2, but **a 1.2 save will not open in 1.1** — once your server runs a save on 1.2, you cannot roll the server back to 1.1 with that same save. Back up the `SaveGames/server/` directory above before flipping `AUTO_UPDATE` on for the first time after a major version bump.
+
+Vehicle path automation was rebuilt from the ground up in 1.2. Per Coffee Stain, routes recorded under 1.1 *should* continue to work as-is, but multiple reports from the experimental cycle indicate complex multi-stop routes sometimes need to be re-recorded under the new system. If your players rely on truck/tractor automation, verify routes on a copy of the save first.
 
 ___
 

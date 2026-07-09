@@ -6,7 +6,8 @@ Conan Exiles is online multiplayer survival game set in the lands of Conan the B
 
 ## Minimum RAM warning
 
-This server requires about 6GB to run properly.
+* This server requires about 6GB to run properly. (Wine version)
+* This server requires about 10GB to run properly. (Enhanced version)
 
 ## Server Ports
 
@@ -20,7 +21,7 @@ Ports required to run the server in a table format.
 | RCON| 25575 |
 
 
-## Mods
+## Mods (Wine version)
 
 If you want mods download you have to allocated 1 extra port and manualy set Engine.ini.
 

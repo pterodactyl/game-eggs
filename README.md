@@ -68,6 +68,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Conan Exiles](./conan_exiles)
 
+#### [Conan Exiles Enhanced](./conan_exiles)
+
 #### [Contagion)](./contagion)
 
 #### [Core Keeper](./core_keeper)
@@ -258,6 +260,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Renown](./renown)
 
+#### [Romestead](./romestead)
+
 #### [SCUM](./scum)
 
 #### [Plains of Pain](./plains_of_pain)
@@ -270,7 +274,11 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Subnautica: Nitrox Mod](./subnautica_nitrox_mod)
 
+#### [StarRupture](./starrupture)
+
 #### [Sunkenland](./sunkenland)
+
+#### [Team Fortress 2](./team_fortress_2)
 
 #### [Voyager of Nera](./voyagers_of_nera)
 
