@@ -1,17 +1,17 @@
 # Velocity-CTD Pterodactyl Egg
 
-Questo repository contiene un egg Pterodactyl per installare ed eseguire **Velocity-CTD**, una fork di Velocity con varie ottimizzazioni e comandi aggiuntivi.
+This repository contains a Pterodactyl egg to install and run **Velocity-CTD**, a fork of Velocity with various optimizations and additional commands.
 
 ## Info
 
-- Autore egg: ItsDavloooDev
-- Software: Velocity-CTD (fork di Velocity)
-- Pannello: Pterodactyl
-- Java minima consigliata: 21
+- Egg author: ItsDavloooDev
+- Software: Velocity-CTD (Velocity fork)
+- Panel: Pterodactyl
+- Recommended minimum Java: 21
 
-## Utilizzo
+## Usage
 
-1. Scarica `egg-velocity-ctd.json`.
-2. Vai nel tuo pannello Pterodactyl → Nests/Eggs → Import.
-3. Importa il file JSON.
-4. Crea un nuovo server usando l’egg Velocity-CTD.
+1. Download `egg-velocity-ctd.json`.
+2. Open your Pterodactyl panel → Nests/Eggs → Import.
+3. Import the JSON file.
+4. Create a new server using the Velocity-CTD egg.
