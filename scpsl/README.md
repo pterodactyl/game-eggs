@@ -9,6 +9,10 @@ This Server is NOT compatible with ServerMod2 or MultiAdmin
 
 SCP: Secret Laboratory Pterodactyl egg with Exiled Plugin Framework <https://github.com/Exiled-Team/EXILED>
 
+## [scpsl-egg](scpsl-egg)
+
+SCP: Secret Laboratory Pterodactyl egg with EXILED and [SCPDiscord](https://github.com/KarlOfDuty/SCPDiscord/) support
+
 ## Documentation
 
 Official technical documentation is available at <https://techwiki.scpslgame.com>.
