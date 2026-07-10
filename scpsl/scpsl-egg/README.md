@@ -17,10 +17,9 @@ Default port required to run the server.
 
 ## Features:
 - Game branch tag support (e.g for public betas)
-  - Able to use private branches, see the SteamDepotDownloader [documentation](https://github.com/SteamRE/DepotDownloader#authentication)
+  - Can use private branches as well, see the SteamDepotDownloader [documentation](https://github.com/SteamRE/DepotDownloader#authentication)
 - Options to choose the release, pre-release or a specific version of [EXILED](https://github.com/ExMod-Team/EXILED)
 - Support to run the [SCPDiscord](https://github.com/KarlOfDuty/SCPDiscord/) Bot alongside the plugin
-- Automatically checks if the egg is up to date and notifies you when there is an update
 - FFmpeg support (for use with audio player plugins)
 
 
