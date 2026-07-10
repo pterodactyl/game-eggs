@@ -1,5 +1,5 @@
 {
-    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
     "meta": {
         "version": "PTDL_v2",
         "update_url": null
@@ -14,7 +14,12 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 21": "ghcr.io/ptero-eggs/yolks:java_21"
+        "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+        "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+        "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+        "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+        "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+        "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar {{SERVER_JARFILE}}",
