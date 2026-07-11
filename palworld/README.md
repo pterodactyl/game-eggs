@@ -61,20 +61,22 @@ Fight, farm, build and work alongside mysterious creatures called "Pals" in this
 
 ## Known Issues / FAQ
 
-1) The server won't show up in the Community-Server tab.<br>
+1) How do I move my existing co-op world to the dedicated server?<br>
+-> Co-op and dedicated servers use different player IDs, so copying the save over resets your character. Use the free [Palworld Save Converter](https://physgun.com/tools/palworld-save-converter/) by [Physgun](https://physgun.com/) - it runs entirely in your browser (nothing uploaded, works with 1.0 saves) and keeps your character, pals, guild, and bases intact.
+
+2) The server won't show up in the Community-Server tab.<br>
 -> This is a known problem and the devs will hopefully fix that asap. Best choice is to connect by IP and Password.
 
-2) The server has a memory leak.<br>
+3) The server has a memory leak.<br>
 -> This is also an issue that they are aware of.<br>
 -> The `bEnableInvaderEnemy` option seems to have a huge impact on the current RAM usage. Disabling it might be choice.<br>
 -> Tip: Schedule a server restart every 6h. You might adjust the value according to your system!<br>
 
-3) The server does not show up in the steam server list.<br>
+4) The server does not show up in the steam server list.<br>
 -> This is currently and might never be supported.
 
-4) The config file gets deleted / reset on server restart.<br>
+5) The config file gets deleted / reset on server restart.<br>
 -> Before editing the config file always make sure to fully stop the server first. Otherwise all changes wont be saved.
-
 ## Recommended server settings
 
 ### RAM
