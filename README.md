@@ -262,6 +262,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Romestead](./romestead)
 
+#### [SCP: Secret Laboratory](./scpsl)
+
 #### [SCUM](./scum)
 
 #### [Plains of Pain](./plains_of_pain)
