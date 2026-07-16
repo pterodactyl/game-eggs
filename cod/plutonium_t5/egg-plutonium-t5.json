@@ -1,0 +1,185 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-07-16T23:59:34+01:00",
+    "name": "Plutonium T5",
+    "author": "poitor@vxl.to",
+    "description": "Plutonium is a community modification for Call of Duty: Black Ops that provides dedicated server support, modding, and an enhanced multiplayer experience. This egg supports both Multiplayer (t5mp) and Zombies (t5sp) game modes. Requires a Steam account that owns Black Ops to download game files.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "Wine-Latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest",
+        "Wine-Staging": "ghcr.io\/ptero-eggs\/yolks:wine_staging"
+    },
+    "file_denylist": [],
+    "startup": "if [ \"${AUTO_UPDATE}\" == \"1\" ]; then .\/plutonium-updater -d plutonium; fi && cd plutonium && wine .\/bin\/plutonium-bootstrapper-win32.exe {{GAME_MODE}} \"Z:\\\\home\\\\container\\\\game\" -dedicated +set key {{SERVER_KEY}} +set fs_game {{MOD}} +exec {{CONFIG_FILE}} +set net_port {{SERVER_PORT}} +set sv_maxclients {{MAX_CLIENTS}} +map_rotate",
+    "config": {
+        "files": "{\r\n    \"plutonium\/storage\/t5\/dedicated.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"set sv_hostname\": \"set sv_hostname \\\"{{server.build.env.SERVER_NAME}}\\\"\"\r\n        }\r\n    },\r\n    \"plutonium\/storage\/t5\/dedicated_sp.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"set sv_hostname\": \"set sv_hostname \\\"{{server.build.env.SERVER_NAME}}\\\"\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Sending heartbeat to master\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# Plutonium T5 Installation Script\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd (Windows files for Wine)\r\nmkdir -p \/mnt\/server\/game\r\ninstall_steam_app() {\r\n    echo \"Installing Steam App ID ${1}...\"\r\n    .\/steamcmd.sh +force_install_dir \/mnt\/server\/game +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${1} validate +quit\r\n}\r\n\r\nif [ \"${GAME_MODE}\" == \"t5sp\" ]; then\r\n    install_steam_app ${T5SP_APPID}\r\nelse\r\n    install_steam_app ${T5MP_APPID}\r\nfi\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## Download plutonium-updater and Plutonium client files\r\ncd \/mnt\/server\r\ncurl -sSL -o plutonium-updater.tar.gz https:\/\/github.com\/mxve\/plutonium-updater.rs\/releases\/latest\/download\/plutonium-updater-x86_64-unknown-linux-gnu.tar.gz\r\ntar -xzf plutonium-updater.tar.gz\r\nchmod +x plutonium-updater\r\nrm -f plutonium-updater.tar.gz\r\n.\/plutonium-updater -d plutonium\r\n\r\n## Create default server configs if not present\r\nmkdir -p plutonium\/storage\/t5\r\n\r\nif [ ! -f plutonium\/storage\/t5\/dedicated.cfg ]; then\r\ncat > plutonium\/storage\/t5\/dedicated.cfg << 'DEDICFG'\r\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\r\n\/\/ Plutonium T5 MP - Basic Server\r\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\r\n\r\nset sv_hostname \"Plutonium T5 Server\"\r\nset g_password \"\"\r\nset rcon_password \"CHANGE_ME_RCON\"\r\nset sv_maxclients 18\r\nset sv_voice 1\r\nset g_logSync 1\r\nset g_log \"logs\/games_mp.log\"\r\nset playlist_enabled 0\r\n\r\nset sv_maprotation \"gametype tdm map mp_crash map mp_nuked map mp_firingrange map mp_cairo\"\r\nDEDICFG\r\nfi\r\n\r\nif [ ! -f plutonium\/storage\/t5\/dedicated_sp.cfg ]; then\r\ncat > plutonium\/storage\/t5\/dedicated_sp.cfg << 'SPCFG'\r\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\r\n\/\/ Plutonium T5 SP - Basic Server\r\n\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\r\n\r\nset sv_hostname \"Plutonium T5 Server\"\r\nset rcon_password \"CHANGE_ME_RCON\"\r\nset sp_minplayers 1\r\nset g_logSync 1\r\nset g_log \"logs\/games_sp.log\"\r\n\r\nset sv_maprotation \"map zombie_theater map zombie_pentagon map zombie_cosmodrome\"\r\nSPCFG\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"\r\n",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam account password.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Multiplayer App ID",
+            "description": "Steam App ID for Call of Duty: Black Ops Multiplayer (t5mp).",
+            "env_variable": "T5MP_APPID",
+            "default_value": "42710",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "Zombies App ID",
+            "description": "Steam App ID for Call of Duty: Black Ops (t5sp).",
+            "env_variable": "T5SP_APPID",
+            "default_value": "42700",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2FA enabled.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+        },
+        {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Key",
+            "description": "Your Plutonium server key from https:\/\/platform.plutonium.pw\/serverkeys",
+            "env_variable": "SERVER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Mode",
+            "description": "Game mode to run. Use t5mp for Multiplayer or t5sp for Zombies.",
+            "env_variable": "GAME_MODE",
+            "default_value": "t5mp",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:t5mp,t5sp",
+            "field_type": "text"
+        },
+        {
+            "name": "Config File",
+            "description": "Server configuration file to execute. Use dedicated.cfg for Multiplayer or dedicated_sp.cfg for Zombies.",
+            "env_variable": "CONFIG_FILE",
+            "default_value": "dedicated.cfg",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:dedicated.cfg,dedicated_sp.cfg",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Sets the server hostname displayed in the server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Plutonium T5 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Clients",
+            "description": "Maximum players allowed on the server (1-32 for MP, 1-4 recommended for Zombies).",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "18",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,32",
+            "field_type": "text"
+        },
+        {
+            "name": "Mod Directory",
+            "description": "Optional mod directory path passed to fs_game (e.g. mods\/my_mod). Leave empty for no mod.",
+            "env_variable": "MOD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Automatically update Plutonium client files on server start using plutonium-updater.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}
