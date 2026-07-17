@@ -1,42 +1,64 @@
 {
-  "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
-  "meta": {
-    "version": "PTDL_v2"
-  },
-  "name": "SteelMC",
-  "author": "AshuraV1",
-  "uuid": "e394d967-ddda-4c74-80bc-cf798150d4bc",
-  "description": "Steel is a lightweight Rust implementation of the Minecraft server.",
-  "features": [
-    "pid_limit"
-  ],
-  "docker_images": {
-    "Debian": "ghcr.io/pterodactyl/yolks:debian"
-  },
-  "startup": "./steel",
-  "config": {
-    "files": "{}",
-    "startup": "{\r\n    \"done\": \"Started Steel Server\"\r\n}",
-    "logs": "{}",
-    "stop": "stop"
-  },
-  "scripts": {
-    "installation": {
-      "script": "#!/usr/bin/env bash\nset -euo pipefail\necho \"Downloading Steel\"\n\ncd /mnt/server\n\nSTEEL_VERSION=\"${STEEL_VERSION}\"\n\nif [ \"$STEEL_VERSION\" = \"latest\" ]; then\n  URL=\"https://github.com/Steel-Foundation/SteelMC/releases/latest/download/steel-linux\"\nelse\n  URL=\"https://github.com/Steel-Foundation/SteelMC/releases/download/${STEEL_VERSION}/steel-linux\"\nfi\n\nif ! curl -sS -L --connect-timeout 10 --max-time 120 --fail \"$URL\" -o steel; then\n  echo \"ERROR: Failed to download Steel binary from GitHub.\"\n  exit 1\nfi\n\nchmod +x steel\n\necho \"Installation successful\"\nexit 0",
-      "container": "ghcr.io/pterodactyl/installers:debian",
-      "entrypoint": "bash"
-    }
-  },
-  "variables": [
-    {
-      "name": "Steel Version",
-      "description": "The version from the release page in github: https://github.com/Steel-Foundation/SteelMC/releases",
-      "env_variable": "STEEL_VERSION",
-      "default_value": "latest",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "required|string",
-      "field_type": "text"
-    }
-  ]
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-07-17T08:45:54+00:00",
+    "name": "Steel",
+    "author": "JunkyDeveloper@gmail.com",
+    "description": "Steel is a lightweight Rust implementation of the Minecraft server.\r\n\r\nSteel is still in BETA, so bugs can happen and some features are not implemented.",
+    "features": [
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Debian": "ghcr.io\/pterodactyl\/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/steel",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Started Steel Server\"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/usr\/bin\/env bash\r\nset -euo pipefail\r\necho \"Install dependencies\"\r\napt-get install -y jq\r\necho \"Downloading Steel\"\r\ncd mnt\/server\r\n## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for VERSION\r\n## this supports using oauth\/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https:\/\/api.github.com\/repos\/Steel-Foundation\/SteelMC\/releases\/latest\")\r\nRELEASES=$(curl --silent \"https:\/\/api.github.com\/repos\/Steel-Foundation\/SteelMC\/releases\")\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i steel-linux)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i steel-linux)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\necho \"$DOWNLOAD_URL\"\r\ncurl -L --fail \"$DOWNLOAD_URL\" -o steel\r\nchmod +x steel\r\necho \"Installation successful\"\r\nexit 0",
+            "container": "ghcr.io\/pterodactyl\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steel Version",
+            "description": "The version from the release page in github: https:\/\/github.com\/Steel-Foundation\/SteelMC\/releases",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Github User",
+            "description": "If you run out of downloads add your github user name here",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Github OAUTH Token",
+            "description": "Token to for your github users, only needed for rate limit",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
 }
