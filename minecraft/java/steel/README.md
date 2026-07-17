@@ -3,7 +3,7 @@
 Steel is a lightweight Rust implementation of the Minecraft server.
 It focuses on clean code, performance, extensibility, and ease of use.
 
-[Steel Website](https://steel-foundation.github.io/SteelDocs/)
+[Steel Website](https://steelmc.dev)
 
 ## Version
 The eggs downloads the the version of a steel release. The version is the release tag so NOT vanilla versioning!
