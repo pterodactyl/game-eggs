@@ -50,9 +50,9 @@
         },
         {
             "name": "OpenTTD Version",
-            "description": "The version of OpenTTD i.e. 12.2",
+            "description": "The version of OpenTTD i.e. 15.0",
             "env_variable": "OPENTTD_VERSION",
-            "default_value": "13.0-RC2",
+            "default_value": "15.0",
             "user_viewable": true,
             "user_editable": false,
             "rules": "required|string|max:20",
@@ -60,9 +60,9 @@
         },
         {
             "name": "OpenGFX Version",
-            "description": "The OpenGFX Version i.e. 7.1",
+            "description": "The OpenGFX Version i.e. 8.0",
             "env_variable": "OPENGFX_VERSION",
-            "default_value": "7.1",
+            "default_value": "8.0",
             "user_viewable": true,
             "user_editable": false,
             "rules": "required|string|max:20",
