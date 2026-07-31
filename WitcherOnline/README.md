@@ -6,7 +6,7 @@ Play The Witcher 3: Wild Hunt multiplayer with friends. Play Gwent with other pl
 Using the mod from [Nexus](https://www.nexusmods.com/witcher3/mods/11590)
 
 > [!IMPORTANT]
-> A non-pirated copy of the latest version of Next Gen, Steam or GOG version 4.04+ is required. 
+> A non-pirated copy of the latest version of Next Gen, Steam or GOG version 4.04+ is required (Clients only). 
 
 ## Server Ports
 Witcher Online uses ports as shown below 
