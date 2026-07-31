@@ -41,3 +41,11 @@ You can following the getting started guide : [Witcher Online Guide](https://rej
 
 Clients need to change there `bin/WitcherOnline/config.xml` to change there name and IP/port to the correct server value's.
 
+
+## Useful Links
+|Source     |Links|
+|-----------|---------------------------------------------------------------------------|
+|Mod page   | https://www.nexusmods.com/witcher3/mods/11590|
+|GitHub     | https://github.com/rejuvenate7/WitcherOnline|
+|Server documentation| https://rejuvenate.gitbook.io/witcheronline/guides/server-setup|
+
