@@ -286,6 +286,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Wine Generic](./wine/generic)
 
+#### [WitcherOnline](./WitcherOnline)
+
 #### [Wolfenstein: Enemy Territory (ET Legacy)](./wolfenstein_enemy_territory/etlegacy)
 
 #### [Wurm Unlimited](./wurm_unlimited)
