@@ -37,7 +37,7 @@ server.properties
 Port will be written with the assigned port of the container.
 
 ## Clients
-You can following the getting started guide : [Witcher Online Guide](https://rejuvenate.gitbook.io/witcheronline/guides/client-setup)
+You can follow the getting started guide : [Witcher Online Guide](https://rejuvenate.gitbook.io/witcheronline/guides/client-setup)
 
 Clients need to change there `bin/WitcherOnline/config.xml` to change there name and IP/port to the correct server value's.
 
