@@ -23,7 +23,7 @@ Witcher Online uses ports as shown below
 There are 2 options to get server working
 1. Using a Nexus premium account - Paste your key to the API field and let the installer download the files .
 
-2. Manually upload the files - Create server and wait until server is accessible, manually upload the server files and hit reinstall server. 
+2. Manually upload the zip file - Create server and wait until server is accessible, manually upload the server file and hit reinstall server. 
 After this the server should be working.
 
 Server file can be found on [Nexus](https://www.nexusmods.com/witcher3/mods/11590?tab=files)
