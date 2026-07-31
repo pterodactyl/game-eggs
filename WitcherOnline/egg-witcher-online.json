@@ -1,0 +1,72 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-07-31T17:58:39+02:00",
+    "name": "Witcher Online",
+    "author": "brainshead@gmail.com",
+    "description": "Witcher Online Server using https:\/\/www.nexusmods.com\/witcher3\/mods\/11590.\r\nWitcher Online is a mod that adds multiplayer to The Witcher 3: Wild Hunt, turning your single player experience into an MMO experience. Join servers to play with your friends, customize your character using Custom Player Characters and relax in taverns using Chill Out. Chat with strangers and perform emotes to roleplay with other players. Complete quests and play through the entire story together. Play Gwent and join parties with other players. The focus of this mod is to allow you to see other players on their adventure exploring throughout the world. A non-pirated copy of the latest version of Next Gen, Steam or GOG version 4.04+ is required.",
+    "features": [],
+    "docker_images": {
+        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar WitcherServer.jar",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Starting Witcher Online server on\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\nset -e\r\n\r\necho \"=========================================\"\r\necho \" Witcher Online Server Installer\"\r\necho \"=========================================\"\r\n\r\napt-get update -y\r\napt-get install -y \\\r\n    curl \\\r\n    jq \\\r\n    unzip \\\r\n    p7zip-full \\\r\n    ca-certificates\r\n\r\ncd \/mnt\/server\r\n\r\nGAME_DOMAIN=\"${GAME_DOMAIN:-witcher3}\"\r\nMOD_ID=\"${MOD_ID:-11590}\"\r\n\r\nDOWNLOAD_URL=\"\"\r\nARCHIVE=\"\"\r\nDOWNLOADED_ARCHIVE=false\r\n\r\n#############################################\r\n# Check for manually uploaded archive\r\n#############################################\r\n\r\necho \"Checking for manually uploaded archive...\"\r\n\r\nEXISTING_ARCHIVE=$(find . \\\r\n    -maxdepth 1 \\\r\n    \\( -iname \"*.zip\" -o -iname \"*.7z\" -o -iname \"*.rar\" \\) \\\r\n    | head -n 1)\r\n\r\nif [ -n \"${EXISTING_ARCHIVE}\" ]; then\r\n\r\n    ARCHIVE=$(basename \"${EXISTING_ARCHIVE}\")\r\n\r\n    echo \"Found archive:\"\r\n    echo \"  ${ARCHIVE}\"\r\n    echo \"Skipping Nexus download.\"\r\n\r\nelse\r\n\r\n    #############################################\r\n    # Validate Nexus API key\r\n    #############################################\r\n\r\n    if [ -z \"${NEXUS_API_KEY}\" ]; then\r\n        echo\r\n        echo \"ERROR: No manually uploaded archive found.\"\r\n        echo \"Please either:\"\r\n        echo \" - Upload the Witcher Online Server archive\"\r\n        echo \" - Provide a Nexus Mods Premium API key\"\r\n        exit 1\r\n    fi\r\n\r\nfi\r\n\r\n#############################################\r\n# Backup existing installation\r\n#############################################\r\n\r\necho\r\necho \"Backing up existing installation...\"\r\n\r\nBACKUP_DIR=\".installer-backups\/$(date +%Y-%m-%d_%H-%M-%S)\"\r\nmkdir -p \"${BACKUP_DIR}\"\r\n\r\nfor FILE in \\\r\n    WitcherServer.jar \\\r\n    run.bat \\\r\n    readme.txt \\\r\n    server.properties \\\r\n    banned-players.json \\\r\n    whitelisted-players.json\r\ndo\r\n    [ -f \"${FILE}\" ] && mv \"${FILE}\" \"${BACKUP_DIR}\/\"\r\ndone\r\n\r\n#############################################\r\n# Nexus download (only if no archive exists)\r\n#############################################\r\n\r\nif [ -z \"${ARCHIVE}\" ]; then\r\n\r\n    echo\r\n    echo \"Retrieving Nexus file list...\"\r\n\r\n    FILES_JSON=$(curl -fsSL \\\r\n        -H \"apikey: ${NEXUS_API_KEY}\" \\\r\n        -H \"accept: application\/json\" \\\r\n        -H \"User-Agent: WitcherOnlineServerInstaller\/1.0\" \\\r\n        \"https:\/\/api.nexusmods.com\/v1\/games\/${GAME_DOMAIN}\/mods\/${MOD_ID}\/files.json\")\r\n\r\n    FILE_ID=$(echo \"${FILES_JSON}\" | jq -r '\r\n        .files\r\n        | map(select(.name | test(\"^Witcher Online Server\"; \"i\")))\r\n        | sort_by(.uploaded_timestamp)\r\n        | last\r\n        | .file_id\r\n    ')\r\n\r\n    if [ -z \"${FILE_ID}\" ] || [ \"${FILE_ID}\" = \"null\" ]; then\r\n        echo\r\n        echo \"ERROR: Unable to determine latest Witcher Online Server file.\"\r\n        exit 1\r\n    fi\r\n\r\n    echo \"Using Nexus File ID: ${FILE_ID}\"\r\n\r\n    echo\r\n    echo \"Requesting Nexus download link...\"\r\n\r\n    DOWNLOAD_RESPONSE=$(curl -sSL \\\r\n        -H \"apikey: ${NEXUS_API_KEY}\" \\\r\n        -H \"accept: application\/json\" \\\r\n        -H \"User-Agent: WitcherOnlineServerInstaller\/1.0\" \\\r\n        \"https:\/\/api.nexusmods.com\/v1\/games\/${GAME_DOMAIN}\/mods\/${MOD_ID}\/files\/${FILE_ID}\/download_link.json\")\r\n\r\n    if echo \"${DOWNLOAD_RESPONSE}\" | jq -e 'type==\"array\"' >\/dev\/null 2>&1; then\r\n\r\n        DOWNLOAD_URL=$(echo \"${DOWNLOAD_RESPONSE}\" | jq -r '.[0].URI')\r\n\r\n    else\r\n\r\n        echo\r\n        echo \"Automatic download unavailable.\"\r\n\r\n        if echo \"${DOWNLOAD_RESPONSE}\" | grep -qi \"premium\"; then\r\n            echo \"Reason: Nexus Mods Premium is required for API downloads.\"\r\n        else\r\n            echo \"${DOWNLOAD_RESPONSE}\"\r\n        fi\r\n\r\n        exit 1\r\n\r\n    fi\r\n\r\n    ARCHIVE=$(basename \"${DOWNLOAD_URL%%\\?*}\")\r\n\r\n    [ -z \"${ARCHIVE}\" ] && ARCHIVE=\"download\"\r\n\r\n    echo\r\n    echo \"Downloading ${ARCHIVE}...\"\r\n\r\n    curl \\\r\n        --fail \\\r\n        --location \\\r\n        --progress-bar \\\r\n        \"${DOWNLOAD_URL}\" \\\r\n        -o \"${ARCHIVE}\"\r\n\r\n    DOWNLOADED_ARCHIVE=true\r\n\r\nfi\r\n\r\n#############################################\r\n# Extract archive\r\n#############################################\r\n\r\necho\r\necho \"Extracting ${ARCHIVE}...\"\r\n\r\ncase \"${ARCHIVE,,}\" in\r\n    *.zip)\r\n        unzip -o \"${ARCHIVE}\"\r\n        ;;\r\n    *.7z|*.rar)\r\n        7z x \"${ARCHIVE}\" -y\r\n        ;;\r\n    *)\r\n        echo \"Unknown archive type, trying 7-Zip...\"\r\n        7z x \"${ARCHIVE}\" -y\r\n        ;;\r\nesac\r\n\r\n#############################################\r\n# Cleanup downloaded archive\r\n#############################################\r\n\r\nif [ \"${DOWNLOADED_ARCHIVE}\" = true ]; then\r\n    rm -f \"${ARCHIVE}\"\r\nfi\r\n\r\n#############################################\r\n# Validate installation\r\n#############################################\r\n\r\nif [ ! -f \"WitcherServer.jar\" ]; then\r\n\r\n    echo\r\n    echo \"ERROR: WitcherServer.jar was not found after extraction.\"\r\n    echo\r\n\r\n    find . -maxdepth 2 -type f\r\n\r\n    exit 1\r\n\r\nfi\r\n\r\n#############################################\r\n# Finished\r\n#############################################\r\n\r\necho\r\necho \"=========================================\"\r\necho \" Installation Complete\"\r\necho \"=========================================\"\r\necho",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Nexus API Key",
+            "description": "Only usable if you a Premium account.\r\nWhen you don't have Premium , you need upload the file manually!.",
+            "env_variable": "NEXUS_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Domain",
+            "description": "",
+            "env_variable": "GAME_DOMAIN",
+            "default_value": "witcher3",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Mod ID",
+            "description": "",
+            "env_variable": "MOD_ID",
+            "default_value": "11590",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "File ID",
+            "description": "When No ID is filled, it will get the latest version.",
+            "env_variable": "FILE_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+        }
+    ]
+}
