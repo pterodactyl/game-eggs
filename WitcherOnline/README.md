@@ -1,5 +1,5 @@
 # WitcherOnline 
-![witcheronline](https://staticdelivery.nexusmods.com/mods/952/images/11590/11590-1767947173-1646630618.png)
+<img src="https://staticdelivery.nexusmods.com/mods/952/images/11590/11590-1767947173-1646630618.png" alt="WitcherOnline" width="600" height="300">
 
 ## Description
 Play The Witcher 3: Wild Hunt multiplayer with friends. Play Gwent with other players. Complete quests and explore the world.
