@@ -1,0 +1,72 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-08-04T14:44:19+02:00",
+    "name": "Witcher Online",
+    "author": "brainshead@gmail.com",
+    "description": "Witcher Online Server using https:\/\/www.nexusmods.com\/witcher3\/mods\/11590.\r\nWitcher Online is a mod that adds multiplayer to The Witcher 3: Wild Hunt, turning your single player experience into an MMO experience. Join servers to play with your friends, customize your character using Custom Player Characters and relax in taverns using Chill Out. Chat with strangers and perform emotes to roleplay with other players. Complete quests and play through the entire story together. Play Gwent and join parties with other players. The focus of this mod is to allow you to see other players on their adventure exploring throughout the world. A non-pirated copy of the latest version of Next Gen, Steam or GOG version 4.04+ is required.",
+    "features": [],
+    "docker_images": {
+        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar WitcherServer.jar",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Starting Witcher Online server on\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n    set -euo pipefail\r\n\r\n    trap 'echo; echo \"ERROR: Installation failed.\"; echo \"Line: $LINENO\"; echo \"Command: $BASH_COMMAND\"' ERR\r\n\r\n    echo \"=========================================\"\r\n    echo \" Witcher Online Server Installer\"\r\n    echo \"=========================================\"\r\n\r\n    apt-get update -y\r\n    apt-get install -y curl jq unzip p7zip-full ca-certificates\r\n\r\n    cd \/mnt\/server\r\n\r\n    GAME_DOMAIN=\"${GAME_DOMAIN:-witcher3}\"\r\n    MOD_ID=\"${MOD_ID:-11590}\"\r\n    DOWNLOADED=false\r\n    ARCHIVE=\"\"\r\n\r\n    echo\r\n    echo \"Checking for installation archive...\"\r\n\r\n    ARCHIVE=$(find . -maxdepth 1 \\( -iname \"*.zip\" -o -iname \"*.7z\" -o -iname \"*.rar\" \\) | head -n1 | sed 's#^\\.\/##')\r\n\r\n    if [ -z \"$ARCHIVE\" ]; then\r\n        echo \"No local archive found.\"\r\n\r\n        if [ -z \"${NEXUS_API_KEY:-}\" ]; then\r\n            echo\r\n            echo \"ERROR: No archive was uploaded and no Nexus API key was provided.\"\r\n            exit 1\r\n        fi\r\n\r\n        echo\r\n        echo \"Retrieving Nexus file list...\"\r\n\r\n        FILE_ID=$(curl -fsSL \\\r\n            -H \"apikey: $NEXUS_API_KEY\" \\\r\n            -H \"accept: application\/json\" \\\r\n            \"https:\/\/api.nexusmods.com\/v1\/games\/$GAME_DOMAIN\/mods\/$MOD_ID\/files.json\" |\r\n            jq -r '.files | map(select(.name|test(\"^Witcher Online Server\";\"i\"))) | max_by(.uploaded_timestamp) | .file_id')\r\n\r\n        [ -z \"$FILE_ID\" ] || [ \"$FILE_ID\" = \"null\" ] && { echo \"Unable to determine latest file.\"; exit 1; }\r\n\r\n        echo \"Using File ID: $FILE_ID\"\r\n        echo\r\n        echo \"Requesting Nexus download link...\"\r\n\r\n        HTTP=$(curl -sS -w \"%{http_code}\" -o response.json \\\r\n            -H \"apikey: $NEXUS_API_KEY\" \\\r\n            -H \"accept: application\/json\" \\\r\n            \"https:\/\/api.nexusmods.com\/v1\/games\/$GAME_DOMAIN\/mods\/$MOD_ID\/files\/$FILE_ID\/download_link.json\")\r\n\r\n        if [ \"$HTTP\" != \"200\" ]; then\r\n            echo\r\n            echo \"Automatic download is unavailable.\"\r\n            echo\r\n\r\n            if [ \"$HTTP\" = \"403\" ]; then\r\n                echo \"Nexus Mods Premium is required for API downloads.\"\r\n            else\r\n                cat response.json\r\n            fi\r\n\r\n            rm -f response.json\r\n\r\n            echo\r\n            echo \"Download the archive manually, upload it to the server,\"\r\n            echo \"then run the installer again.\"\r\n            exit 1\r\n        fi\r\n\r\n        URL=$(jq -r '.[0].URI' response.json)\r\n        rm -f response.json\r\n\r\n        ARCHIVE=$(basename \"${URL%%\\?*}\")\r\n        curl --fail --location --progress-bar \"$URL\" -o \"$ARCHIVE\"\r\n        DOWNLOADED=true\r\n    else\r\n        echo \"Using local archive: $ARCHIVE\"\r\n    fi\r\n\r\n    echo\r\n    echo \"Backing up existing installation...\"\r\n\r\n    BACKUP=\".installer-backups\/$(date +%Y-%m-%d_%H-%M-%S)\"\r\n    mkdir -p \"$BACKUP\"\r\n\r\n    find . -mindepth 1 -maxdepth 1 \\\r\n        ! -name \".installer-backups\" \\\r\n        ! -iname \"*.zip\" \\\r\n        ! -iname \"*.7z\" \\\r\n        ! -iname \"*.rar\" \\\r\n        -exec mv {} \"$BACKUP\/\" \\;\r\n\r\n    echo\r\n    echo \"Extracting $ARCHIVE...\"\r\n\r\n    case \"${ARCHIVE,,}\" in\r\n        *.zip) unzip -o \"$ARCHIVE\" ;;\r\n        *.7z|*.rar) 7z x \"$ARCHIVE\" -y ;;\r\n        *) echo \"Unsupported archive.\"; exit 1 ;;\r\n    esac\r\n\r\n    if [ \"$DOWNLOADED\" = true ]; then\r\n        rm -f \"$ARCHIVE\"\r\n    fi\r\n\r\n    echo\r\n    echo \"Validating installation...\"\r\n\r\n    [ -f WitcherServer.jar ] || {\r\n        echo \"WitcherServer.jar not found.\"\r\n        find . -maxdepth 2 -type f\r\n        exit 1\r\n    }\r\n\r\n    echo\r\n    echo \"Installation complete.\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Nexus API Key",
+            "description": "Only usable if you a Premium account.\r\nWhen you don't have Premium , you need upload the file manually!.",
+            "env_variable": "NEXUS_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Domain",
+            "description": "",
+            "env_variable": "GAME_DOMAIN",
+            "default_value": "witcher3",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Mod ID",
+            "description": "",
+            "env_variable": "MOD_ID",
+            "default_value": "11590",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+        },
+        {
+            "name": "File ID",
+            "description": "When No ID is filled, it will get the latest version.",
+            "env_variable": "FILE_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+        }
+    ]
+}
