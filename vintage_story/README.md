@@ -20,3 +20,19 @@ Vintage Story requires a single port
 | Port    | default |
 |---------|---------|
 | Game    | 42420   |
+
+## Arm64 Nodes
+
+Vintage Story is published for `linux-x64` only. On an arm64 node the install script automatically
+replaces `Lib/` and the `VintagestoryServer` host files with the `linux-arm64` build from
+[anegostudios/VintagestoryServerArm64](https://github.com/anegostudios/VintagestoryServerArm64),
+which is the swap that project's README describes doing by hand. Everything else (`assets/`,
+`VintagestoryLib.dll`, `VintagestoryAPI.dll`) is architecture neutral and comes from the official
+archive, so both architectures run the same game files.
+
+The `Arm64 build` (`ARM64_RELEASE`) variable selects the release. `auto`, the default, picks the
+one matching the installed game's major.minor version - 1.22.6 uses the `1.22.0` release. Set an
+exact tag to pin it. The variable is ignored on x86_64 nodes, where the official files are used
+unchanged.
+
+Mods that ship native libraries for `linux-x64` only will not work on arm64.
