@@ -215,6 +215,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Mount & Blade II: Bannerlord](./mount_blade_II_bannerlord)
 
+#### [Mount & Blade II: Bannerlord Coop](./mount_blade_II_bannerlord_coop)
+
 #### [Myth of Empires](./myth_of_empires)
 
 #### [Necesse](./necesse)
