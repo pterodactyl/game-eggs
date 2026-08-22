@@ -5,6 +5,10 @@
 This egg provides an easy way to deploy the **LunaMultiplayer dedicated server** using Pterodactyl.
 
 ---
+## Installing
+When you want to use version < 0.9.2, use .Net 5 docker image.  
+When you want to use  ≥ 0.9.2, use .Net 6 docker image.  
+When you want to use Nightly build use .net 10 docker image.  
 
 ## Server Ports
 | Port | Default | Description |
