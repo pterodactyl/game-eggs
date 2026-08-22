@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-02-01T03:48:16+00:00",
+    "exported_at": "2026-04-11T23:43:19+01:00",
     "name": "The Lord of the Rings: Return to Moria",
     "author": "eggs@purpleflaghosting.com",
     "description": "The only survival crafting game set in the Fourth Age of Middle-earth\u2122. Embark on an epic journey to reclaim the Dwarven homeland of Moria, and explore, craft, and build in procedurally generated worlds. Play as a solo adventurer, or join friends in co-op gameplay for up to 8 players.",
@@ -15,7 +15,7 @@
         "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
     },
     "file_denylist": [],
-    "startup": "wine .\/Moria\/Binaries\/Win64\/MoriaServer-Win64-Shipping.exe",
+    "startup": "wine .\/Moria\/Binaries\/Win64\/MoriaServer-Win64-Shipping.exe & S_PID=$!; tail -c0 -F \/home\/container\/Moria\/Saved\/Logs\/Moria.log --pid=$S_PID",
     "config": {
         "files": "{\r\n    \"MoriaServerConfig.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"Host.ListenPort\": \"{{server.build.default.port}}\",\r\n            \"Main.OptionalPassword\": \"{{server.build.env.SERVER_PASSWORD}}\",\r\n            \"World.Name\": \"\\\"{{server.build.env.WORLD_NAME}}\\\"\",\r\n            \"[World.Create].Difficulty.Preset\": \"{{server.build.env.DIFFICULTY}}\",\r\n            \"Console.Enabled\": false\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Unable to AutoLogin user\"\r\n}",

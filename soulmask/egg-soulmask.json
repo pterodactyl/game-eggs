@@ -4,25 +4,25 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2025-07-04T16:45:10+02:00",
+    "exported_at": "2026-06-20T19:04:11+02:00",
     "name": "Soulmask",
     "author": "josdekurk@gmail.com",
     "description": "Escaping a deadly sacrificial ritual, you find an ancient mystical mask on your journey. This mask holds potent knowledge, changing the world you knew. Face the harsh challenges of nature, survive, rally followers, and build your own tribe. Explore and unveil the truths behind the enigmatic mask.",
-    "features": null,
+    "features": [],
     "docker_images": {
         "SteamCMD": "ghcr.io\/ptero-eggs\/steamcmd:debian"
     },
     "file_denylist": [],
-    "startup": "\/home\/container\/WS\/Binaries\/Linux\/WSServer-Linux-Shipping WS Level01_Main -server -SteamServerName=\"{{SERVER_NAME}}\" -saving={{SAVE_TIME}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -EchoPort={{ECHO_PORT}} -forcepassthrough -adminpsw={{ADMIN_PASSWORD}} -PSW={{SERVER_PASSWORD}} -MaxPlayers={{MAX_PLAYERS}} -gamedistindex={{region}} -backup={{BACKUP_TIME}} -log -UTF8Output -MULTIHOME=0.0.0.0 -mod=\\\"{{MOD_ID}}\\\"",
+    "startup": "\/home\/container\/WS\/Binaries\/Linux\/WSServer-Linux-Shipping WS {{MAP}} -log -server -UTF8Output -serverid={{SERVER_ID}} -mainserverport={{CLUSTER_MAIN_PORT}} -clientserverconnect={{CLUSTER_MAIN_IP}}:{{CLUSTER_MAIN_PORT}} -SteamServerName=\"{{SERVER_NAME}}\" -saving={{SAVE_TIME}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -EchoPort={{ECHO_PORT}} -forcepassthrough -adminpsw={{ADMIN_PASSWORD}} -PSW={{SERVER_PASSWORD}} -MaxPlayers={{MAX_PLAYERS}} -gamedistindex={{region}} -backup={{BACKUP_TIME}} -MULTIHOME=0.0.0.0 -mod=\\\"{{MOD_ID}}\\\"",
     "config": {
-        "files": "{}",
+        "files": "{\r\n    \".\/WS\/Saved\/GameplaySettings\/GameXishu.json\": {\r\n        \"parser\": \"json\",\r\n        \"find\": {\r\n            \"0.KaiQiKuaFu\": \"{{server.build.env.ENABLE_CROSS_SERVER}}\",\r\n            \"1.KaiQiKuaFu\": \"{{server.build.env.ENABLE_CROSS_SERVER}}\",\r\n            \"2.KaiQiKuaFu\": \"{{server.build.env.ENABLE_CROSS_SERVER}}\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Create Dungeon Successed\"\r\n}",
         "logs": "{}",
         "stop": "^C"
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} +app_update 1007 $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## Maybe this path is just needed?\r\nmkdir -p \/mnt\/server\/WS\/Saved\/Config\/LinuxServer\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} +app_update 1007 $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## Maybe this path is just needed?\r\nmkdir -p \/mnt\/server\/WS\/Saved\/Config\/LinuxServer\r\n#Create settings file for first time startup .\r\nmkdir -p \/mnt\/server\/WS\/Saved\/GameplaySettings\r\n\r\nif [ \"${ENABLE_CROSS_SERVER}\" = \"1\" ]; then\r\n    echo '{\"0\":{\"KaiQiKuaFu\":1},\"1\":{\"KaiQiKuaFu\":1},\"2\":{\"KaiQiKuaFu\":1}}' > \/mnt\/server\/WS\/Saved\/GameplaySettings\/GameXishu.json\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
             "container": "ghcr.io\/ptero-eggs\/installers:debian",
             "entrypoint": "bash"
         }
@@ -140,12 +140,62 @@
         },
         {
             "name": "Region",
-            "description": "1= Asia 2=North America 3=Europe 4=Mainland China 5=South America 6=Oceania 7=Africa",
+            "description": "0: Test (events allowed any time) 1= Asia 2=North America 3=Europe 4=Mainland China 5=South America 6=Oceania 7=Africa",
             "env_variable": "region",
-            "default_value": "1",
+            "default_value": "0",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|digits:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Map",
+            "description": "Which map to load .\r\nLevel01_Main = Cloud Mist Forest (default)\r\nDLC_Level01_Main = Shifting Sands",
+            "env_variable": "MAP",
+            "default_value": "Level01_Main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:Level01_Main,DLC_Level01_Main",
+            "field_type": "text"
+        },
+        {
+            "name": "Server ID",
+            "description": "Server ID is unique for every server you want connect. \r\n!! If this value is changed after starting server, all save data is reset !!",
+            "env_variable": "SERVER_ID",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Cluster Server Port",
+            "description": "The TCP broadcast port that client server will connect to. The presence of this parameter designates the server as a main server for a cluster. This port should not be open to the public, but needs to be accessible to servers within the cluster. Any server with access to the port can register as a client server.",
+            "env_variable": "CLUSTER_MAIN_PORT",
+            "default_value": "2000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Main Server Address",
+            "description": "The IP of the main server to connect to. The presence of the parameter designates the server as a client server in a cluster. 127.0.0.1 = Standalone Mode\/Main Server",
+            "env_variable": "CLUSTER_MAIN_IP",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable Character Transfers",
+            "description": "Enable Character Transfers",
+            "env_variable": "ENABLE_CROSS_SERVER",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
             "field_type": "text"
         }
     ]
