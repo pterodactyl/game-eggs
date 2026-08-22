@@ -4,12 +4,17 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2025-10-30T16:08:41+01:00",
+    "exported_at": "2026-08-22T22:09:26+02:00",
     "name": "KSP - LMP",
     "author": "brainshead@gmail.com",
-    "description": "Dedicated server for the LunaMultiplayer (LMP) mod for Kerbal Space Program. Automatically installs the latest or specified version from GitHub. Runs on .NET 5 using the official Ptero-Eggs yolk.",
-    "features": null,
+    "description": "Dedicated server for the LunaMultiplayer (LMP) mod for Kerbal Space Program. Automatically installs the latest or specified version from GitHub. Runs on .NET 5 using the official Ptero-Eggs yolk. From V0.29.2 and up its uses .NET 6 , Nighly build uses .NET 10.",
+    "features": [],
     "docker_images": {
+        "Dotnet 10 ": " ghcr.io\/ptero-eggs\/yolks:dotnet_10",
+        "Dotnet 9 ": " ghcr.io\/ptero-eggs\/yolks:dotnet_9",
+        "Dotnet 8 ": " ghcr.io\/ptero-eggs\/yolks:dotnet_8",
+        "Dotnet 7 ": " ghcr.io\/ptero-eggs\/yolks:dotnet_7",
+        "Dotnet 6 ": " ghcr.io\/ptero-eggs\/yolks:dotnet_6",
         "Dotnet 5 ": " ghcr.io\/ptero-eggs\/yolks:dotnet_5"
     },
     "file_denylist": [],
