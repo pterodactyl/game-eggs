@@ -204,6 +204,7 @@ Below is a categorized list of games with links to their respective server confi
   * [Fabric](./minecraft/java/fabric)
   * [Forge](./minecraft/java/forge)
   * [Technic](./minecraft/java/technic)
+  * [Youer](./minecraft/java/youer)
 
 #### [Minetest](./minetest)
 
