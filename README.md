@@ -50,7 +50,9 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Black Mesa](./black_mesa)
 
-#### [Brickadia](./brickadia)
+#### Brickadia
+* [Brickadia](./brickadia)
+* [Omegga](./brickadia/omegga)
 
 #### [Carrier Command 2](./carrier_command_2)
 

@@ -1,0 +1,164 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-09-02T20:15:48+00:00",
+    "name": "Brickadia (Omegga)",
+    "author": "cake@brickadia.dev",
+    "description": "A Brickadia dedicated server run through Omegga, a server wrapper, automator, and plugin runner. Omegga adds a plugin API for JavaScript, TypeScript, and anything that speaks JSON-RPC, and serves a web interface for the console, players, plugins, and saves. Brickadia is installed with SteamCMD; Omegga is installed from npm on boot.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "SteamCMD Node.js": "ghcr.io\/ptero-eggs\/steamcmd:nodejs"
+    },
+    "file_denylist": [],
+    "startup": "if [ \"{{OMEGGA_UPDATE}}\" == \"1\" ]; then npm install --no-audit --no-fund --prefix \/home\/container omegga@{{OMEGGA_VERSION}} || echo \"!> Could not install omegga from npm, starting the installed version\"; fi; if [ ! -x .\/node_modules\/.bin\/omegga ]; then echo \"!> omegga is not installed and npm could not install it\"; exit 1; fi; BRICKADIA_PORT={{SERVER_PORT}} OMEGGA_UI_HOST={{SERVER_IP}} .\/node_modules\/.bin\/omegga {{OMEGGA_FLAGS}}",
+    "config": {
+        "files": "{\n    \"omegga-config.yml\": {\n        \"parser\": \"yaml\",\n        \"find\": {\n            \"server.port\": \"{{server.build.default.port}}\",\n            \"omegga.port\": \"{{env.OMEGGA_PORT}}\"\n        }\n    }\n}",
+        "startup": "{\n    \"done\": \"Server has started\"\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\n# steamcmd Base Installation Script\n#\n# Server Files: \/mnt\/server\n#\n# Omegga itself is not installed here: no installer image ships node, and the\n# startup command installs it from npm on every boot so it stays current.\n\n##\n#\n# Variables\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\n#\n ##\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd \/tmp\nmkdir -p \/mnt\/server\/steamcmd\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\ncd \/mnt\/server\/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root \/mnt\nexport HOME=\/mnt\/server\n\n## install game using steamcmd\n## the first run after bootstrapping regularly fails with \"Missing configuration\"\n## because steamcmd's app cache is still empty, so give it a few attempts\nfor attempt in 1 2 3; do\n    .\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit && break\n    echo -e \"steamcmd attempt ${attempt} failed, retrying...\\n\"\ndone\n\n## set up 32 bit libraries\nmkdir -p \/mnt\/server\/.steam\/sdk32\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p \/mnt\/server\/.steam\/sdk64\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\n\n## add below your custom commands if needed\n\n## omegga writes its own config, data\/ and plugins\/ on first boot. Writing the\n## config here just makes it editable from the file manager before that.\ncd \/mnt\/server\nif [ -f omegga-config.yml ]; then\n    echo \"omegga-config.yml already exists, leaving it alone\"\nelse\n    cat > omegga-config.yml <<'YML'\nomegga:\n  webui: true\n  port: 8080\n  https: true\nserver:\n  port: 7777\n  map: Plate\nmetrics:\n  enabled: false\n  bind: 127.0.0.1\n  port: 9000\nYML\nfi\nmkdir -p plugins data\/Saved\/Builds\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"\n",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Brickadia hosting token",
+            "description": "Server hosting token, generated at https:\/\/brickadia.com\/account\/tokens. Required: without one the server has nothing to authenticate with and stops on start.",
+            "env_variable": "BRICKADIA_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Omegga web UI port",
+            "description": "Port for Omegga's web interface. This must be a SECOND allocation assigned to this server on the Network tab: the primary allocation is Brickadia's game port, and Brickadia reports its configured port to the master server, so the two cannot share a number.",
+            "env_variable": "OMEGGA_PORT",
+            "default_value": "8080",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Omegga version",
+            "description": "npm version or tag of Omegga to install, e.g. latest or 1.16.0.",
+            "env_variable": "OMEGGA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Update Omegga on boot",
+            "description": "Install the configured Omegga version from npm on every start. Turn this off to keep the copy already in the server's node_modules, which also lets the server start while npm is unreachable.",
+            "env_variable": "OMEGGA_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Extra Omegga flags",
+            "description": "Extra flags appended to the omegga command. Leave empty for normal operation. --verbose prints extra messages for debugging, --debug prints all console logs rather than just chat. Use this rather than the BRICKADIA_DEBUG environment variable: Omegga treats that one as set-or-unset.",
+            "env_variable": "OMEGGA_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam App ID",
+            "description": "Brickadia's Steam app ID.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3017590",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:3017590",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Auto-Updates",
+            "description": "Check Steam for a Brickadia update on every start. Leaving this on is recommended: an outdated server cannot be joined by up-to-date clients.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam branch",
+            "description": "Steam beta branch to install Brickadia from. Leave empty for the default branch.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+        },
+        {
+            "name": "Brickadia install directory",
+            "description": "Where SteamCMD installed Brickadia. Omegga runs this build instead of downloading its own copy, which is what leaves the Steam install and its updates to the panel. Do not change.",
+            "env_variable": "BRICKADIA_DIR",
+            "default_value": "\/home\/container\/Brickadia",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Non-interactive",
+            "description": "Must stay \"true\". Wings gives the container a terminal, so Omegga cannot tell on its own that this console submits whole lines and can never answer an arrow-key prompt. Without it Omegga waits at the authentication prompt until the startup timeout instead of exiting with the token URL.",
+            "env_variable": "OMEGGA_NONINTERACTIVE",
+            "default_value": "true",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:true",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable metrics",
+            "description": "Serve the Prometheus metrics endpoint. Needs a third allocation matching the metrics port below.",
+            "env_variable": "METRICS_ENABLED",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Metrics bind address",
+            "description": "Address the metrics endpoint binds to. Must be 0.0.0.0 to be reachable from outside the container; 127.0.0.1 keeps it container-local.",
+            "env_variable": "METRICS_BIND",
+            "default_value": "0.0.0.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:45",
+            "field_type": "text"
+        },
+        {
+            "name": "Metrics port",
+            "description": "Port for the Prometheus metrics endpoint, when metrics are enabled.",
+            "env_variable": "METRICS_PORT",
+            "default_value": "9000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        }
+    ]
+}

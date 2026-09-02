@@ -14,3 +14,7 @@ Brickadia is a next-generation sandbox game with immense flexibility. Every crea
 | Name    | Default       |
 |---------|---------------|
 | Game    | 7777 |
+
+## Plugins and server administration
+
+[Omegga](https://github.com/brickadia-community/omegga) wraps a Brickadia server to add plugin support, along with a web console, player and role management, and save management. See the [Omegga egg](omegga/README.md) for a server that runs it.
