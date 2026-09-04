@@ -1,0 +1,154 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-09-04T00:37:19+00:00",
+    "name": "Brickadia (Omegga)",
+    "author": "cake@brickadia.dev",
+    "description": "A Brickadia dedicated server run through Omegga, a server wrapper, automator, and plugin runner. Omegga adds a plugin API for JavaScript, TypeScript, and anything that speaks JSON-RPC, and serves a web interface for the console, players, plugins, and saves. Brickadia is installed with SteamCMD, and Omegga updates it in place from there, saving and restoring the server around the restart.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "SteamCMD Debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "export PATH=\/home\/container\/node\/bin:$PATH; if [ \"{{OMEGGA_UPDATE}}\" == \"1\" ]; then npm install --no-audit --no-fund --prefix \/home\/container omegga@{{OMEGGA_VERSION}} || echo \"!> Could not reach npm, starting the omegga already installed\"; fi; BRICKADIA_PORT={{SERVER_PORT}} OMEGGA_UI_HOST={{SERVER_IP}} .\/node_modules\/.bin\/omegga {{OMEGGA_FLAGS}}",
+    "config": {
+        "files": "{\n    \"omegga-config.yml\": {\n        \"parser\": \"yaml\",\n        \"find\": {\n            \"server.port\": \"{{server.build.default.port}}\",\n            \"omegga.port\": \"{{env.OMEGGA_PORT}}\"\n        }\n    }\n}",
+        "startup": "{\n    \"done\": \"Server has started\"\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\n# Brickadia (Omegga) Installation Script\n#\n# Server Files: \/mnt\/server\n#\n# Omegga is a node application that installs and runs Brickadia itself, so this\n# installs node and omegga, then hands the game over to omegga. It updates the\n# game the same way once the server is running, saving and restoring the server\n# around the restart.\n\n##\n#\n# Variables\n# NODE_VERSION: node release to install, from https:\/\/nodejs.org\/dist\n# OMEGGA_VERSION: npm version or tag of omegga to install\n#\n ##\n\nset -eo pipefail\n\n# omegga resolves its config dir, data\/, and plugins\/ relative to $HOME and the\n# working directory, so both have to point at the mounted volume.\nexport HOME=\/mnt\/server\ncd \/mnt\/server\n\n## install node, which no installer image ships\necho -e \"Installing node v${NODE_VERSION}\\n\"\ncurl -sSL -o node.tar.gz \"https:\/\/nodejs.org\/dist\/v${NODE_VERSION}\/node-v${NODE_VERSION}-linux-x64.tar.gz\"\nmkdir -p node\ntar -xzf node.tar.gz -C node --strip-components=1\nrm node.tar.gz\nexport PATH=\/mnt\/server\/node\/bin:${PATH}\n\n## install omegga\necho -e \"Installing omegga@${OMEGGA_VERSION}\\n\"\nnpm_config_cache=\/mnt\/server\/.npm-install npm install --no-audit --no-fund --prefix \/mnt\/server \"omegga@${OMEGGA_VERSION}\"\nrm -rf \/mnt\/server\/.npm-install\n\n## omegga writes these on the first start; writing the config here makes it\n## editable from the file manager before that\nif [ -f omegga-config.yml ]; then\n    echo \"omegga-config.yml already exists, leaving it alone\"\nelse\n    cat > omegga-config.yml <<'YML'\nomegga:\n  webui: true\n  https: true\n  port: 8080\nserver:\n  port: 7777\n  map: Plate\nYML\nfi\nmkdir -p plugins data\/Saved\/Builds\n\n## omegga installs SteamCMD and the game itself, and updates them the same way\n## once the server is running\necho -e \"Installing Brickadia\\n\"\n.\/node_modules\/.bin\/omegga download\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"\n",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Brickadia hosting token",
+            "description": "Server hosting token, generated at https:\/\/brickadia.com\/account\/tokens. Required: without one the server has nothing to authenticate with and stops on start.",
+            "env_variable": "BRICKADIA_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Omegga web UI port",
+            "description": "Port for Omegga's web interface. This must be a SECOND allocation assigned to this server on the Network tab: the primary allocation is Brickadia's game port, and Brickadia reports its configured port to the master server, so the two cannot share a number.",
+            "env_variable": "OMEGGA_PORT",
+            "default_value": "8080",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Omegga version",
+            "description": "npm version or tag of Omegga to install, e.g. latest or 1.16.1.",
+            "env_variable": "OMEGGA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20|regex:\/^[\\w.\\-]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Update Omegga on boot",
+            "description": "Install the configured Omegga version from npm on every start. Turn this off to keep the copy in the server's node_modules, which also lets the server start while npm is unreachable. Brickadia updates are Omegga's own and are unaffected either way.",
+            "env_variable": "OMEGGA_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Extra Omegga flags",
+            "description": "Extra flags appended to the omegga command. Leave empty for normal operation. --update checks Steam for a Brickadia update on every start, --verbose prints extra messages for debugging, --debug prints all console logs rather than just chat. Use this rather than the BRICKADIA_DEBUG environment variable: Omegga treats that one as set-or-unset.",
+            "env_variable": "OMEGGA_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Node version",
+            "description": "Node release installed into the server, from https:\/\/nodejs.org\/dist. Omegga needs v23 or newer. Changing this takes effect on the next reinstall.",
+            "env_variable": "NODE_VERSION",
+            "default_value": "24.20.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:16|regex:\/^\\d+\\.\\d+\\.\\d+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam App ID",
+            "description": "Brickadia's Steam app ID, read by both the install script and Omegga.",
+            "env_variable": "STEAM_APP_ID",
+            "default_value": "3017590",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:3017590",
+            "field_type": "text"
+        },
+        {
+            "name": "Skip SteamCMD prompt",
+            "description": "Must stay \"true\". The install script provides SteamCMD, but if it is ever missing Omegga asks before downloading its own, which the console cannot answer.",
+            "env_variable": "SKIP_STEAMCMD_PROMPT",
+            "default_value": "true",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:true",
+            "field_type": "text"
+        },
+        {
+            "name": "Non-interactive",
+            "description": "Must stay \"true\". Wings gives the container a terminal, so Omegga cannot tell on its own that this console submits whole lines and can never answer an arrow-key prompt. Without it Omegga waits at the authentication prompt until the startup timeout instead of exiting with the token URL.",
+            "env_variable": "OMEGGA_NONINTERACTIVE",
+            "default_value": "true",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:true",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable metrics",
+            "description": "Serve the Prometheus metrics endpoint. Needs a third allocation matching the metrics port below.",
+            "env_variable": "METRICS_ENABLED",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Metrics bind address",
+            "description": "Address the metrics endpoint binds to. Must be 0.0.0.0 to be reachable from outside the container; 127.0.0.1 keeps it container-local.",
+            "env_variable": "METRICS_BIND",
+            "default_value": "0.0.0.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:45",
+            "field_type": "text"
+        },
+        {
+            "name": "Metrics port",
+            "description": "Port for the Prometheus metrics endpoint, when metrics are enabled.",
+            "env_variable": "METRICS_PORT",
+            "default_value": "9000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        }
+    ]
+}
