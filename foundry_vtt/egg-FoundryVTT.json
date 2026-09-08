@@ -2,9 +2,9 @@
     "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
     "meta": {
         "version": "PTDL_v2",
-        "update_url": null
+        "update_url": "https:\/\/pterodactyleggs.com\/egg\/6735ff4a4924a4e9bbcba0f6\/download\/egg-FoundryVTT.json"
     },
-    "exported_at": "2025-05-02T12:50:37+00:00",
+    "exported_at": "2026-09-08T11:10:28+02:00",
     "name": "Foundry VTT",
     "author": "pterodactyl@demi.cloud",
     "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
