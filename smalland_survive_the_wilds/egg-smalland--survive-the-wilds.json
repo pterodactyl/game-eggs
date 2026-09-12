@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2024-01-29T20:58:28-08:00",
+    "exported_at": "2026-09-12T09:13:12-04:00",
     "name": "Smalland: Survive the Wilds",
     "author": "git@robsti.dev",
     "description": "Experience a big adventure on a tiny scale! Enjoy multiplayer survival in a vast, hazardous world. Preparation is key when you're this small & at the bottom of the food chain. Craft weapons & armour, tame & ride creatures, build encampments & explore a strange new land.\r\n\r\nSteam: https:\/\/store.steampowered.com\/app\/768200\/Smalland_Survive_the_Wilds\/",
@@ -15,7 +15,7 @@
         "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
     },
     "file_denylist": [],
-    "startup": ".\/SMALLAND\/Binaries\/Linux\/SMALLANDServer-Linux-Shipping SMALLAND \/Game\/Maps\/WorldGame\/WorldGame_Smalland?SERVERNAME=\\\"$SERVERNAME\\\"?WORLDNAME=\\\"$WORLDNAME\\\"$( [ -z \"${PASSWORD}\" ] || echo \"?PASSWORD=\\\"$PASSWORD\\\"\" )$( [ \"$FRIENDLYFIRE\" == \"0\" ] || echo \"?FRIENDLYFIRE\" )$( [ \"$PEACEFULMODE\" == \"0\" ] || echo \"?PEACEFULMODE\" )$( [ \"$KEEPINVENTORY\" == \"0\" ] || echo \"?KEEPINVENTORY\" )$( [ \"$DETERIORATION\" == \"1\" ] || echo \"?NODETERIORATION\" )$( [ \"$PRIVATE\" == \"0\" ] || echo \"?PRIVATE\" )?lengthofdayseconds=$LENGTHOFDAYSECONDS?lengthofseasonseconds=$LENGTHOFSEASONSECONDS?creaturehealthmodifier=$CREATUREHEALTHMODIFIER?creaturedamagemodifier=$CREATUREDAMAGEMODIFIER?nourishmentlossmodifier=$NOURISHMENTLOSSMODIFIER?falldamagemodifier=$FALLDAMAGEMODIFIER -ini:Engine:[EpicOnlineServices]:DeploymentId=50f2b148496e4cbbbdeefbecc2ccd6a3 -ini:Engine:[EpicOnlineServices]:DedicatedServerClientId=xyza78918KT08TkA6emolUay8yhvAAy2 -ini:Engine:[EpicOnlineServices]:DedicatedServerClientSecret=aN2GtVw7aHb6hx66HwohNM+qktFaO3vtrLSbGdTzZWk -ini:Engine:[EpicOnlineServices]:DedicatedServerPrivateKey= -port=$SERVER_PORT -NOSTEAM -log",
+    "startup": ".\/SMALLAND\/Binaries\/Linux\/SMALLANDServer-Linux-Shipping SMALLAND \/Game\/Maps\/WorldGame\/WorldGame_Smalland?SERVERNAME=\\\"$SERVERNAME\\\"?WORLDNAME=\\\"$WORLDNAME\\\"$( [ -z \"${PASSWORD}\" ] || echo \"?PASSWORD=\\\"$PASSWORD\\\"\" )$( [ \"$FRIENDLYFIRE\" == \"0\" ] || echo \"?FRIENDLYFIRE\" )$( [ \"$PEACEFULMODE\" == \"0\" ] || echo \"?PEACEFULMODE\" )$( [ \"$KEEPINVENTORY\" == \"0\" ] || echo \"?KEEPINVENTORY\" )$( [ \"$DETERIORATION\" == \"1\" ] || echo \"?NODETERIORATION\" )$( [ \"$PRIVATE\" == \"0\" ] || echo \"?PRIVATE\" )$( [ \"$CROSSPLAY\" == \"0\" ] || echo \"?CROSSPLAY\" )?lengthofdayseconds=$LENGTHOFDAYSECONDS?lengthofseasonseconds=$LENGTHOFSEASONSECONDS?creaturehealthmodifier=$CREATUREHEALTHMODIFIER?creaturedamagemodifier=$CREATUREDAMAGEMODIFIER?nourishmentlossmodifier=$NOURISHMENTLOSSMODIFIER?falldamagemodifier=$FALLDAMAGEMODIFIER?SESSIONPLATFORM=pc -ini:Engine:[EpicOnlineServices]:DeploymentId=50f2b148496e4cbbbdeefbecc2ccd6a3 -ini:Engine:[EpicOnlineServices]:DedicatedServerClientId=xyza78918KT08TkA6emolUay8yhvAAy2 -ini:Engine:[EpicOnlineServices]:DedicatedServerClientSecret=aN2GtVw7aHb6hx66HwohNM+qktFaO3vtrLSbGdTzZWk -ini:Engine:[EpicOnlineServices]:DedicatedServerPrivateKey= -port=$SERVER_PORT -NOSTEAM -log",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"Session 'GameSession' is being set as 'listening'\"\r\n}",
@@ -178,6 +178,16 @@
             "user_viewable": false,
             "user_editable": false,
             "rules": "required|string|in:808040",
+            "field_type": "text"
+        },
+        {
+            "name": "Crossplay",
+            "description": "",
+            "env_variable": "CROSSPLAY",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
             "field_type": "text"
         }
     ]
