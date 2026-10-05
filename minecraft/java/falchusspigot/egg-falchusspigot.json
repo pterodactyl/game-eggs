@@ -1,0 +1,58 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-03-27T14:32:59+01:00",
+    "name": "FalchusSpigot",
+    "author": "elias@falchus.com",
+    "description": "A high-performance WindSpigot fork focused on improving server performance.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25",
+        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
+        "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\r\n# FalchusSpigot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nUSER_AGENT=\"Pterodactyl (https://Pterodactyl.io)\"\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tAPI_RESPONSE=`curl --user-agent \"${USER_AGENT}\" -s \"https://api.voxel.shop/v1/getDownloadURL?resource_id=9159\"`\r\n\tDOWNLOAD_URL=`echo \"${API_RESPONSE}\" | jq -r '.response.result.url'`\r\n\tBUILD_NUMBER=`echo \"${API_RESPONSE}\" | jq -r '.response.result.version'`\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\nfi\r\n\r\ncd /mnt/server\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl --user-agent \"${USER_AGENT}\" -L -o ${SERVER_JARFILE} \"${DOWNLOAD_URL}\"\r\n\r\nif [ ! -f server.properties ]; then\r\n\tcurl --user-agent \"${USER_AGENT}\" -o server.properties https://raw.githubusercontent.com/pterodactyl/game-eggs/main/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io\/ptero-eggs\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+        },
+        {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
+}

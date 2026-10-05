@@ -110,6 +110,11 @@ Spigot Plugins are not compatible with this fork. unless they are optimised for 
 [Purpur Website](https://purpurmc.org/)
 Purpur is a drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.
 
+### [FalchusSpigot](falchusspigot)
+
+[FalchusSpigot Website](https://falchus.com/spigot)
+FalchusSpigot is a high-performance WindSpigot fork focused on improving server performance.
+
 ### [Spigot](spigot)
 
 [Spigot Website](https://www.spigotmc.org)
