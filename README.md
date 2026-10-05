@@ -31,6 +31,7 @@ Below is a categorized list of games with links to their respective server confi
 #### Assetto Corsa
 
 #### [Astroneer](./astroneer)
+* [AstroTuxLauncher](./astroneer/astrotux_launcher)
 
 #### [Astro Colony](./astro_colony)
 

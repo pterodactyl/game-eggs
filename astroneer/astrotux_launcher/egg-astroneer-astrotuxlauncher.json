@@ -1,0 +1,162 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-05T00:00:00+02:00",
+    "name": "Astroneer AstroTuxLauncher",
+    "author": "mr_drake@icloud.com",
+    "description": "Astroneer dedicated server managed by AstroTuxLauncher: RCON console, player monitoring, Discord/ntfy notifications and graceful saves.",
+    "features": null,
+    "docker_images": {
+        "AstroTuxLauncher": "ghcr.io/dxrty369/astroneer-tux:latest"
+    },
+    "file_denylist": [],
+    "config": {
+        "files": "{\r\n    \"AstroneerServer\\/Astro\\/Saved\\/Config\\/WindowsServer\\/Engine.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[URL].Port\": \"{{server.build.default.port}}\",\r\n            \"[SystemSettings].net.AllowEncryption\": \"false\"\r\n        }\r\n    },\r\n    \"AstroneerServer\\/Astro\\/Saved\\/Config\\/WindowsServer\\/AstroServerSettings.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[\\/Script\\/Astro.AstroServerSettings].PublicIP\": \"{{env.PUBLIC_IP}}\",\r\n            \"[\\/Script\\/Astro.AstroServerSettings].OwnerName\": \"{{env.OWNER_NAME}}\",\r\n            \"[\\/Script\\/Astro.AstroServerSettings].OwnerGuid\": \"{{env.OWNER_GUID}}\",\r\n            \"[\\/Script\\/Astro.AstroServerSettings].PlayerProperties\": \"(PlayerFirstJoinName=\\\"{{env.OWNER_NAME}}\\\",PlayerCategory=Admin,PlayerGuid=\\\"{{env.OWNER_GUID}}\\\",PlayerRecentJoinName=\\\"\\\")\",\r\n            \"[\\/Script\\/Astro.AstroServerSettings].ServerPassword\": \"{{env.SERVER_PWD}}\",\r\n            \"[\\/Script\\/Astro.AstroServerSettings].ServerName\": \"{{env.SERVER_NAME}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Dedicated Server ready!\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\r\n# The server container already carries the AstroTuxLauncher binary, so\r\n# there is nothing to fetch here. Installation happens on first boot:\r\n# astrotux-entrypoint.sh runs `astrotux-launcher install`, which pulls the\r\n# Astroneer dedicated server via DepotDownloader and creates the wine prefix.\r\necho \"Nothing to install in the egg step; the launcher installs on first start.\"\r\nexit 0\r\n",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "startup": "astrotux-entrypoint.sh",
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "Name shown in the server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Astroneer Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Owner Name",
+            "description": "Steam display name of the server owner.",
+            "env_variable": "OWNER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Owner SteamID",
+            "description": "SteamID64 of the server owner, e.g. 76561198000000000.",
+            "env_variable": "OWNER_GUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:17,20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password players must enter to join. Leave empty for a public server.",
+            "env_variable": "SERVER_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,100",
+            "field_type": "text"
+        },
+        {
+            "name": "Public IP",
+            "description": "Leave empty to let the launcher detect it.",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|ip",
+            "field_type": "text"
+        },
+        {
+            "name": "Automatic Server Updates",
+            "description": "Check for and apply game updates on every start (1 Enable | 0 Disable).",
+            "env_variable": "SERVER_AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Overwrite Public IP",
+            "description": "Force the Public IP above even when it looks wrong (1 Enable | 0 Disable).",
+            "env_variable": "OVERWRITE_IP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Debug Logging",
+            "description": "Include DEBUG-level messages in the console and log file. Disable to reduce noise (1 Enable | 0 Disable).",
+            "env_variable": "LOG_DEBUG",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Network Check",
+            "description": "Warn when the network config looks unusual. Makes external requests and delays startup (1 Enable | 0 Disable).",
+            "env_variable": "CHECK_NETWORK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Notification Method",
+            "description": "Empty, discord or ntfy.",
+            "env_variable": "NOTIFY_METHOD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|in:discord,ntfy",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Webhook URL",
+            "description": "Only used when Notification Method is discord.",
+            "env_variable": "DISCORD_WEBHOOK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+        },
+        {
+            "name": "ntfy Topic",
+            "description": "Only used when Notification Method is ntfy.",
+            "env_variable": "NTFY_TOPIC",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Uptime Kuma Push URL",
+            "description": "Optional push URL that makes the panel status follow the real server status.",
+            "env_variable": "UPTIME_KUMA_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+        }
+    ]
+}
