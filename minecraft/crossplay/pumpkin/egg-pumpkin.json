@@ -1,0 +1,62 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-10-12T15:35:37+00:00",
+    "name": "Pumpkin",
+    "author": "kubisgg@users.noreply.github.com",
+    "description": "Minecraft server written in Rust with native Java and experimental Bedrock support. Pumpkin is under heavy development. Expect incomplete features and bugs.",
+    "features": null,
+    "docker_images": {
+        "Debian": "ghcr.io\/ptero-eggs\/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": "sed -i -e \"\/^\\[networking.java\\]$\/,\/^\\[\/s\/^address = .*\/address = \\\"0.0.0.0:{{SERVER_PORT}}\\\"\/\" -e \"\/^\\[networking.bedrock\\]$\/,\/^\\[\/s\/^enabled = .*\/enabled = {{BEDROCK_ENABLED}}\/\" -e \"\/^\\[networking.bedrock.nethernet\\]$\/,\/^\\[\/{s\/^enabled = .*\/enabled = {{BEDROCK_ENABLED}}\/;s\/^address = .*\/address = \\\"0.0.0.0:{{BEDROCK_PORT}}\\\"\/;}\" pumpkin.toml && exec .\/pumpkin",
+    "config": {
+        "files": "{}",
+        "startup": "{\n    \"done\": \"Server is now running.\"\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\nset -euo pipefail\n\ncd \/mnt\/server\n\ncase \"$(uname -m)\" in\n    x86_64) PUMPKIN_ARCH=X64 ;;\n    aarch64|arm64) PUMPKIN_ARCH=ARM64 ;;\n    *) echo \"Unsupported architecture: $(uname -m)\"; exit 1 ;;\nesac\n\nGITHUB_PACKAGE=\"Pumpkin-MC\/Pumpkin\"\nVERSION=\"${PUMPKIN_VERSION}\"\nMATCH=\"pumpkin-${PUMPKIN_ARCH}-Linux\"\nRELEASE_API=\"https:\/\/api.github.com\/repos\/${GITHUB_PACKAGE}\/releases\"\n\nif [ \"${VERSION}\" = \"latest\" ]; then\n    echo \"Fetching latest stable Pumpkin release.\"\n    RELEASE_JSON=$(curl -fsSL \"${RELEASE_API}\/latest\")\nelse\n    echo \"Fetching Pumpkin release ${VERSION}.\"\n    RELEASES=$(curl -fsSL \"${RELEASE_API}?per_page=100\")\n    VERSION_CHECK=$(printf '%s' \"${RELEASES}\" | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name == $VERSION) | .tag_name')\n    if [ \"${VERSION}\" = \"${VERSION_CHECK}\" ]; then\n        RELEASE_JSON=$(printf '%s' \"${RELEASES}\" | jq -er --arg VERSION \"${VERSION}\" '.[] | select(.tag_name == $VERSION)')\n    else\n        echo \"Release ${VERSION} not listed. Checking the tag directly.\"\n        RELEASE_TAG=$(printf '%s' \"${VERSION}\" | jq -sRr @uri)\n        RELEASE_JSON=$(curl -fsSL \"${RELEASE_API}\/tags\/${RELEASE_TAG}\")\n    fi\nfi\n\nDOWNLOAD_URL=$(printf '%s' \"${RELEASE_JSON}\" | jq -er --arg MATCH \"${MATCH}\" '.assets[] | select(.name == $MATCH) | .browser_download_url')\necho \"Downloading ${MATCH}.\"\ncurl -fSL --retry 3 \"${DOWNLOAD_URL}\" -o pumpkin\nchmod +x pumpkin\n\nif [ ! -f pumpkin.toml ]; then\n    echo \"Downloading default pumpkin.toml.\"\n    curl -fSL --retry 3 \"https:\/\/raw.githubusercontent.com\/pterodactyl\/game-eggs\/refs\/heads\/main\/minecraft\/crossplay\/pumpkin\/pumpkin.toml\" -o pumpkin.toml\nelse\n    echo \"Keeping existing pumpkin.toml.\"\nfi\n\necho \"Pumpkin installation completed.\"\n",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Pumpkin version",
+            "description": "Release to download when installing or reinstalling. Use latest for the latest stable release, nightly for development builds, or an exact GitHub release tag. Reinstall to apply a version change.",
+            "env_variable": "PUMPKIN_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Enable Bedrock",
+            "description": "Set to true to enable Bedrock, or false to disable it. Restart to apply changes.",
+            "env_variable": "BEDROCK_ENABLED",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Bedrock port",
+            "description": "Port used when Bedrock is enabled. Set this to a separate TCP\/UDP allocation assigned to the server. Restart to apply changes.",
+            "env_variable": "BEDROCK_PORT",
+            "default_value": "19132",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        }
+    ]
+}

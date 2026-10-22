@@ -1,0 +1,14 @@
+[commands]
+use_console = true
+use_tty = false
+
+[networking.java]
+enabled = true
+address = "0.0.0.0:25565"
+
+[networking.bedrock]
+enabled = false
+
+[networking.bedrock.nethernet]
+enabled = false
+address = "0.0.0.0:19132"
