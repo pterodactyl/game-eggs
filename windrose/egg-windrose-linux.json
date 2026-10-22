@@ -1,0 +1,122 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-07-30T19:54:41+02:00",
+    "name": "Windrose - Linux",
+    "author": "1725073+Kalanur@users.noreply.github.com",
+    "description": "Runs the official native Linux Windrose dedicated server from an automatically rebuilt runtime image. Saves and ServerDescription.json remain in the Pterodactyl volume while application updates are delivered by pulling a new container image.",
+    "features": [],
+    "docker_images": {
+        "ghcr.io\/pterodactyl\/games:windrose": "ghcr.io\/pterodactyl\/games:windrose"
+    },
+    "file_denylist": [],
+    "startup": "\/usr\/local\/bin\/windrose-start",
+    "config": {
+        "files": "{}",
+        "startup": "{\n    \"done\": \"Bringing up level for play took\"\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\nset -euo pipefail\n\nreadonly TARGET_DIRECTORY=\"\/mnt\/server\"\n\nmkdir -p \\\n    \"${TARGET_DIRECTORY}\/R5\/Saved\/.windrose-var-tmp\" \\\n    \"${TARGET_DIRECTORY}\/R5\"\n\nif [[ -f \"${TARGET_DIRECTORY}\/R5\/Binaries\/Linux\/WindroseServer-Linux-Shipping\" ]]; then\n    echo \"Legacy Windrose application files were detected in the server volume.\"\n    echo \"They are ignored because the current runtime image contains the application payload.\"\n    echo \"Remove them only after verifying the new image and keeping a backup.\"\nfi\n\ncat <<'MESSAGE'\nWindrose persistent storage initialized.\nThe official native server payload is included in the runtime image and is updated by pulling a newly built image.\nR5\/Saved and R5\/ServerDescription.json remain in the Pterodactyl server volume.\nMESSAGE\n",
+            "container": "ghcr.io\/pterodactyl\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "Name shown for this Windrose server.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Windrose Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+        },
+        {
+            "name": "Invite Code",
+            "description": "Leave empty to let Windrose generate or preserve the invite code. A non-empty value is an explicit override. The effective value is printed at startup and written to R5\/GeneratedServerValues.txt.",
+            "env_variable": "INVITE_CODE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:6|max:32|regex:\/^[a-zA-Z0-9]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Leave empty to disable password protection.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Maximum Players",
+            "description": "Maximum number of simultaneous players.",
+            "env_variable": "MAX_PLAYER_COUNT",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:10",
+            "field_type": "text"
+        },
+        {
+            "name": "Connection Region",
+            "description": "Connection Service region. EU also covers North America. Leave empty for automatic selection.",
+            "env_variable": "USER_SELECTED_REGION",
+            "default_value": "EU",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:EU,SEA,CIS",
+            "field_type": "text"
+        },
+        {
+            "name": "P2P Proxy Address",
+            "description": "Listening address for invite-code\/P2P mode. For same-LAN clients this may need the host LAN address.",
+            "env_variable": "P2P_PROXY_ADDRESS",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|ip",
+            "field_type": "text"
+        },
+        {
+            "name": "Use Direct Connection",
+            "description": "Use the primary Pterodactyl allocation directly. The same port must be reachable through TCP and UDP.",
+            "env_variable": "USE_DIRECT_CONNECTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "World Island ID",
+            "description": "Leave empty for a new world or to preserve the current world. Set an existing world folder ID when importing a save. The effective value is printed at startup and written to R5\/GeneratedServerValues.txt.",
+            "env_variable": "WORLD_ISLAND_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64|regex:\/^[A-Za-z0-9_-]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Automatic Corrupt-Save Recovery",
+            "description": "Automatically load the latest backup when the active save is detected as broken.",
+            "env_variable": "AUTO_LOAD_LATEST_BACKUP_IF_HAS_BROKEN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}
