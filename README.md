@@ -285,6 +285,11 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Team Fortress 2](./team_fortress_2)
 
+#### [Valheim](./valheim)
+* [Vanilla](./valheim/valheim_vanilla)
+* [BepInX](./valheim/valheim_bepinex)
+* [Plus](./valheim/valheim_plus)
+
 #### [Voyager of Nera](./voyagers_of_nera)
 
 #### [Windrose](./windrose)
