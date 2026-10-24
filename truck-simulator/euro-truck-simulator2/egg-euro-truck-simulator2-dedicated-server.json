@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2023-04-24T17:19:01+02:00",
+    "exported_at": "2026-10-14T10:33:19+02:00",
     "name": "Euro Truck Simulator 2 Dedicated server",
     "author": "josdekurk@gmail.com",
     "description": "Travel across Europe as king of the road, a trucker who delivers important cargo across impressive distances! With dozens of cities to explore, your endurance, skill and speed will all be pushed to their limits.",
@@ -17,9 +17,9 @@
     "file_denylist": [],
     "startup": ".\/bin\/linux_x64\/eurotrucks2_server",
     "config": {
-        "files": "{\r\n    \"\/.local\/share\/Euro Truck Simulator 2\/server_config.sii\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \" connection_dedicated_port:\": \" connection_dedicated_port: {{server.build.default.port}}\",\r\n            \" query_dedicated_port:\": \" query_dedicated_port: {{env.QUERY_PORT}}\",\r\n            \" server_logon_token:\": \" server_logon_token: \\\"{{env.STEAM_TOKEN}}\\\"\",\r\n            \" lobby_name:\": \" lobby_name: \\\"{{env.LOBBY_NAME}}\\\"\"\r\n        }\r\n    }\r\n}",
-        "startup": "{\r\n    \"done\": \"[MP] State: running\"\r\n}",
-        "logs": "{}",
+    "files": "{\n    \"\\/.local\\/share\\/Euro Truck Simulator 2\\/server_config.sii\": {\n        \"parser\": \"file\",\n        \"find\": {\n            \" connection_dedicated_port:\": \" connection_dedicated_port: {{server.build.default.port}}\",\n            \" query_dedicated_port:\": \" query_dedicated_port: {{env.QUERY_PORT}}\",\n            \" server_logon_token:\": \" server_logon_token: \\\"{{env.STEAM_TOKEN}}\\\"\",\n            \" lobby_name:\": \" lobby_name: \\\"{{env.LOBBY_NAME}}\\\"\",\n            \" max_players:\": \" max_players: {{env.MAX_PLAYERS}}\",\n            \" description:\": \" description: \\\"{{env.DESCRIPTION}}\\\"\",\n            \" welcome_message:\": \" welcome_message: \\\"{{env.WELCOME_MESSAGE}}\\\"\",\n            \" password:\": \" password: \\\"{{env.PASSWORD}}\\\"\",\n            \" player_damage:\": \" player_damage: \\\"{{env.PLAYER_DAMAGE}}\\\"\",\n            \" traffic:\": \" traffic: \\\"{{env.TRAFFIC}}\\\"\",\n            \" force_speed_limiter:\": \" force_speed_limiter: \\\"{{env.FORCE_SPEED_LIMITER}}\\\"\"\n        }\n    },\n    \"\\/.local\\/share\\/Euro Truck Simulator 2\\/config_ds.cfg\": {\n        \"parser\": \"file\",\n        \"find\": {\n            \"uset g_max_convoy_size\": \"uset g_max_convoy_size '{{env.MAX_PLAYERS}}'\"\n        }\n    }\n}",
+    "startup": "{\r\n    \"done\": \"[MP] State: running\"\r\n}",
+    "logs": "{}",
         "stop": "^^C"
     },
     "scripts": {
@@ -55,14 +55,14 @@
             "description": "By there readme of the game the query port must be between 27015-27020, but from our testing this port can be any port",
             "env_variable": "QUERY_PORT",
             "default_value": "27016",
-            "user_viewable": true,
+            "user_viewable": false,
             "user_editable": false,
             "rules": "required|string",
             "field_type": "text"
         },
         {
             "name": "Steam Auth token",
-            "description": "By default, whenever a dedicated server is launched it is using an anonymous account. For such an account non-persistent server id is generated (used for direct search). To avoid this you can acquire a logon token on https:\/\/steamcommunity.com\/dev\/managegameservers (game ownership is required)",
+            "description": "By default, whenever a dedicated server is launched it is using an anonymous account. For such an account non-persistent server id is generated (used for direct search). To avoid this you can acquire a logon token on https://steamcommunity.com/dev/managegameservers (game ownership is required)",
             "env_variable": "STEAM_TOKEN",
             "default_value": "",
             "user_viewable": true,
@@ -72,12 +72,82 @@
         },
         {
             "name": "Lobby name",
-            "description": "",
+            "description": "Lobby name displayed in the Convoy-Browser",
             "env_variable": "LOBBY_NAME",
             "default_value": "Euro Truck Simulator 2 server",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Maximum Players",
+            "description": "Set the maximum number of players allowed on the Server.\nNOTE: Player limits above 8 are experimental, and every player has to adjust their config.cfg to  'g_max_convoy_size \"128\"'  in order to find the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:2,128",
+            "field_type": "text"
+        },
+        {
+            "name": "Description",
+            "description": "Server description shown in the Convoy Browser.\nDo not use special characters!",
+            "env_variable": "DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Welcome Message",
+            "description": "Do not use special characters!",
+            "env_variable": "WELCOME_MESSAGE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Password",
+            "description": "Set the password required to join.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Player Damage",
+            "description": "Enable / Disable player damage",
+            "env_variable": "PLAYER_DAMAGE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Traffic",
+            "description": "Enable / Disable traffic",
+            "env_variable": "TRAFFIC",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Speed-Limiter",
+            "description": "Limit the maximum driving speed to 90 km/h.",
+            "env_variable": "FORCE_SPEED_LIMITER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
             "field_type": "text"
         }
     ]
