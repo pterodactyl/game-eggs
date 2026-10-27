@@ -4,10 +4,10 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2023-02-20T02:33:05+01:00",
+    "exported_at": "2026-08-18T13:27:21+10:00",
     "name": "7 Days To Die",
     "author": "kristoffer.norman@bahnhof.se",
-    "description": "7 days to die server",
+    "description": "7 Days to Die is an open-world survival horde crafting game set in a post-apocalyptic world overrun by the undead. Updated for V3.1.0 \"Henpocalypse\" with the V3.0 SandboxCode server configuration model.",
     "features": [
         "steam_disk_space"
     ],
@@ -15,16 +15,16 @@
         "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
     },
     "file_denylist": [],
-    "startup": ".\/7DaysToDieServer.x86_64 -configfile=serverconfig.xml -quit -batchmode -nographics -dedicated -ServerPort=${SERVER_PORT} -ServerDisabledNetworkProtocols=${SERVER_DISABLED_NETWORK_PROTOCOLS} -ServerMaxPlayerCount=${MAX_PLAYERS} -GameDifficulty=${GAME_DIFFICULTY} -ControlPanelEnabled=false -TelnetEnabled=true -TelnetPort=${TELNET_PORT} -TelnetPassword=${PASSWORD} -logfile logs\/latest.log & echo -e \"Checking on telnet connection\" && until nc -z -v -w5 127.0.0.1 ${TELNET_PORT}; do echo \"Waiting for telnet connection...\"; sleep 5; done && $( [[ -z ${PASSWORD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\" || printf %s \"rcon -t telnet -a 127.0.0.1:${TELNET_PORT} -p {{PASSWORD}}\" )",
+    "startup": ".\/7DaysToDieServer.x86_64 -configfile=serverconfig.xml -quit -batchmode -nographics -dedicated -logfile logs\/latest.log & echo -e \"Checking on telnet connection\" && until nc -z -v -w5 127.0.0.1 ${TELNET_PORT}; do echo \"Waiting for telnet connection...\"; sleep 5; done && $( [[ -z ${TELNET_PASSWORD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\" || printf %s \"rcon -t telnet -a 127.0.0.1:${TELNET_PORT} -p {{TELNET_PASSWORD}}\" )",
     "config": {
-        "files": "{}",
+        "files": "{\r\n    \"serverconfig.xml\": {\r\n        \"parser\": \"xml\",\r\n        \"find\": {\r\n            \"ServerSettings.property[@name='ServerName']\": \"[value='{{server.build.env.SERVER_NAME}}']\",\r\n            \"ServerSettings.property[@name='ServerDescription']\": \"[value='{{server.build.env.SERVER_DESCRIPTION}}']\",\r\n            \"ServerSettings.property[@name='ServerWebsiteURL']\": \"[value='{{server.build.env.SERVER_WEBSITE_URL}}']\",\r\n            \"ServerSettings.property[@name='ServerLoginConfirmationText']\": \"[value='{{server.build.env.SERVER_LOGIN_TEXT}}']\",\r\n            \"ServerSettings.property[@name='Region']\": \"[value='{{server.build.env.REGION}}']\",\r\n            \"ServerSettings.property[@name='Language']\": \"[value='{{server.build.env.LANGUAGE}}']\",\r\n            \"ServerSettings.property[@name='ServerPassword']\": \"[value='{{server.build.env.SERVER_PASSWORD}}']\",\r\n            \"ServerSettings.property[@name='ServerVisibility']\": \"[value='{{server.build.env.SERVER_VISIBILITY}}']\",\r\n            \"ServerSettings.property[@name='ServerMaxPlayerCount']\": \"[value='{{server.build.env.MAX_PLAYERS}}']\",\r\n            \"ServerSettings.property[@name='ServerReservedSlots']\": \"[value='{{server.build.env.RESERVED_SLOTS}}']\",\r\n            \"ServerSettings.property[@name='ServerReservedSlotsPermission']\": \"[value='{{server.build.env.RESERVED_SLOTS_PERMISSION}}']\",\r\n            \"ServerSettings.property[@name='ServerAdminSlots']\": \"[value='{{server.build.env.ADMIN_SLOTS}}']\",\r\n            \"ServerSettings.property[@name='ServerAdminSlotsPermission']\": \"[value='{{server.build.env.ADMIN_SLOTS_PERMISSION}}']\",\r\n            \"ServerSettings.property[@name='ServerDisabledNetworkProtocols']\": \"[value='{{server.build.env.DISABLED_NETWORK_PROTOCOLS}}']\",\r\n            \"ServerSettings.property[@name='ServerMaxWorldTransferSpeedKiBs']\": \"[value='{{server.build.env.MAX_WORLD_TRANSFER_SPEED}}']\",\r\n            \"ServerSettings.property[@name='EACEnabled']\": \"[value='{{server.build.env.EAC_ENABLED}}']\",\r\n            \"ServerSettings.property[@name='ServerAllowCrossplay']\": \"[value='{{server.build.env.ALLOW_CROSSPLAY}}']\",\r\n            \"ServerSettings.property[@name='IgnoreEOSSanctions']\": \"[value='{{server.build.env.IGNORE_EOS_SANCTIONS}}']\",\r\n            \"ServerSettings.property[@name='PersistentPlayerProfiles']\": \"[value='{{server.build.env.PERSISTENT_PROFILES}}']\",\r\n            \"ServerSettings.property[@name='GameWorld']\": \"[value='{{server.build.env.GAME_WORLD}}']\",\r\n            \"ServerSettings.property[@name='WorldGenSeed']\": \"[value='{{server.build.env.WORLD_GEN_SEED}}']\",\r\n            \"ServerSettings.property[@name='WorldGenSize']\": \"[value='{{server.build.env.WORLD_GEN_SIZE}}']\",\r\n            \"ServerSettings.property[@name='GameName']\": \"[value='{{server.build.env.GAME_NAME}}']\",\r\n            \"ServerSettings.property[@name='GameMode']\": \"[value='{{server.build.env.GAME_MODE}}']\",\r\n            \"ServerSettings.property[@name='SandboxCode']\": \"[value='{{server.build.env.SANDBOX_CODE}}']\",\r\n            \"ServerSettings.property[@name='PlayerSafeZoneLevel']\": \"[value='{{server.build.env.PLAYER_SAFE_ZONE_LEVEL}}']\",\r\n            \"ServerSettings.property[@name='PlayerSafeZoneHours']\": \"[value='{{server.build.env.PLAYER_SAFE_ZONE_HOURS}}']\",\r\n            \"ServerSettings.property[@name='BuildCreate']\": \"[value='{{server.build.env.BUILD_CREATE}}']\",\r\n            \"ServerSettings.property[@name='BedrollDeadZoneSize']\": \"[value='{{server.build.env.BEDROLL_DEADZONE_SIZE}}']\",\r\n            \"ServerSettings.property[@name='BedrollExpiryTime']\": \"[value='{{server.build.env.BEDROLL_EXPIRY_TIME}}']\",\r\n            \"ServerSettings.property[@name='MaxSpawnedZombies']\": \"[value='{{server.build.env.MAX_SPAWNED_ZOMBIES}}']\",\r\n            \"ServerSettings.property[@name='MaxSpawnedAnimals']\": \"[value='{{server.build.env.MAX_SPAWNED_ANIMALS}}']\",\r\n            \"ServerSettings.property[@name='ServerMaxAllowedViewDistance']\": \"[value='{{server.build.env.MAX_VIEW_DISTANCE}}']\",\r\n            \"ServerSettings.property[@name='MaxUncoveredMapChunksPerPlayer']\": \"[value='{{server.build.env.MAX_UNCOVERED_MAP_CHUNKS}}']\",\r\n            \"ServerSettings.property[@name='PlayerKillingMode']\": \"[value='{{server.build.env.PLAYER_KILLING_MODE}}']\",\r\n            \"ServerSettings.property[@name='PartySharedKillRange']\": \"[value='{{server.build.env.PARTY_SHARED_KILL_RANGE}}']\",\r\n            \"ServerSettings.property[@name='LandClaimCount']\": \"[value='{{server.build.env.LAND_CLAIM_COUNT}}']\",\r\n            \"ServerSettings.property[@name='LandClaimSize']\": \"[value='{{server.build.env.LAND_CLAIM_SIZE}}']\",\r\n            \"ServerSettings.property[@name='LandClaimDeadZone']\": \"[value='{{server.build.env.LAND_CLAIM_DEAD_ZONE}}']\",\r\n            \"ServerSettings.property[@name='LandClaimExpiryTime']\": \"[value='{{server.build.env.LAND_CLAIM_EXPIRY_TIME}}']\",\r\n            \"ServerSettings.property[@name='LandClaimDecayMode']\": \"[value='{{server.build.env.LAND_CLAIM_DECAY_MODE}}']\",\r\n            \"ServerSettings.property[@name='LandClaimOnlineDurabilityModifier']\": \"[value='{{server.build.env.LAND_CLAIM_ONLINE_DURABILITY}}']\",\r\n            \"ServerSettings.property[@name='LandClaimOfflineDurabilityModifier']\": \"[value='{{server.build.env.LAND_CLAIM_OFFLINE_DURABILITY}}']\",\r\n            \"ServerSettings.property[@name='LandClaimOfflineDelay']\": \"[value='{{server.build.env.LAND_CLAIM_OFFLINE_DELAY}}']\",\r\n            \"ServerSettings.property[@name='DynamicMeshEnabled']\": \"[value='{{server.build.env.DYNAMIC_MESH_ENABLED}}']\",\r\n            \"ServerSettings.property[@name='DynamicMeshLandClaimOnly']\": \"[value='{{server.build.env.DYNAMIC_MESH_LAND_CLAIM_ONLY}}']\",\r\n            \"ServerSettings.property[@name='DynamicMeshLandClaimBuffer']\": \"[value='{{server.build.env.DYNAMIC_MESH_LAND_CLAIM_BUFFER}}']\",\r\n            \"ServerSettings.property[@name='DynamicMeshMaxItemCache']\": \"[value='{{server.build.env.DYNAMIC_MESH_MAX_ITEM_CACHE}}']\",\r\n            \"ServerSettings.property[@name='TelnetEnabled']\": \"[value='{{server.build.env.TELNET_ENABLED}}']\",\r\n            \"ServerSettings.property[@name='TelnetPort']\": \"[value='{{server.build.env.TELNET_PORT}}']\",\r\n            \"ServerSettings.property[@name='TelnetPassword']\": \"[value='{{server.build.env.TELNET_PASSWORD}}']\",\r\n            \"ServerSettings.property[@name='TelnetFailedLoginLimit']\": \"[value='{{server.build.env.TELNET_FAILED_LOGIN_LIMIT}}']\",\r\n            \"ServerSettings.property[@name='TelnetFailedLoginsBlocktime']\": \"[value='{{server.build.env.TELNET_FAILED_LOGIN_BLOCKTIME}}']\",\r\n            \"ServerSettings.property[@name='WebDashboardEnabled']\": \"[value='{{server.build.env.WEB_DASHBOARD_ENABLED}}']\",\r\n            \"ServerSettings.property[@name='WebDashboardPort']\": \"[value='{{server.build.env.WEB_DASHBOARD_PORT}}']\",\r\n            \"ServerSettings.property[@name='EnableMapRendering']\": \"[value='{{server.build.env.ENABLE_MAP_RENDERING}}']\",\r\n            \"ServerSettings.property[@name='HideCommandExecutionLog']\": \"[value='{{server.build.env.HIDE_COMMAND_LOG}}']\",\r\n            \"ServerSettings.property[@name='AdminFileName']\": \"[value='{{server.build.env.ADMIN_FILE_NAME}}']\",\r\n            \"ServerSettings.property[@name='TwitchServerPermission']\": \"[value='{{server.build.env.TWITCH_PERMISSION}}']\",\r\n            \"ServerSettings.property[@name='TwitchBloodMoonAllowed']\": \"[value='{{server.build.env.TWITCH_BLOODMOON_ALLOWED}}']\",\r\n            \"ServerSettings.property[@name='ServerPort']\": \"[value='{{server.build.default.port}}']\"\r\n        }\r\n    }\r\n}",
         "startup": "{\r\n    \"done\": \"Connected with 7DTD server\"\r\n}",
         "logs": "{}",
         "stop": "shutdown"
     },
     "scripts": {
         "installation": {
-            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "script": "#!\/bin\/bash\n# steamcmd Base Installation Script\n#\n# Server Files: \/mnt\/server\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\n\n##\n#\n# Variables\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\n# SRCDS_APPID - steam app id found here - https:\/\/developer.valvesoftware.com\/wiki\/Dedicated_Servers_List\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\n#\n##\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd \/tmp\nmkdir -p \/mnt\/server\/steamcmd\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\nmkdir -p \/mnt\/server\/steamapps # Fix steamcmd disk write error when this folder is missing\ncd \/mnt\/server\/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root \/mnt\nexport HOME=\/mnt\/server\n\n## install game using steamcmd\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) +app_update ${SRCDS_APPID} ${INSTALL_FLAGS} validate +quit\n\n## set up 32 bit libraries\nmkdir -p \/mnt\/server\/.steam\/sdk32\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p \/mnt\/server\/.steam\/sdk64\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\n\ncd \/mnt\/server\n\n## Create serverconfig.xml with every setting the panel exposes, if it doesn't already exist.\n## 7 Days to Die only writes values the panel's find\/replace can update into a line that is\n## already present, so this file has to exist with every property up front for the panel\n## settings to apply from the very first boot.\nif [[ ! -f \/mnt\/server\/serverconfig.xml ]]; then\ncat > \/mnt\/server\/serverconfig.xml << 'SEVENDTDXML'\n<?xml version=\"1.0\"?>\n<ServerSettings>\n\t<!-- Server representation -->\n\t<property name=\"ServerName\"\t\t\t\t\t\tvalue=\"My Game Host\"\/>\n\t<property name=\"ServerDescription\"\t\t\t\tvalue=\"A 7 Days to Die server\"\/>\n\t<property name=\"ServerWebsiteURL\"\t\t\t\tvalue=\"\"\/>\n\t<property name=\"ServerPassword\"\t\t\t\t\tvalue=\"\"\/>\n\t<property name=\"ServerLoginConfirmationText\"\tvalue=\"\" \/>\n\t<property name=\"Region\"\t\t\t\t\t\t\tvalue=\"NorthAmericaEast\" \/>\n\t<property name=\"Language\"\t\t\t\t\t\tvalue=\"English\" \/>\n\t<!-- Networking -->\n\t<property name=\"ServerPort\"\t\t\t\t\t\tvalue=\"26900\"\/>\n\t<property name=\"ServerVisibility\"\t\t\t\tvalue=\"2\"\/>\n\t<property name=\"ServerDisabledNetworkProtocols\"\tvalue=\"SteamNetworking\"\/>\n\t<property name=\"ServerMaxWorldTransferSpeedKiBs\" value=\"512\"\/>\n\t<!-- Slots -->\n\t<property name=\"ServerMaxPlayerCount\"\t\t\tvalue=\"8\"\/>\n\t<property name=\"ServerReservedSlots\"\t\t\tvalue=\"0\"\/>\n\t<property name=\"ServerReservedSlotsPermission\"\tvalue=\"100\"\/>\n\t<property name=\"ServerAdminSlots\"\t\t\t\tvalue=\"0\"\/>\n\t<property name=\"ServerAdminSlotsPermission\"\t\tvalue=\"0\"\/>\n\t<!-- Crossplay \/ anti-cheat -->\n\t<property name=\"EACEnabled\"\t\t\t\t\t\tvalue=\"true\"\/>\n\t<property name=\"ServerAllowCrossplay\"\t\t\tvalue=\"false\"\/>\n\t<property name=\"IgnoreEOSSanctions\"\t\t\t\tvalue=\"false\"\/>\n\t<!-- Admin interfaces -->\n\t<property name=\"WebDashboardEnabled\"\t\t\tvalue=\"false\"\/>\n\t<property name=\"WebDashboardPort\"\t\t\t\tvalue=\"8080\"\/>\n\t<property name=\"EnableMapRendering\"\t\t\t\tvalue=\"false\"\/>\n\t<property name=\"TelnetEnabled\"\t\t\t\t\tvalue=\"true\"\/>\n\t<property name=\"TelnetPort\"\t\t\t\t\t\tvalue=\"8081\"\/>\n\t<property name=\"TelnetPassword\"\t\t\t\t\tvalue=\"\"\/>\n\t<property name=\"TelnetFailedLoginLimit\"\t\t\tvalue=\"10\"\/>\n\t<property name=\"TelnetFailedLoginsBlocktime\"\tvalue=\"10\"\/>\n\t<!-- Folder and file locations -->\n\t<property name=\"AdminFileName\"\t\t\t\t\tvalue=\"serveradmin.xml\"\/>\n\t<!-- Other technical settings -->\n\t<property name=\"HideCommandExecutionLog\"\t\tvalue=\"0\"\/>\n\t<property name=\"MaxUncoveredMapChunksPerPlayer\"\tvalue=\"131072\"\/>\n\t<property name=\"PersistentPlayerProfiles\"\t\tvalue=\"false\" \/>\n\t<!-- World -->\n\t<property name=\"GameWorld\"\t\t\t\t\t\tvalue=\"Navezgane\"\/>\n\t<property name=\"WorldGenSeed\"\t\t\t\t\tvalue=\"asdf\"\/>\n\t<property name=\"WorldGenSize\"\t\t\t\t\tvalue=\"6144\"\/>\n\t<property name=\"GameName\"\t\t\t\t\t\tvalue=\"My Game\"\/>\n\t<property name=\"GameMode\"\t\t\t\t\t\tvalue=\"GameModeSurvival\"\/>\n\t<!-- Gameplay: sandbox rules (V3.0+, replaces 30 legacy per-property settings) -->\n\t<property name=\"SandboxCode\"\t\t\t\t\tvalue=\"AAAJABJACJADJARFBNC\"\/>\n\t<!-- Difficulty-adjacent settings that survived the SandboxCode migration -->\n\t<property name=\"PlayerSafeZoneLevel\"\t\t\tvalue=\"5\" \/>\n\t<property name=\"PlayerSafeZoneHours\"\t\t\tvalue=\"5\" \/>\n\t<property name=\"BuildCreate\"\t\t\t\t\tvalue=\"false\" \/>\n\t<property name=\"BedrollDeadZoneSize\"\t\t\tvalue=\"15\" \/>\n\t<property name=\"BedrollExpiryTime\"\t\t\t\tvalue=\"45\" \/>\n\t<!-- Performance related -->\n\t<property name=\"MaxSpawnedZombies\"\t\t\t\tvalue=\"64\" \/>\n\t<property name=\"MaxSpawnedAnimals\"\t\t\t\tvalue=\"50\" \/>\n\t<property name=\"ServerMaxAllowedViewDistance\"\tvalue=\"12\" \/>\n\t<!-- Multiplayer -->\n\t<property name=\"PartySharedKillRange\"\t\t\tvalue=\"100\"\/>\n\t<property name=\"PlayerKillingMode\"\t\t\t\tvalue=\"3\" \/>\n\t<!-- Land claim options -->\n\t<property name=\"LandClaimCount\"\t\t\t\t\tvalue=\"1\"\/>\n\t<property name=\"LandClaimSize\"\t\t\t\t\tvalue=\"41\"\/>\n\t<property name=\"LandClaimDeadZone\"\t\t\t\tvalue=\"30\"\/>\n\t<property name=\"LandClaimExpiryTime\"\t\t\tvalue=\"7\"\/>\n\t<property name=\"LandClaimDecayMode\"\t\t\t\tvalue=\"0\"\/>\n\t<property name=\"LandClaimOnlineDurabilityModifier\"\tvalue=\"4\"\/>\n\t<property name=\"LandClaimOfflineDurabilityModifier\"\tvalue=\"4\"\/>\n\t<property name=\"LandClaimOfflineDelay\"\t\t\tvalue=\"0\"\/>\n\t<!-- Dynamic mesh (building collapse) -->\n\t<property name=\"DynamicMeshEnabled\"\t\t\t\tvalue=\"true\"\/>\n\t<property name=\"DynamicMeshLandClaimOnly\"\t\tvalue=\"true\"\/>\n\t<property name=\"DynamicMeshLandClaimBuffer\"\t\tvalue=\"3\"\/>\n\t<property name=\"DynamicMeshMaxItemCache\"\t\tvalue=\"3\"\/>\n\t<!-- Twitch integration -->\n\t<property name=\"TwitchServerPermission\"\t\t\tvalue=\"90\"\/>\n\t<property name=\"TwitchBloodMoonAllowed\"\t\t\tvalue=\"false\"\/>\n<\/ServerSettings>\nSEVENDTDXML\nfi\n\n## add below your custom commands if needed\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"\n",
             "container": "ghcr.io\/ptero-eggs\/installers:debian",
             "entrypoint": "bash"
         }
@@ -32,37 +32,27 @@
     "variables": [
         {
             "name": "Max Players",
-            "description": "Maximum Concurrent Players",
+            "description": "Maximum concurrent players.",
             "env_variable": "MAX_PLAYERS",
             "default_value": "8",
             "user_viewable": true,
-            "user_editable": false,
-            "rules": "required|string|max:20",
-            "field_type": "text"
-        },
-        {
-            "name": "Game Difficulty",
-            "description": "0 - 5, 0=easiest, 5=hardest",
-            "env_variable": "GAME_DIFFICULTY",
-            "default_value": "2",
-            "user_viewable": true,
             "user_editable": true,
-            "rules": "required|integer|between:0,5",
+            "rules": "required|integer|min:1|max:100",
             "field_type": "text"
         },
         {
-            "name": "Source AppID",
-            "description": "This is the app id for 7dtd please no step on snek.",
+            "name": "Steam App ID",
+            "description": "Steam app ID for the 7 Days to Die dedicated server. Do not change unless you know what you're doing.",
             "env_variable": "SRCDS_APPID",
             "default_value": "294420",
-            "user_viewable": false,
+            "user_viewable": true,
             "user_editable": false,
             "rules": "required|string|max:20",
             "field_type": "text"
         },
         {
-            "name": "Auto Update",
-            "description": "This is to auto update the server on start.\r\n\r\nOptions are 0 or 1\r\nDefault is 1",
+            "name": "Automatic Updates",
+            "description": "Check Steam for a new version every time the server starts, and install it if one is found. 1 to enable, 0 to disable.",
             "env_variable": "AUTO_UPDATE",
             "default_value": "1",
             "user_viewable": true,
@@ -71,29 +61,519 @@
             "field_type": "text"
         },
         {
-            "name": "ld lib path",
-            "description": "This is really annoying that more games are doing this.",
+            "name": "Library Path",
+            "description": "Internal library search path the server binary needs to find its own files. Do not change.",
             "env_variable": "LD_LIBRARY_PATH",
             "default_value": ".",
-            "user_viewable": false,
+            "user_viewable": true,
             "user_editable": false,
             "rules": "required|string|max:20",
             "field_type": "text"
         },
         {
             "name": "Beta Branch",
-            "description": "Installs beta branch if specified. For example, latest_experimental would install the latest experimental branch release. Requires a reinstall to switch branches properly.",
+            "description": "Installs this Steam beta branch instead of the default stable release, e.g. latest_experimental. Leave blank for stable. Requires a reinstall to switch branches.",
             "env_variable": "SRCDS_BETAID",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "nullable|string|max:20",
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Telnet Port",
+            "description": "Port the Telnet console listens on.",
+            "env_variable": "TELNET_PORT",
+            "default_value": "8081",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1024|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "The name shown in the server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Description",
+            "description": "Short text shown under the server name in the browser.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Website URL",
+            "description": "Shown in the server browser as a clickable link. Leave blank for none.",
+            "env_variable": "SERVER_WEBSITE_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Join Message",
+            "description": "Message a player must confirm before they can join. Leave blank to skip it.",
+            "env_variable": "SERVER_LOGIN_TEXT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+        },
+        {
+            "name": "Region",
+            "description": "Region shown in the server browser. One of: NorthAmericaEast, NorthAmericaWest, CentralAmerica, SouthAmerica, Europe, Russia, Asia, MiddleEast, Africa, Oceania.",
+            "env_variable": "REGION",
+            "default_value": "NorthAmericaEast",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:NorthAmericaEast,NorthAmericaWest,CentralAmerica,SouthAmerica,Europe,Russia,Asia,MiddleEast,Africa,Oceania",
+            "field_type": "text"
+        },
+        {
+            "name": "Language",
+            "description": "Primary language for players on this server, shown in the browser (e.g. English, German, Spanish, French).",
+            "env_variable": "LANGUAGE",
+            "default_value": "English",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Join Password",
+            "description": "Password players must enter to join. Leave blank for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Browser Visibility",
+            "description": "Who can see this server in the browser. 0 = not listed, 1 = friends only, 2 = public.",
+            "env_variable": "SERVER_VISIBILITY",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2",
+            "field_type": "text"
+        },
+        {
+            "name": "Reserved Slots",
+            "description": "Out of Max Players, this many slots are held for players at or above the permission level below.",
+            "env_variable": "RESERVED_SLOTS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Reserved Slots Permission Level",
+            "description": "Permission level (0 = highest) required to use a reserved slot.",
+            "env_variable": "RESERVED_SLOTS_PERMISSION",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Slots",
+            "description": "Extra slots on top of Max Players that only admins can use to join a full server.",
+            "env_variable": "ADMIN_SLOTS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Slots Permission Level",
+            "description": "Permission level (0 = highest) required to use an admin slot.",
+            "env_variable": "ADMIN_SLOTS_PERMISSION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Disabled Network Protocols",
+            "description": "Networking protocols to turn off, comma separated. Values: LiteNetLib, SteamNetworking. Disable SteamNetworking if port-forwarding is set up correctly or there's no NAT router between you and your players.",
+            "env_variable": "DISABLED_NETWORK_PROTOCOLS",
+            "default_value": "SteamNetworking",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "World Download Speed Limit (KiB\/s)",
+            "description": "Caps how fast the world is sent to a client connecting without a copy of it yet. About 1300 is the practical maximum even if you set higher.",
+            "env_variable": "MAX_WORLD_TRANSFER_SPEED",
+            "default_value": "512",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Easy Anti-Cheat",
+            "description": "Set to true to enable EasyAntiCheat. Required for crossplay. Most DLL\/Harmony mods require this to be false.",
+            "env_variable": "EAC_ENABLED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Allow Crossplay",
+            "description": "Set to true to let PC, PlayStation and Xbox players join together. Requires Easy Anti-Cheat on, no mods, and Max Players at 8 or below.",
+            "env_variable": "ALLOW_CROSSPLAY",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Ignore Epic Online Services Bans",
+            "description": "Set to true to let players join even if Epic Online Services has sanctioned their account.",
+            "env_variable": "IGNORE_EOS_SANCTIONS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Persistent Player Profiles",
+            "description": "Set to true to make a player rejoin with the same profile they used last time. Set to false to let them pick a different one each time they connect.",
+            "env_variable": "PERSISTENT_PROFILES",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "World",
+            "description": "Navezgane (the hand-built map), RWG (randomly generated, see World Seed\/Size below), or the exact name of a custom map already in the Worlds folder.",
+            "env_variable": "GAME_WORLD",
+            "default_value": "Navezgane",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "World Seed",
+            "description": "Seed used to generate the world when World is set to RWG. Ignored otherwise.",
+            "env_variable": "WORLD_GEN_SEED",
+            "default_value": "asdf",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "World Size",
+            "description": "Width and height in metres of a generated RWG world. Must be a multiple of 2048, from 2048 to 16384. Larger takes longer to generate, download and load.",
+            "env_variable": "WORLD_GEN_SIZE",
+            "default_value": "6144",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:2048|max:16384",
+            "field_type": "text"
+        },
+        {
+            "name": "Save Name",
+            "description": "Internal save name. Changing this starts a brand new save the next time the server boots - it is not the name players see (that's Server Name above).",
+            "env_variable": "GAME_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Mode",
+            "description": "Game mode. GameModeSurvival is currently the only mode dedicated servers support.",
+            "env_variable": "GAME_MODE",
+            "default_value": "GameModeSurvival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Sandbox Code",
+            "description": "Encodes every difficulty, loot, zombie and world-rule setting (150 options as of V3.1). Generated in-game from the Sandbox Options menu, or the official preset codes - this cannot be typed by hand. The default is the equivalent of the old Adventurer difficulty.",
+            "env_variable": "SANDBOX_CODE",
+            "default_value": "AAAJABJACJADJARFBNC",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Safe Zone Player Level",
+            "description": "New players at or below this level get a temporary no-enemy safe zone around their spawn.",
+            "env_variable": "PLAYER_SAFE_ZONE_LEVEL",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Safe Zone Duration (in-game hours)",
+            "description": "How many in-game hours the safe zone above lasts.",
+            "env_variable": "PLAYER_SAFE_ZONE_HOURS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Creative Mode For Everyone",
+            "description": "Set to true to give every player creative-mode building and unlimited resources. Flags the server as Modded in the browser.",
+            "env_variable": "BUILD_CREATE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Bedroll No-Spawn Radius",
+            "description": "Radius in blocks around a bedroll where zombies will not spawn.",
+            "env_variable": "BEDROLL_DEADZONE_SIZE",
+            "default_value": "15",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Bedroll Expiry (real days)",
+            "description": "Real-world days a bedroll stays claimed after its owner was last online.",
+            "env_variable": "BEDROLL_EXPIRY_TIME",
+            "default_value": "45",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Zombies (whole map)",
+            "description": "Hard cap on zombies alive anywhere on the map at once. The single biggest performance lever on this list.",
+            "env_variable": "MAX_SPAWNED_ZOMBIES",
+            "default_value": "64",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Animals (whole map)",
+            "description": "Hard cap on wildlife alive anywhere on the map at once. Costs much less CPU per animal than a zombie.",
+            "env_variable": "MAX_SPAWNED_ANIMALS",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Max View Distance",
+            "description": "Largest view distance a client is allowed to request, from 6 to 12. Big effect on server memory and CPU.",
+            "env_variable": "MAX_VIEW_DISTANCE",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:6|max:12",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Revealed Map Area Per Player",
+            "description": "Caps how many in-game map chunks each player can uncover, which also caps their map file size. The default allows about 32 km\u00b2 per player.",
+            "env_variable": "MAX_UNCOVERED_MAP_CHUNKS",
+            "default_value": "131072",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Player Killing",
+            "description": "Who players are allowed to kill. 0 = no PvP, 1 = allies can kill each other, 2 = strangers can kill each other, 3 = everyone can kill everyone.",
+            "env_variable": "PLAYER_KILLING_MODE",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2,3",
+            "field_type": "text"
+        },
+        {
+            "name": "Party Shared XP Range (metres)",
+            "description": "How close party members must be to share kill XP and party quest credit.",
+            "env_variable": "PARTY_SHARED_KILL_RANGE",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Max Per Player",
+            "description": "Maximum land claims (keystones) a single player can place.",
+            "env_variable": "LAND_CLAIM_COUNT",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Protected Size (blocks)",
+            "description": "Size in blocks of the area a keystone protects.",
+            "env_variable": "LAND_CLAIM_SIZE",
+            "default_value": "41",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Minimum Spacing (blocks)",
+            "description": "Minimum distance in blocks required between two keystones, unless the owners are friends.",
+            "env_variable": "LAND_CLAIM_DEAD_ZONE",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Expire After (real days)",
+            "description": "Real-world days a player can stay offline before their claim expires and loses protection.",
+            "env_variable": "LAND_CLAIM_EXPIRY_TIME",
+            "default_value": "7",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Offline Decay",
+            "description": "How a claim's protection fades while its owner is offline. 0 = slow (linear), 1 = fast (exponential), 2 = none (full protection until it expires).",
+            "env_variable": "LAND_CLAIM_DECAY_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Block Hardness (owner online)",
+            "description": "Multiplies block hardness inside a claim while its owner is online. 0 means the blocks cannot be damaged at all.",
+            "env_variable": "LAND_CLAIM_ONLINE_DURABILITY",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Block Hardness (owner offline)",
+            "description": "Same as above, but while the owner is offline.",
+            "env_variable": "LAND_CLAIM_OFFLINE_DURABILITY",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Land Claims: Offline Grace Period (minutes)",
+            "description": "Minutes after a player logs out before their claim's hardness switches from the online to the offline modifier above.",
+            "env_variable": "LAND_CLAIM_OFFLINE_DELAY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Dynamic Mesh (Building Collapse)",
+            "description": "Set to true to let damaged structures visually deform and collapse instead of staying rigid.",
+            "env_variable": "DYNAMIC_MESH_ENABLED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Dynamic Mesh: Land Claims Only",
+            "description": "Set to true to limit dynamic mesh physics to areas inside a land claim, saving performance everywhere else.",
+            "env_variable": "DYNAMIC_MESH_LAND_CLAIM_ONLY",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Dynamic Mesh: Land Claim Buffer (chunks)",
+            "description": "How many extra chunks around a land claim also get dynamic mesh physics.",
+            "env_variable": "DYNAMIC_MESH_LAND_CLAIM_BUFFER",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Dynamic Mesh: Max Concurrent Items",
+            "description": "How many dynamic mesh items can process at once. Higher uses more RAM.",
+            "env_variable": "DYNAMIC_MESH_MAX_ITEM_CACHE",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Telnet",
+            "description": "Set to true to enable the Telnet remote console (this is what the panel console uses to talk to the server).",
+            "env_variable": "TELNET_ENABLED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
             "field_type": "text"
         },
         {
             "name": "Telnet Password",
-            "description": "Telnet listens on a local interface by default without a password. However, you can specify a password if  you wish to expose telnet.",
-            "env_variable": "PASSWORD",
+            "description": "Password for the Telnet console. Leave blank to only allow connections from localhost (safe default - the panel console still works either way).",
+            "env_variable": "TELNET_PASSWORD",
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
@@ -101,23 +581,93 @@
             "field_type": "text"
         },
         {
-            "name": "Telnet Port",
-            "description": "",
-            "env_variable": "TELNET_PORT",
-            "default_value": "8081",
+            "name": "Telnet Failed Login Limit",
+            "description": "How many wrong passwords from one remote address before it gets blocked.",
+            "env_variable": "TELNET_FAILED_LOGIN_LIMIT",
+            "default_value": "10",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|max:20",
+            "rules": "required|integer|min:1",
             "field_type": "text"
         },
         {
-            "name": "Network Protocols",
-            "description": "Networking protocols that should NOT be used. Separated by comma. Possible values: LiteNetLib, SteamNetworking. Dedicated servers should disable SteamNetworking if there is no NAT router in between your users and the server or when port-forwarding is set up correctly. lets it empty if you are connecting your self hosted server behind a NAT",
-            "env_variable": "SERVER_DISABLED_NETWORK_PROTOCOLS",
-            "default_value": "",
+            "name": "Telnet Login Block Time (seconds)",
+            "description": "How long a blocked address stays blocked after too many failed Telnet logins.",
+            "env_variable": "TELNET_FAILED_LOGIN_BLOCKTIME",
+            "default_value": "10",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "nullable|string|max:20",
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+        },
+        {
+            "name": "Web Dashboard",
+            "description": "Set to true to enable the built-in browser-based admin dashboard.",
+            "env_variable": "WEB_DASHBOARD_ENABLED",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Web Dashboard Port",
+            "description": "Port the web dashboard listens on. Only matters if Web Dashboard is enabled.",
+            "env_variable": "WEB_DASHBOARD_PORT",
+            "default_value": "8080",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1024|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Web Map Rendering",
+            "description": "Set to true to render explored-map tiles for the web dashboard's map view.",
+            "env_variable": "ENABLE_MAP_RENDERING",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Hide Command Execution Log",
+            "description": "How much of the command log is hidden. 0 = log every command, 1 = hide Telnet\/dashboard commands, 2 = also hide remote in-game commands, 3 = hide everything.",
+            "env_variable": "HIDE_COMMAND_LOG",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2,3",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin List Filename",
+            "description": "Filename of the admin\/permissions list, inside your save folder.",
+            "env_variable": "ADMIN_FILE_NAME",
+            "default_value": "serveradmin.xml",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Twitch Integration Permission Level",
+            "description": "Permission level (0 = highest) required to use Twitch chat integration on this server.",
+            "env_variable": "TWITCH_PERMISSION",
+            "default_value": "90",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Allow Twitch Events During Blood Moon",
+            "description": "Set to true to let viewers' Twitch actions spawn extra zombies during a blood moon. Can add server lag.",
+            "env_variable": "TWITCH_BLOODMOON_ALLOWED",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
             "field_type": "text"
         }
     ]
