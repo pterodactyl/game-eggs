@@ -202,6 +202,7 @@ Below is a categorized list of games with links to their respective server confi
   * [Cuberite](./minecraft/java/cuberite)
   * [CurseForge](./minecraft/java/curseforge)
   * [Fabric](./minecraft/java/fabric)
+  * [FalchusSpigot](./minecraft/java/falchusspigot)
   * [Forge](./minecraft/java/forge)
   * [Technic](./minecraft/java/technic)
 
