@@ -1,0 +1,184 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-09-18T02:01:08+02:00",
+    "name": "The Risen Survival",
+    "author": "support@therisensurvival.com",
+    "description": "The Risen Survival Dedicated Server egg with SteamCMD auto-installation, automatic updates, and Unity Netick runtime support.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "if [ ! -f .\/Server.x86_64 ] || [ \"${AUTO_UPDATE}\" = \"1\" ]; then echo '--- Checking for server files via SteamCMD ---'; if [ -z \"${STEAM_USER}\" ] || [ \"${STEAM_USER}\" = \"anonymous\" ]; then .\/steamcmd\/steamcmd.sh +force_install_dir \/home\/container +login anonymous +app_update ${SRCDS_APPID} $( [ \"${VALIDATE}\" = \"1\" ] && echo \"validate\" ) +quit; else .\/steamcmd\/steamcmd.sh +force_install_dir \/home\/container +login \"${STEAM_USER}\" \"${STEAM_PASS}\" +app_update ${SRCDS_APPID} $( [ \"${VALIDATE}\" = \"1\" ] && echo \"validate\" ) +quit; fi; fi; chmod +x .\/Server.x86_64; export LD_LIBRARY_PATH=\".:$LD_LIBRARY_PATH\"; .\/Server.x86_64 -batchmode -nographics -dedicatedServer -port ${SERVER_PORT} -queryport ${QUERY_PORT} -servername \"${SERVER_NAME}\" -region \"${SERVER_REGION}\" -maxplayers ${MAX_PLAYERS} -map \"${MAP_SCENE}\" -password \"${SERVER_PASSWORD}\" -gamemode ${GAME_MODE} -pvp ${PVP_ENABLED} -restartinterval ${RESTART_INTERVAL}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Dedicated Server mode detected\"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# steamcmd Base Installation Script for The Risen Survival\r\n# Server Files: \/mnt\/server\r\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\r\nmkdir -p \/mnt\/server\/steamapps\r\ncd \/mnt\/server\/steamcmd\r\n\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n\r\n## install game using steamcmd\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk32\r\ncp -v linux32\/steamclient.so ..\/.steam\/sdk32\/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p \/mnt\/server\/.steam\/sdk64\r\ncp -v linux64\/steamclient.so ..\/.steam\/sdk64\/steamclient.so\r\n\r\n## ensure permissions\r\nchmod +x \/mnt\/server\/Server.x86_64\r\nif [ -f \/mnt\/server\/start_server.sh ]; then\r\n    chmod +x \/mnt\/server\/start_server.sh\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Source AppID",
+            "description": "Steam App ID for The Risen Survival Dedicated Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "5035520",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Name",
+            "description": "Name of the dedicated server as seen in the Steam server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "The Risen Survival Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password required to join the server (leave blank for no password).",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Query Port",
+            "description": "Steam Query Port for server ping and browser discovery.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum concurrent players allowed.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "42",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Map Scene",
+            "description": "Starting scene\/map to load.",
+            "env_variable": "MAP_SCENE",
+            "default_value": "Hollow Pines",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Mode",
+            "description": "Game mode preset: 0=Survival, 1=Hardcore, 2=Casual, 3=PurgeMadness.",
+            "env_variable": "GAME_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+        },
+        {
+            "name": "PVP Enabled",
+            "description": "Enable or disable PVP combat damage (true\/false).",
+            "env_variable": "PVP_ENABLED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Auto update the server on start (1=enabled, 0=disabled).",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam User",
+            "description": "Steam account username (leave blank for anonymous install).",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam Password",
+            "description": "Steam account password if STEAM_USER is set.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Beta Branch",
+            "description": "Beta branch if specified (leave blank for default).",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Region",
+            "description": "Server region tag (e.g. EU, US-East, US-West, ASIA). Used for server browser categorization.",
+            "env_variable": "SERVER_REGION",
+            "default_value": "EU",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Scheduled Restart Interval (Hours)",
+            "description": "Hours between automatic scheduled server restarts (0 = disabled, 24 = once every 24 hours).",
+            "env_variable": "RESTART_INTERVAL",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:0",
+            "field_type": "text"
+        },
+        {
+            "name": "Validate Server Files",
+            "description": "Validate game server files via SteamCMD on startup (0=disabled, 1=enabled).",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}
