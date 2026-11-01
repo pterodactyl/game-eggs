@@ -8,6 +8,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Abiotic Factor](./abiotic_factor)
 
+#### [Alchemy Factory](./alchemy_factory)
+
 #### [Aloft](./aloft)
 
 #### Americas Army
