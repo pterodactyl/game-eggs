@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2024-07-15T18:52:08+02:00",
+    "exported_at": "2026-09-11T23:20:23+02:00",
     "name": "Palworld",
     "author": "admin@ballaual.de",
     "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
@@ -17,7 +17,7 @@
     "file_denylist": [
         "PalServer.sh"
     ],
-    "startup": ".\/PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < \/dev\/stdin & \/home\/container\/Pal\/Binaries\/Linux\/PalServer-Linux-Shipping Pal -publiclobby -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
+    "startup": ".\/PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < \/dev\/stdin & \/home\/container\/Pal\/Binaries\/Linux\/PalServer-Linux-Shipping Pal -publiclobby -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"Setting breakpad minidump AppID = 2394010\"\r\n}",
@@ -63,26 +63,6 @@
             "field_type": "text"
         },
         {
-            "name": "Admin Password",
-            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
-            "env_variable": "ADMIN_PASSWORD",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": true,
-            "rules": "required|alpha_dash|between:1,30",
-            "field_type": "text"
-        },
-        {
-            "name": "Public IP",
-            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
-            "env_variable": "PUBLIC_IP",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": false,
-            "rules": "nullable|string",
-            "field_type": "text"
-        },
-        {
             "name": "Server Name",
             "description": "",
             "env_variable": "SERVER_NAME",
@@ -100,6 +80,26 @@
             "user_viewable": true,
             "user_editable": true,
             "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+        },
+        {
+            "name": "Public IP",
+            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
             "field_type": "text"
         },
         {
