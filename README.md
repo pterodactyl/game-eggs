@@ -130,6 +130,9 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Garry's Mod (GMod)](./gmod)
 
+#### Gen1Recomp
+* [RBYMMOMod](./gen1recomp/rbymmomod)
+
 #### [Ground Branch](./ground_branch)
 
 #### Grand Theft Auto (GTA)
