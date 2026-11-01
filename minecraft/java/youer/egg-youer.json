@@ -1,0 +1,77 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-08-19T03:51:03+00:00",
+    "name": "Youer",
+    "author": "parker@pterodactyl.io",
+    "description": "NeoForge hybrid server implementing the Paper\/Purpur API. Supports NeoForge mods + Bukkit\/Spigot\/Paper plugins.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 25": "ghcr.io\/pterodactyl\/yolks:java_25",
+        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true --add-modules=jdk.incubator.vector -jar {{SERVER_JARFILE}}",
+    "config": {
+        "files": "{\r\n    \"server.properties\": {\r\n        \"parser\": \"properties\",\r\n        \"find\": {\r\n            \"server-ip\": \"0.0.0.0\",\r\n            \"server-port\": \"{{server.build.default.port}}\",\r\n            \"query.port\": \"{{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \")! For help, type \"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/ash\r\n# Youer (MohistMC) Installation Script\r\n# Uses the current API: https:\/\/api.mohistmc.com\/project\/youer\/{version}\/builds\r\n#\r\n# Server Files: \/mnt\/server\r\nPROJECT=youer\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's\/{{\/${\/g' -e 's\/}}\/}\/g')`\r\nelse\r\n\techo -e \"Fetching builds for ${PROJECT} ${MINECRAFT_VERSION}...\"\r\n\tBUILDS_JSON=$(curl -s --max-time 30 \"https:\/\/api.mohistmc.com\/project\/${PROJECT}\/${MINECRAFT_VERSION}\/builds\")\r\n\r\n\tif [ -z \"$BUILDS_JSON\" ] || ! echo \"$BUILDS_JSON\" | jq -e 'type == \"array\"' >\/dev\/null 2>&1; then\r\n\t\techo -e \"ERROR: Could not fetch builds from the MohistMC API.\"\r\n\t\techo -e \"Tried: https:\/\/api.mohistmc.com\/project\/${PROJECT}\/${MINECRAFT_VERSION}\/builds\"\r\n\t\techo -e \"Response was empty or not a JSON array. Check the version or try again later.\"\r\n\t\texit 1\r\n\tfi\r\n\r\n\t# Newest build is the first element in the array\r\n\tif [ -z \"${BUILD_NUMBER}\" ] || [ \"${BUILD_NUMBER}\" = \"latest\" ]; then\r\n\t\tBUILD_NUMBER=$(echo \"$BUILDS_JSON\" | jq -r '.[0].id')\r\n\t\techo -e \"Using latest build: ${BUILD_NUMBER}\"\r\n\telse\r\n\t\t# Check whether the requested build id exists\r\n\t\tEXISTS=$(echo \"$BUILDS_JSON\" | jq -r --arg id \"${BUILD_NUMBER}\" '.[] | select(.id == ($id | tonumber)) | .id' | head -n1)\r\n\t\tif [ -n \"$EXISTS\" ] && [ \"$EXISTS\" != \"null\" ]; then\r\n\t\t\techo -e \"Build ${BUILD_NUMBER} is valid.\"\r\n\t\telse\r\n\t\t\tBUILD_NUMBER=$(echo \"$BUILDS_JSON\" | jq -r '.[0].id')\r\n\t\t\techo -e \"Build not found, falling back to latest: ${BUILD_NUMBER}\"\r\n\t\tfi\r\n\tfi\r\n\r\n\tif [ -z \"${BUILD_NUMBER}\" ] || [ \"${BUILD_NUMBER}\" = \"null\" ]; then\r\n\t\techo -e \"ERROR: Could not determine a valid build id.\"\r\n\t\texit 1\r\n\tfi\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"Project: ${PROJECT}\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\tDOWNLOAD_URL=\"https:\/\/api.mohistmc.com\/project\/${PROJECT}\/${MINECRAFT_VERSION}\/builds\/${BUILD_NUMBER}\/download\"\r\nfi\r\n\r\ncd \/mnt\/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -f -L --max-time 180 -o ${SERVER_JARFILE} \"${DOWNLOAD_URL}\"\r\n\r\nif [ ! -f ${SERVER_JARFILE} ] || [ ! -s ${SERVER_JARFILE} ]; then\r\n\techo -e \"ERROR: Download failed or the resulting file is empty.\"\r\n\texit 1\r\nfi\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl --user-agent \"Pterodactyl (https:\/\/Pterodactyl.io)\" -o server.properties https:\/\/raw.githubusercontent.com\/pterodactyl\/game-eggs\/main\/minecraft\/java\/server.properties\r\nfi\r\n\r\necho -e \"Installation completed successfully.\"",
+            "container": "ghcr.io\/pterodactyl\/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Minecraft Version",
+            "description": "The Youer \/ Minecraft version to download (e.g. 26.2, 1.21.1).\r\n\r\nMust match a version that exists on the MohistMC API.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "26.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:\/^([\\w\\d._-]+)(\\.jar)$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Build Number",
+            "description": "Specific build id to download.\r\n\r\nLeave as \"latest\" (or empty) to always get the newest build for the chosen version.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+        }
+    ]
+}
