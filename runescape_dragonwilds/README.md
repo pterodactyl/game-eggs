@@ -1,37 +1,46 @@
-# RuneScape: Dragonwilds Pterodactyl Egg
+# RuneScape: Dragonwilds
 
 A Pterodactyl egg for the RuneScape: Dragonwilds dedicated server.
 
-## Resources & Requirements
-- **RAM**: 2GB base + 1GB per player. 
-- **CPU**: Requires **AVX instruction support**.
-- **Players**: The server can support up to 6 players.
+## Server Requirements
 
+| Resource | Recommended |
+|----------|-------------|
+| RAM | 2GB base + 1GB per player |
+| CPU | Modern x86-64 CPU. Some virtualised CPU models without SSE4.2/AVX have been reported to fail; if the server crashes on boot, set your VM CPU type to `host`. |
+| Players | Up to 6 |
 
-## Mandatory configuration values
-**Owner ID**: This is your RuneScape: Dragonwilds Player ID. It can be found in game at the bottom of the Settings Menu.
+## Configuration
 
-**Server Name**: The name of your server, no matter what world it may run.
+### Required
 
-**Default World Name**: Upon startup, your Dedicated Server will create a default world. This configuration value allows you to decide how you want it to be named.
+**Owner ID**: Your in-game RuneScape: Dragonwilds Player ID. This is a 32-character code found at the bottom of the in-game Settings menu. It is **not** your Steam ID; a Steam ID is accepted by the game but leaves the world without an owner.
 
-**Admin password**: Anyone who knows this password can enter the Server Management tab in the Pause Menu > Settings menu. 
+The server does not create a world until an Owner ID is set. Until then it stays on "Starting" in the panel; this is expected, not a hang.
 
-**World Password**: (Optional) The password required to join the world. Leave empty for public access.
+**Server Name**: The name of your server. The in-game server browser only shows the first 16 characters.
 
-**Extra Arguments**: If you need to pass additional startup flags (such as `-multihome`), you can add them here. 
+**Default World Name**: The name of the world the server creates on first startup.
 
-Only use `-multihome` if you specifically need to bind to a specific IP and your networking environment supports it.
+### Optional
+
+**Admin Password**: Anyone who knows this password can open the Server Management tab (Pause Menu > Settings). Leave it empty and the server generates a random one, printed in the console on startup. The owner always has admin rights without it.
+
+**World Password**: The password required to join the world. Leave empty for public access.
+
+**Extra Arguments**: Additional startup flags. The logging flags the panel needs are already part of the startup command.
+
+Only use `-multihome` if you specifically need to bind to a specific IP and your networking environment supports it. Pterodactyl already binds the server to its allocation.
 
 ## Find your world
-To find your dedicated server, go to the Public tab of the Worlds screen, then in the search tab, enter your exact World name, case sensitive.
 
-## Network & Ports
-By default, the server uses the following ports.
+In game, go to the Public tab of the Worlds screen and search for your exact world name (case sensitive).
 
-However, Pterodactyl ensures that the **Game** Port will automatically use the port assigned by your server's primary allocation.
+## Server Ports
+
+The **Game** port is set automatically from your server's primary allocation.
 
 | Port | Default | Protocol | Purpose |
 |------|---------|----------|---------|
 | Game | 7777 | UDP | Main game traffic |
-| Query | 27015 | UDP | Steam Server Browser traffic |
+| Query | 27015 | UDP | Steam query (may be unused; the game uses EOS matchmaking) |

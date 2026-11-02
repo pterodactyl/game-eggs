@@ -15,7 +15,7 @@
     "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
   },
   "file_denylist": [],
-  "startup": ".\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId={{OWNER_ID}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword={{ADMIN_PASSWORD}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{SERVER_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}} {{EXTRA_ARGS}}",
+  "startup": ".\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -log -unattended -NoCrashDialog -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId=\"{{OWNER_ID}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword=\"{{ADMIN_PASSWORD}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{SERVER_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}} {{EXTRA_ARGS}}",
   "config": {
     "files": "{}",
     "startup": "{\r\n    \"done\": \"START SESSION - Success\"\r\n}",
@@ -24,7 +24,7 @@
   },
   "scripts": {
     "installation": {
-      "script": "#!\/bin\/bash\n# SteamCMD Base Installation Script\n\napt -y update\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\n\n# Variables\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"Using anonymous Steam login\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nfi\n\ncd \/tmp\nmkdir -p \/mnt\/server\/steamcmd\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\n\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\nmkdir -p \/mnt\/server\/steamapps\ncd \/mnt\/server\/steamcmd\n\nexport HOME=\/mnt\/server\n\n# Install server\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\n\n# Fix steam libraries\nmkdir -p \/mnt\/server\/.steam\/sdk32\ncp -v linux32\/steamclient.so \/mnt\/server\/.steam\/sdk32\/steamclient.so\n\nmkdir -p \/mnt\/server\/.steam\/sdk64\ncp -v linux64\/steamclient.so \/mnt\/server\/.steam\/sdk64\/steamclient.so\n\n# Permissions for Sentry Crash Handler\nchmod +x \/mnt\/server\/RSDragonwilds\/Plugins\/Developer\/Sentry\/Binaries\/Linux\/crashpad_handler 2>\/dev\/null || true\n\n# Seed DedicatedServer.ini\nmkdir -p \/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\ncat <<'EOF' > \/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\/DedicatedServer.ini\n[SectionsToSave]\nbCanSaveAllSections=true\n\n[\/Script\/Dominion.DedicatedServerSettings]\nAdminPassword=\nOwnerId=\nWorldPassword=\nServerName=\nDefaultWorldName=\nServerGuid=\nEOF\n\necho \"-----------------------------------------\"\necho \"Installation completed\"\necho \"-----------------------------------------\"",
+      "script": "#!\/bin\/bash\n# SteamCMD Base Installation Script\n\n# Variables\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"Using anonymous Steam login\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nfi\n\ncd \/tmp\nmkdir -p \/mnt\/server\/steamcmd\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\n\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\nmkdir -p \/mnt\/server\/steamapps\ncd \/mnt\/server\/steamcmd\n\nexport HOME=\/mnt\/server\n\n# Install server\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\n\n# Fix steam libraries\nmkdir -p \/mnt\/server\/.steam\/sdk32\ncp -v linux32\/steamclient.so \/mnt\/server\/.steam\/sdk32\/steamclient.so\n\nmkdir -p \/mnt\/server\/.steam\/sdk64\ncp -v linux64\/steamclient.so \/mnt\/server\/.steam\/sdk64\/steamclient.so\n\n# Permissions for Sentry Crash Handler\nchmod +x \/mnt\/server\/RSDragonwilds\/Plugins\/Developer\/Sentry\/Binaries\/Linux\/crashpad_handler 2>\/dev\/null || true\n\n# Seed DedicatedServer.ini (first install only, so reinstalls keep ServerGuid and AdminList)\nINI_DIR=\/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\nif [ ! -f \"${INI_DIR}\/DedicatedServer.ini\" ]; then\n    echo \"Creating default DedicatedServer.ini\"\n    mkdir -p \"${INI_DIR}\"\n    cat <<'EOF' > \"${INI_DIR}\/DedicatedServer.ini\"\n[SectionsToSave]\nbCanSaveAllSections=true\n\n[\/Script\/Dominion.DedicatedServerSettings]\nAdminPassword=\nOwnerId=\nWorldPassword=\nServerName=\nDefaultWorldName=\nServerGuid=\nEOF\nfi\n\necho \"-----------------------------------------\"\necho \"Installation completed\"\necho \"-----------------------------------------\"",
       "container": "ghcr.io\/ptero-eggs\/installers:debian",
       "entrypoint": "bash"
     }
@@ -32,32 +32,32 @@
   "variables": [
     {
       "name": "Owner ID",
-      "description": "Your RuneScape: Dragonwilds Player ID (Required for server startup)",
+      "description": "Your in-game RuneScape: Dragonwilds Player ID, a 32-character code shown at the bottom of the in-game Settings menu. This is NOT your Steam ID. Required: the server will not create a world without an owner.",
       "env_variable": "OWNER_ID",
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|string",
+      "rules": "required|string|size:32",
       "field_type": "text"
     },
     {
       "name": "Server Name",
-      "description": "The name of your server",
+      "description": "The name of your server. The in-game server browser only shows the first 16 characters.",
       "env_variable": "SERVER_NAME",
       "default_value": "A Dragonwilds Server",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|string",
+      "rules": "required|string|max:64",
       "field_type": "text"
     },
     {
       "name": "Admin Password",
-      "description": "The password used to access server management in-game",
+      "description": "Password that lets other players open Server Management in-game. Leave empty to have the server generate a random one (printed in the console on startup). The owner always has admin rights.",
       "env_variable": "ADMIN_PASSWORD",
-      "default_value": "ChangeMe",
+      "default_value": "",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|string",
+      "rules": "nullable|string|max:64",
       "field_type": "text"
     },
     {
@@ -67,7 +67,7 @@
       "default_value": "MyWorld",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|string",
+      "rules": "required|string|max:64",
       "field_type": "text"
     },
     {
@@ -77,47 +77,47 @@
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "nullable|string",
+      "rules": "nullable|string|max:64",
       "field_type": "text"
     },
     {
       "name": "Query Port",
-      "description": "Steam query port (UDP)",
+      "description": "Steam query port (UDP). If you change it, add a matching allocation. The game appears to use EOS matchmaking, so this port may not be used.",
       "env_variable": "QUERY_PORT",
       "default_value": "27015",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|numeric",
+      "rules": "required|integer|between:1024,65535",
       "field_type": "text"
     },
     {
       "name": "Max Players",
-      "description": "Maximum number of players allowed on the server",
+      "description": "Maximum number of players allowed on the server (1-6)",
       "env_variable": "MAX_PLAYERS",
       "default_value": "6",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|numeric",
+      "rules": "required|integer|between:1,6",
       "field_type": "text"
     },
     {
       "name": "Auto Update",
-      "description": "Enable automatic updates on server startup",
+      "description": "Check for and install server updates on every startup (1 = on, 0 = off)",
       "env_variable": "AUTO_UPDATE",
       "default_value": "1",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|numeric",
+      "rules": "required|boolean",
       "field_type": "text"
     },
     {
       "name": "Extra Arguments",
-      "description": "Additional server startup arguments",
+      "description": "Additional server startup arguments. The required logging flags are already part of the startup command.",
       "env_variable": "EXTRA_ARGS",
-      "default_value": "-log -unattended -NoCrashDialog",
+      "default_value": "",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "nullable|string",
+      "rules": "nullable|string|max:256",
       "field_type": "text"
     },
     {
@@ -127,7 +127,7 @@
       "default_value": "4019830",
       "user_viewable": false,
       "user_editable": false,
-      "rules": "required|string",
+      "rules": "required|string|in:4019830",
       "field_type": "text"
     }
   ]
