@@ -24,9 +24,9 @@ The server does not create a world until an Owner ID is set. Until then it stays
 
 ### Optional
 
-**Admin Password**: Anyone who enters this password in game under ESC > Settings > Server Management becomes an admin. Do not reuse the World Password here, or every player who joins gets admin rights.
+**Admin Password**: Lets players other than the owner manage the server. Do not reuse the World Password here, or every player who joins gets admin rights.
 
-> **Known issue (game build 254097):** in testing, the Server Management tab did not appear in game, whether the Owner ID and Admin Password were passed by this egg or written directly into `DedicatedServer.ini`. The server does receive both values, so this appears to be a game-side issue rather than an egg problem.
+> **World management needs the Beacon Port.** The game manages world settings over a separate UDP beacon port, not the game port. Without an allocation for it, the owner and admins cannot manage the world. See [Server Ports](#server-ports).
 
 Values passed by the egg are applied at every startup. The game does not write them back to `RSDragonwilds/Saved/Config/LinuxServer/DedicatedServer.ini`, so don't expect to see them there.
 
@@ -42,9 +42,9 @@ In game, go to the Public tab of the Worlds screen and search for your exact wor
 
 ## Server Ports
 
-The **Game** port is set automatically from your server's primary allocation.
+The **Game** port is set automatically from your server's primary allocation. The **Beacon** port needs its own allocation on the same IP; set the **Beacon Port** variable to match it. Jagex's official server image ([runescape/rsdw-dedicated](https://github.com/runescape/rsdw-dedicated)) publishes both ports.
 
 | Port | Default | Protocol | Purpose |
 |------|---------|----------|---------|
 | Game | 7777 | UDP | Main game traffic |
-| Query | 27015 | UDP | Steam query (may be unused; the game uses EOS matchmaking) |
+| Beacon | 8888 | UDP | World settings beacon (Jagex default: game port + 1111) |

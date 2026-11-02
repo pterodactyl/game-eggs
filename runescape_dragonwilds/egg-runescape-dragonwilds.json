@@ -15,7 +15,7 @@
         "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
     },
     "file_denylist": [],
-    "startup": ".\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -log -unattended -NoCrashDialog -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId=\"{{OWNER_ID}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword=\"{{ADMIN_PASSWORD}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{SERVER_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}} {{EXTRA_ARGS}}",
+    "startup": ".\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -log -unattended -NoCrashDialog -Port={{SERVER_PORT}} -BeaconPort={{BEACON_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId=\"{{OWNER_ID}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword=\"{{ADMIN_PASSWORD}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{SERVER_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}} {{EXTRA_ARGS}}",
     "config": {
         "files": "{}",
         "startup": "{\r\n    \"done\": \"START SESSION - Success\"\r\n}",
@@ -81,10 +81,10 @@
             "field_type": "text"
         },
         {
-            "name": "Query Port",
-            "description": "Steam query port (UDP). If you change it, add a matching allocation. The game appears to use EOS matchmaking, so this port may not be used.",
-            "env_variable": "QUERY_PORT",
-            "default_value": "27015",
+            "name": "Beacon Port",
+            "description": "UDP world settings beacon port (Jagex default: 8888, the game port + 1111). Add an allocation for this port on the same IP as the game port, or players cannot reach it.",
+            "env_variable": "BEACON_PORT",
+            "default_value": "8888",
             "user_viewable": true,
             "user_editable": true,
             "rules": "required|integer|between:1024,65535",
