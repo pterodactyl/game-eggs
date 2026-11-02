@@ -24,7 +24,11 @@ The server does not create a world until an Owner ID is set. Until then it stays
 
 ### Optional
 
-**Admin Password**: Anyone who knows this password can open the Server Management tab (Pause Menu > Settings). Leave it empty and the server generates a random one, printed in the console on startup. The owner always has admin rights without it.
+**Admin Password**: Anyone who enters this password in game under ESC > Settings > Server Management becomes an admin. Do not reuse the World Password here, or every player who joins gets admin rights.
+
+> **Known issue (game build 254097):** in testing, the Server Management tab did not appear in game, whether the Owner ID and Admin Password were passed by this egg or written directly into `DedicatedServer.ini`. The server does receive both values, so this appears to be a game-side issue rather than an egg problem.
+
+Values passed by the egg are applied at every startup. The game does not write them back to `RSDragonwilds/Saved/Config/LinuxServer/DedicatedServer.ini`, so don't expect to see them there.
 
 **World Password**: The password required to join the world. Leave empty for public access.
 

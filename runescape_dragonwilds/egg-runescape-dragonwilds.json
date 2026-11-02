@@ -52,7 +52,7 @@
         },
         {
             "name": "Admin Password",
-            "description": "Password that lets other players open Server Management in-game. Leave empty to have the server generate a random one (printed in the console on startup). The owner always has admin rights.",
+            "description": "Password that grants admin rights to whoever enters it in-game under ESC > Settings > Server Management. Do not reuse the World Password.",
             "env_variable": "ADMIN_PASSWORD",
             "default_value": "",
             "user_viewable": true,
