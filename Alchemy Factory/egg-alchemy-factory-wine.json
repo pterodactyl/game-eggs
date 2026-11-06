@@ -1,0 +1,182 @@
+{
+  "_comment": "Alchemy Factory Dedicated Server via Wine + hidden Xvfb",
+  "meta": {
+    "version": "PTDL_v2",
+    "update_url": null
+  },
+  "exported_at": "2026-11-06T17:25:00+01:00",
+  "name": "Alchemy Factory (Wine)",
+  "author": "admin@crackscout.eu",
+  "description": "Alchemy Factory dedicated server (Windows exe) on Linux via Wine, hidden dummy X display, SteamCMD auto-update.",
+  "features": null,
+  "docker_images": {
+    "Wine Latest": "ghcr.io/parkervcp/yolks:wine_latest"
+  },
+  "file_denylist": [],
+  "startup": "bash ./af-start.sh",
+  "config": {
+    "files": "{}",
+    "startup": "{\"done\": \"join code\"}",
+    "logs": "{}",
+    "stop": "^C"
+  },
+  "scripts": {
+    "installation": {
+      "script": "#!/bin/bash\napt-get update && apt-get install -y curl ca-certificates lib32gcc-s1 tar\nmkdir -p /mnt/server/steamcmd /mnt/server/server\ncd /mnt/server/steamcmd\ncurl -sSL https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz | tar -xz\ncd /mnt/server\n./steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir /mnt/server/server +login anonymous +app_update ${AF_APPID} validate +quit\nmkdir -p /mnt/server/.steam/sdk32 /mnt/server/.steam/sdk64\ncp -v steamcmd/linux32/steamclient.so .steam/sdk32/steamclient.so 2>/dev/null\ncp -v steamcmd/linux64/steamclient.so .steam/sdk64/steamclient.so 2>/dev/null\ncat > /mnt/server/af-start.sh <<'AFSTART'\n#!/bin/bash\ncd /home/container || exit 1\nSRV=/home/container/server\nexport WINEPREFIX=/home/container/.wine WINEARCH=win64 WINEDEBUG=${WINEDEBUG:-err+all,fixme-all}\nexport HOME=/home/container DISPLAY=:99 LANG=C.UTF-8\nexport XDG_RUNTIME_DIR=/tmp/runtime-container; mkdir -p \"$XDG_RUNTIME_DIR\"; chmod 700 \"$XDG_RUNTIME_DIR\"\nunset WAYLAND_DISPLAY\nexport WINEDLLOVERRIDES=\"mscoree,mshtml=\"\nstart_x() {\n  if ! pgrep -x Xvfb >/dev/null 2>&1; then\n    rm -f /tmp/.X99-lock\n    Xvfb :99 -screen 0 640x480x16 -nolisten tcp >/home/container/xvfb.log 2>&1 &\n    sleep 2\n  fi\n  pgrep -x Xvfb >/dev/null 2>&1 && echo \"[egg] Xvfb running\" || { echo \"[egg] Xvfb NOT running:\"; cat /home/container/xvfb.log; }\n}\n\nif [ \"${AF_AUTO_UPDATE}\" = \"1\" ]; then\n  echo \"[egg] Checking for updates (app ${AF_APPID})...\"\n  if [ -x ./steamcmd/steamcmd.sh ]; then\n    ./steamcmd/steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir \"$SRV\" +login anonymous +app_update ${AF_APPID} ${STEAM_BETA_ARGS} validate +quit \\\n      || echo \"[egg] WARNING: steamcmd failed, starting installed version.\"\n  else echo \"[egg] steamcmd missing, skipping update.\"; fi\nfi\n\nstart_x\n\nif [ ! -f \"$WINEPREFIX/.x11set\" ]; then\n  echo \"[egg] Initialising Wine prefix (first start, ~1 min)\"\n  wineboot -u 2>&1 | tail -n 15; wineserver -w\n  wine reg add 'HKCU\\Software\\Wine\\Drivers' /v Graphics /d x11 /f 2>&1 | tail -n 3\n  touch \"$WINEPREFIX/.x11set\"\nfi\n\nEXE=\"${SERVER_EXE}\"\n[ -n \"$EXE\" ] && [ \"${EXE#/}\" = \"$EXE\" ] && EXE=\"$SRV/$EXE\"\n[ -z \"$EXE\" ] && EXE=$(find \"$SRV\" -maxdepth 3 -iname '*server*.exe' ! -iname '*crash*' ! -iname 'UE*' | head -n1)\nif [ -z \"$EXE\" ] || [ ! -f \"$EXE\" ]; then\n  echo \"[egg] ERROR: no server exe found. Set SERVER_EXE. Found:\"; find \"$SRV\" -maxdepth 3 -iname '*.exe'; exit 1\nfi\nEXEDIR=$(dirname \"$EXE\")\n\ncat > \"$EXEDIR/ServerConfig.ini\" <<INI\n[ServerSettings]\nserver_name=${SERVER_NAME}\nserver_public=${SERVER_PUBLIC}\nserver_port=${SERVER_PORT}\nquery_port=$((SERVER_PORT+1))\nserver_relay=${SERVER_RELAY}\nserver_lan=0\nserver_password=${SERVER_PASSWORD}\nadmin_password=${ADMIN_PASSWORD}\nmax_clients=${MAX_CLIENTS}\nmax_admins=${MAX_ADMINS}\nautosave_mode=${AUTOSAVE_MODE}\npause_when_empty=${PAUSE_WHEN_EMPTY}\nsession_retry_seconds=10\nINI\n\ncd \"$EXEDIR\"\necho \"[egg] Starting $EXE ${EXTRA_ARGS}\"\nSTART_TS=$(date +%s)\nwine \"$EXE\" ${EXTRA_ARGS} <&0 &\nWPID=$!\ntrap 'kill -INT $WPID 2>/dev/null' INT TERM\n\n# mirror newest game log into the console\n( sleep 15; L=$(find \"$SRV\" -iname '*.log' -newermt \"@$START_TS\" 2>/dev/null | head -n1); [ -n \"$L\" ] && { echo \"[egg] Following $L\"; tail -n +1 -F \"$L\"; } ) &\nTPID=$!\n\nwait $WPID; CODE=$?\nkill $TPID 2>/dev/null\necho \"[egg] Server exited with code $CODE\"\nif [ $((`date +%s` - START_TS)) -lt 60 ]; then\n  echo \"[egg] Quick exit - diagnostics:\"\n  echo \"--- xvfb.log\"; tail -n 10 /home/container/xvfb.log\n  for L in $(find \"$SRV\" -iname '*.log' -newermt \"@$START_TS\" 2>/dev/null | head -n3); do echo \"--- $L\"; tail -n 40 \"$L\"; done\nfi\nexit $CODE\nAFSTART\ncat > /mnt/server/af-wine.sh <<'AFWINE'\n#!/bin/bash\n# Manual: ./af-wine.sh server/<name>.exe [args]\nexport WINEPREFIX=/home/container/.wine WINEARCH=win64 WINEDEBUG=${WINEDEBUG:-err+all,fixme-all}\nexport HOME=/home/container DISPLAY=:99 LANG=C.UTF-8\nexport XDG_RUNTIME_DIR=/tmp/runtime-container; mkdir -p \"$XDG_RUNTIME_DIR\"; chmod 700 \"$XDG_RUNTIME_DIR\"\nunset WAYLAND_DISPLAY\nexport WINEDLLOVERRIDES=\"mscoree,mshtml=\"\nstart_x() {\n  if ! pgrep -x Xvfb >/dev/null 2>&1; then\n    rm -f /tmp/.X99-lock\n    Xvfb :99 -screen 0 640x480x16 -nolisten tcp >/home/container/xvfb.log 2>&1 &\n    sleep 2\n  fi\n  pgrep -x Xvfb >/dev/null 2>&1 && echo \"[egg] Xvfb running\" || { echo \"[egg] Xvfb NOT running:\"; cat /home/container/xvfb.log; }\n}\nstart_x\nexec wine \"$@\"\nAFWINE\nchmod +x /mnt/server/af-start.sh /mnt/server/af-wine.sh\necho \"-----> Install complete\"\n",
+      "container": "ghcr.io/parkervcp/installers:debian",
+      "entrypoint": "bash"
+    }
+  },
+  "variables": [
+    {
+      "name": "Steam App ID",
+      "description": "Dedicated Server app (anonymous).",
+      "env_variable": "AF_APPID",
+      "default_value": "4550060",
+      "user_viewable": true,
+      "user_editable": false,
+      "rules": "required|string",
+      "field_type": "text"
+    },
+    {
+      "name": "Auto Update",
+      "description": "1 = SteamCMD update check on every start.",
+      "env_variable": "AF_AUTO_UPDATE",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Steam Beta Args",
+      "description": "e.g. -beta experimental",
+      "env_variable": "STEAM_BETA_ARGS",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:100",
+      "field_type": "text"
+    },
+    {
+      "name": "Server Name",
+      "description": "server_name",
+      "env_variable": "SERVER_NAME",
+      "default_value": "Alchemy Factory",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:200",
+      "field_type": "text"
+    },
+    {
+      "name": "Max Players",
+      "description": "1-6",
+      "env_variable": "MAX_CLIENTS",
+      "default_value": "4",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|between:1,6",
+      "field_type": "text"
+    },
+    {
+      "name": "Show in Server List",
+      "description": "0/1",
+      "env_variable": "SERVER_PUBLIC",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Server Password",
+      "description": "Empty = open.",
+      "env_variable": "SERVER_PASSWORD",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:64",
+      "field_type": "text"
+    },
+    {
+      "name": "Admin Password",
+      "description": "In game: /admin <pw>",
+      "env_variable": "ADMIN_PASSWORD",
+      "default_value": "ChangeMe123",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|max:64",
+      "field_type": "text"
+    },
+    {
+      "name": "Max Admins",
+      "description": "",
+      "env_variable": "MAX_ADMINS",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|between:1,6",
+      "field_type": "text"
+    },
+    {
+      "name": "Autosave Mode",
+      "description": "0=sleep, 1=5min, 2=10min, 3=never",
+      "env_variable": "AUTOSAVE_MODE",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|between:0,3",
+      "field_type": "text"
+    },
+    {
+      "name": "Pause When Empty",
+      "description": "0/1",
+      "env_variable": "PAUSE_WHEN_EMPTY",
+      "default_value": "1",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Steam Relay",
+      "description": "0 = direct IP; 1 = join code only. (Join code works alaways no matter what.)",
+      "env_variable": "SERVER_RELAY",
+      "default_value": "0",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|boolean",
+      "field_type": "text"
+    },
+    {
+      "name": "Server EXE",
+      "description": "Relative to /home/container/server. Empty = auto-detect.",
+      "env_variable": "SERVER_EXE",
+      "default_value": "AlchemyFactory/Binaries/Win64/AlchemyFactoryServer-Win64-Shipping.exe",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:200",
+      "field_type": "text"
+    },
+    {
+      "name": "Extra Args",
+      "description": "Extra exe arguments.",
+      "env_variable": "EXTRA_ARGS",
+      "default_value": "-log -stdout -unattended",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:300",
+      "field_type": "text"
+    },
+    {
+      "name": "Wine Debug",
+      "description": "Use -all to silence Wine. May result in zero outputs to console.",
+      "env_variable": "WINEDEBUG",
+      "default_value": "err+all,fixme-all",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:100",
+      "field_type": "text"
+    }
+  ]
+}
