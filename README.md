@@ -10,6 +10,9 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Aloft](./aloft)
 
+#### Alchemy Factory
+ * [Alchemy Factory Wine](./alchemyfactory)
+
 #### Americas Army
 * [Proving Grounds](./americas_army/proving_grounds)
 
