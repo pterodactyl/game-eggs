@@ -1,0 +1,264 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": ""
+    },
+    "exported_at": "2026-11-08T17:41:15-05:00",
+    "name": "RuneScape: Dragonwilds (RSDWServerAPI)",
+    "author": "cobratrinity@proton.me",
+    "description": "On RuneScape\u2019s forgotten continent of Ashenfall, dragons have awoken. Gather, build, skill and craft to survive in this co-operative survival crafting game. This variant preloads RSDWServerAPI, which adds a REST API, RCON, in-game admin chat commands and a Discord chat\/death relay.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/steamcmd:debian": "ghcr.io\/ptero-eggs\/steamcmd:debian"
+    },
+    "file_denylist": [],
+    "startup": "export LD_PRELOAD=\"\/home\/container\/librsdwapi.so${LD_PRELOAD:+:$LD_PRELOAD}\"; export RSDWAPI_DIR=\/home\/container\/rsdwapi; .\/RSDragonwilds\/Binaries\/Linux\/RSDragonwildsServer-Linux-Shipping RSDragonwilds -log -unattended -NoCrashDialog -Port={{SERVER_PORT}} -BeaconPort={{BEACON_PORT}} -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:OwnerId=\"{{OWNER_ID}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:AdminPassword=\"{{ADMIN_PASSWORD}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:ServerName=\"{{SERVER_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:DefaultWorldName=\"{{WORLD_NAME}}\" -ini:DedicatedServer:[\/Script\/Dominion.DedicatedServerSettings]:WorldPassword=\"{{SERVER_PASSWORD}}\" -ini:Game:[\/Script\/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}} {{EXTRA_ARGS}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"START SESSION - Success\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\n# SteamCMD Base Installation Script\n\n# Variables\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"Using anonymous Steam login\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nfi\n\ncd \/tmp\nmkdir -p \/mnt\/server\/steamcmd\ncurl -sSL -o steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\n\ntar -xzvf steamcmd.tar.gz -C \/mnt\/server\/steamcmd\nmkdir -p \/mnt\/server\/steamapps\ncd \/mnt\/server\/steamcmd\n\nexport HOME=\/mnt\/server\n\n# Install server\n.\/steamcmd.sh +force_install_dir \/mnt\/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\n\n# Fix steam libraries\nmkdir -p \/mnt\/server\/.steam\/sdk32\ncp -v linux32\/steamclient.so \/mnt\/server\/.steam\/sdk32\/steamclient.so\n\nmkdir -p \/mnt\/server\/.steam\/sdk64\ncp -v linux64\/steamclient.so \/mnt\/server\/.steam\/sdk64\/steamclient.so\n\n# Permissions for Sentry Crash Handler\nchmod +x \/mnt\/server\/RSDragonwilds\/Plugins\/Developer\/Sentry\/Binaries\/Linux\/crashpad_handler 2>\/dev\/null || true\n\n# Seed DedicatedServer.ini (first install only, so reinstalls keep ServerGuid and AdminList)\nINI_DIR=\/mnt\/server\/RSDragonwilds\/Saved\/Config\/LinuxServer\nif [ ! -f \"${INI_DIR}\/DedicatedServer.ini\" ]; then\n    echo \"Creating default DedicatedServer.ini\"\n    mkdir -p \"${INI_DIR}\"\n    cat <<'EOF' > \"${INI_DIR}\/DedicatedServer.ini\"\n[SectionsToSave]\nbCanSaveAllSections=true\n\n[\/Script\/Dominion.DedicatedServerSettings]\nAdminPassword=\nOwnerId=\nWorldPassword=\nServerName=\nDefaultWorldName=\nServerGuid=\nEOF\nfi\n\n# RSDWServerAPI (REST API \/ RCON \/ Discord relay mod, preloaded by the startup command)\n# Installed from a GitHub release on every (re)install: \"latest\", a pinned tag, or \"manual\"\n# to keep a librsdwapi.so you uploaded yourself. A failed download keeps the current build.\nRSDWAPI_REPO=${RSDWAPI_REPO:-CobraTrinity\/RSDWServerAPI}\nRSDWAPI_RELEASE=${RSDWAPI_RELEASE:-latest}\nmkdir -p \/mnt\/server\/rsdwapi\n\nif [[ \"${RSDWAPI_RELEASE}\" == \"manual\" ]]; then\n    echo \"RSDWServerAPI: release set to manual, keeping the existing librsdwapi.so\"\nelse\n    DOWNLOAD_URL=${RSDWAPI_URL}\n    DIGEST=\"\"\n    if [[ -z \"${DOWNLOAD_URL}\" ]]; then\n        if [[ \"${RSDWAPI_RELEASE}\" == \"latest\" ]]; then\n            API_URL=\"https:\/\/api.github.com\/repos\/${RSDWAPI_REPO}\/releases\/latest\"\n        else\n            API_URL=\"https:\/\/api.github.com\/repos\/${RSDWAPI_REPO}\/releases\/tags\/${RSDWAPI_RELEASE}\"\n        fi\n        # Pick the asset by name: librsdwapi.so, else any .so, else a (linux) zip.\n        ASSET=$(curl -fsSL -H \"Accept: application\/vnd.github+json\" \"${API_URL}\" | jq -c '\n            [ (.assets[] | select(.name == \"librsdwapi.so\")),\n              (.assets[] | select(.name | test(\"\\\\.so$\"))),\n              (.assets[] | select(.name | test(\"(?i)linux.*\\\\.zip$\"))),\n              (.assets[] | select(.name | test(\"\\\\.zip$\"))) ] | first \/\/ empty')\n        DOWNLOAD_URL=$(echo \"${ASSET}\" | jq -r '.browser_download_url \/\/ empty' 2>\/dev\/null)\n        DIGEST=$(echo \"${ASSET}\" | jq -r '.digest \/\/ empty' 2>\/dev\/null | sed 's\/^sha256:\/\/')\n    fi\n\n    if [[ -z \"${DOWNLOAD_URL}\" ]]; then\n        echo \"RSDWServerAPI: no release asset found in ${RSDWAPI_REPO} (${RSDWAPI_RELEASE}), skipping\"\n    else\n        echo \"RSDWServerAPI: downloading ${DOWNLOAD_URL}\"\n        rm -rf \/tmp\/rsdwapi && mkdir -p \/tmp\/rsdwapi\n        SO=\/tmp\/rsdwapi\/download\n        if ! curl -fsSL -o \"${SO}\" \"${DOWNLOAD_URL}\"; then\n            echo \"RSDWServerAPI: download failed, keeping the current build\"\n            SO=\"\"\n        elif [[ -n \"${DIGEST}\" ]] && [[ \"$(sha256sum \"${SO}\" | cut -d' ' -f1)\" != \"${DIGEST}\" ]]; then\n            echo \"RSDWServerAPI: download does not match the release's SHA-256, keeping the current build\"\n            SO=\"\"\n        elif unzip -tq \"${SO}\" >\/dev\/null 2>&1; then\n            unzip -oq \"${SO}\" -d \/tmp\/rsdwapi\/x\n            SO=$(find \/tmp\/rsdwapi\/x -type f -name 'librsdwapi.so' | head -n 1)\n            [[ -n \"${SO}\" ]] || echo \"RSDWServerAPI: the zip has no librsdwapi.so, keeping the current build\"\n        fi\n        if [[ -n \"${SO}\" ]] && [[ \"$(head -c 4 \"${SO}\" | od -An -c | tr -d ' ')\" == '177ELF' ]]; then\n            install -m 0755 \"${SO}\" \/mnt\/server\/librsdwapi.so\n            echo \"RSDWServerAPI: installed ($(stat -c %s \/mnt\/server\/librsdwapi.so) bytes)\"\n        elif [[ -n \"${SO}\" ]]; then\n            echo \"RSDWServerAPI: the download is not a Linux shared library, keeping the current build\"\n        fi\n        rm -rf \/tmp\/rsdwapi\n    fi\nfi\n[[ -f \/mnt\/server\/librsdwapi.so ]] || echo \"RSDWServerAPI: librsdwapi.so is missing, the server will start without the API\"\n\necho \"-----------------------------------------\"\necho \"Installation completed\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "The name of your server. The in-game server browser only shows the first 16 characters.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Dragonwilds Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Owner ID",
+            "description": "Your in-game RuneScape: Dragonwilds Player ID, a 32-character code shown at the bottom of the in-game Settings menu. This is NOT your Steam ID. Required: the server will not create a world without an owner.",
+            "env_variable": "OWNER_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|size:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "Password that grants admin rights to whoever enters it in-game under ESC > Settings > Server Management. Do not reuse the World Password.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed on the server (1-6)",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,6",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Check for and install server updates on every startup (1 = on, 0 = off)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam App ID",
+            "description": "Steam App ID for Dragonwilds server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "4019830",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:4019830",
+            "field_type": "text"
+        },
+        {
+            "name": "RSDWServerAPI Repository",
+            "description": "GitHub owner\/repo whose releases provide librsdwapi.so. Applied on (re)install.",
+            "env_variable": "RSDWAPI_REPO",
+            "default_value": "CobraTrinity\/RSDWServerAPI",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|regex:\/^[A-Za-z0-9_.-]+\\\/[A-Za-z0-9_.-]+$\/",
+            "field_type": "text"
+        },
+        {
+            "name": "RSDWServerAPI Release",
+            "description": "Release to install: 'latest', a tag to pin (e.g. 0.1.6), or 'manual' to keep a librsdwapi.so you uploaded. Reinstall the server to update the mod.",
+            "env_variable": "RSDWAPI_RELEASE",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "RSDWServerAPI Download URL",
+            "description": "Optional direct link to librsdwapi.so or a zip containing it. Overrides the repository and release.",
+            "env_variable": "RSDWAPI_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url|max:512",
+            "field_type": "text"
+        },
+        {
+            "name": "API Port",
+            "description": "TCP port of the REST API. Needs its own allocation.",
+            "env_variable": "RSDWAPI_API_PORT",
+            "default_value": "8080",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "API Bind Address",
+            "description": "0.0.0.0 to reach the API through its allocation; 127.0.0.1 to keep it inside the container.",
+            "env_variable": "RSDWAPI_API_BIND",
+            "default_value": "0.0.0.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|ip",
+            "field_type": "text"
+        },
+        {
+            "name": "API Bearer Token",
+            "description": "Token for the REST API. Leave empty to use the one generated on first start (rsdwapi\/settings.ini).",
+            "env_variable": "RSDWAPI_API_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:16|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "API IP Whitelist",
+            "description": "Comma separated addresses or CIDR blocks allowed to use the API. Empty allows everyone with the token.",
+            "env_variable": "RSDWAPI_API_WHITELIST",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Enabled",
+            "description": "Source RCON listener (1 = on, 0 = off).",
+            "env_variable": "RSDWAPI_RCON_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Port",
+            "description": "TCP port for RCON. Needs its own allocation when RCON is enabled.",
+            "env_variable": "RSDWAPI_RCON_PORT",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Password",
+            "description": "Leave empty to use the one generated on first start (rsdwapi\/settings.ini).",
+            "env_variable": "RSDWAPI_RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Relay Enabled",
+            "description": "Relay chat, joins and leaves to a Discord webhook (1 = on, 0 = off).",
+            "env_variable": "RSDWAPI_DISCORD_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Webhook URL",
+            "description": "Discord webhook for chat, joins and leaves.",
+            "env_variable": "RSDWAPI_DISCORD_WEBHOOK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url|max:512",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Death Webhook URL",
+            "description": "Optional separate webhook for player deaths.",
+            "env_variable": "RSDWAPI_DISCORD_DEATH_WEBHOOK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url|max:512",
+            "field_type": "text"
+        },
+        {
+            "name": "Default World Name",
+            "description": "The name of the world to create\/load",
+            "env_variable": "WORLD_NAME",
+            "default_value": "MyWorld",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "World Password",
+            "description": "Optional world password. Leave empty for public access.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Beacon Port",
+            "description": "UDP world settings beacon port (Jagex default: 8888, the game port + 1111). Add an allocation for this port on the same IP as the game port, or players cannot reach it.",
+            "env_variable": "BEACON_PORT",
+            "default_value": "8888",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Extra Arguments",
+            "description": "Additional server startup arguments. The required logging flags are already part of the startup command.",
+            "env_variable": "EXTRA_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:256",
+            "field_type": "text"
+        }
+    ]
+}
