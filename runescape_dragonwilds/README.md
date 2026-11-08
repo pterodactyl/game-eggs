@@ -2,6 +2,10 @@
 
 A Pterodactyl egg for the RuneScape: Dragonwilds dedicated server.
 
+## Variants
+
+* [RSDWServerAPI](./rsdwserverapi): this egg with the RSDWServerAPI mod preloaded, which adds a REST API, RCON and a Discord relay.
+
 ## Server Requirements
 
 | Resource | Recommended |

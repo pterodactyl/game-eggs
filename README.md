@@ -263,6 +263,7 @@ Below is a categorized list of games with links to their respective server confi
 #### [Romestead](./romestead)
 
 #### [RuneScape: Dragonwilds](./runescape_dragonwilds)
+* [RSDWServerAPI](./runescape_dragonwilds/rsdwserverapi)
 
 #### [Rust](./rust)
 * [Autowipe](./rust/rust_autowipe)
