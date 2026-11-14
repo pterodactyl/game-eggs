@@ -23,6 +23,10 @@ Fabric is a lightweight, experimental modding toolchain for Minecraft.
 [Feather GitHub](https://github.com/feather-rs/feather)
 An experimental Minecraft server implementation in Rust
 
+## [SteelMC](steel)
+[SteelMC](https://steel-foundation.github.io/SteelDocs/)
+SteelMC is a Rust based server which aims a 1:1 parity from vanilla with rust speed.
+
 ## Forge Based
 
 ### [Arclight](arclight)
