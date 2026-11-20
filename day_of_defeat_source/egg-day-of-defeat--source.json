@@ -37,7 +37,7 @@
             "default_value": "A Pterodactyl Hosted Day of Defeat: Source Server",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "required|string|max:64",
+            "rules": "required|string|max:64|not_regex:/[\\x22\\x5C\\x0D\\x0A]/",
             "field_type": "text"
         },
         {
@@ -67,7 +67,7 @@
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "nullable|string|max:32",
+            "rules": "nullable|string|max:32|not_regex:/[\\x22\\x5C\\x0D\\x0A]/",
             "field_type": "text"
         },
         {
@@ -77,7 +77,7 @@
             "default_value": "",
             "user_viewable": true,
             "user_editable": true,
-            "rules": "nullable|string|max:32",
+            "rules": "nullable|string|max:32|not_regex:/[\\x22\\x5C\\x0D\\x0A]/",
             "field_type": "text"
         },
         {

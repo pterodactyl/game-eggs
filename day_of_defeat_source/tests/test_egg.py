@@ -142,7 +142,7 @@ class EggContractTests(unittest.TestCase):
         expected = {
             "HOSTNAME": (
                 "A Pterodactyl Hosted Day of Defeat: Source Server",
-                "required|string|max:64",
+                r"required|string|max:64|not_regex:/[\x22\x5C\x0D\x0A]/",
                 True,
                 True,
             ),
@@ -153,8 +153,18 @@ class EggContractTests(unittest.TestCase):
                 True,
             ),
             "MAX_PLAYERS": ("32", "required|integer|between:1,32", True, True),
-            "SERVER_PASSWORD": ("", "nullable|string|max:32", True, True),
-            "RCON_PASSWORD": ("", "nullable|string|max:32", True, True),
+            "SERVER_PASSWORD": (
+                "",
+                r"nullable|string|max:32|not_regex:/[\x22\x5C\x0D\x0A]/",
+                True,
+                True,
+            ),
+            "RCON_PASSWORD": (
+                "",
+                r"nullable|string|max:32|not_regex:/[\x22\x5C\x0D\x0A]/",
+                True,
+                True,
+            ),
             "AUTO_UPDATE": ("1", "required|boolean", True, True),
             "SRCDS_APPID": ("232290", "required|string|in:232290", False, False),
             "SRCDS_GAME": ("dod", "required|string|in:dod", False, False),
@@ -172,6 +182,51 @@ class EggContractTests(unittest.TestCase):
                 self.assertEqual(variable["field_type"], "text")
                 self.assertTrue(variable["name"].strip())
                 self.assertTrue(variable["description"].strip())
+
+    def test_quoted_server_cfg_values_reject_command_delimiters(self) -> None:
+        egg = json.loads(EGG_PATH.read_text(encoding="utf-8"))
+        variables = {
+            variable["env_variable"]: variable for variable in egg.get("variables", [])
+        }
+        valid_values = {
+            "HOSTNAME": (
+                variables["HOSTNAME"]["default_value"],
+                "Friendly DoD:S; Server",
+            ),
+            "SERVER_PASSWORD": (
+                variables["SERVER_PASSWORD"]["default_value"],
+                "ordinary;pass-123",
+            ),
+            "RCON_PASSWORD": (
+                variables["RCON_PASSWORD"]["default_value"],
+                "Rcon;pass_123",
+            ),
+        }
+        unsafe_values = ('"', "\\", "\r", "\n", 'safe"; quit')
+
+        for env_name, allowed in valid_values.items():
+            with self.subTest(env_name=env_name):
+                rule = next(
+                    (
+                        item
+                        for item in variables[env_name]["rules"].split("|")
+                        if item.startswith("not_regex:")
+                    ),
+                    None,
+                )
+                self.assertIsNotNone(
+                    rule,
+                    f"{env_name} must reject Source quoted-command delimiters",
+                )
+                assert rule is not None
+                expression = rule.removeprefix("not_regex:")
+                delimiter = expression[0]
+                self.assertEqual(expression[-1], delimiter)
+                pattern = expression[1:-1]
+                for value in allowed:
+                    self.assertIsNone(re.search(pattern, value), value)
+                for value in unsafe_values:
+                    self.assertIsNotNone(re.search(pattern, value), repr(value))
 
     def test_startup_map_rule_rejects_shell_metacharacters(self) -> None:
         egg = json.loads(EGG_PATH.read_text(encoding="utf-8"))
