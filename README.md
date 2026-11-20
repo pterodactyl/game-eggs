@@ -91,6 +91,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### [Cubic Odyssey](./cubic_odyssey)
 
+#### [Day of Defeat: Source](./day_of_defeat_source)
+
 #### [DayZ](./dayz)
 
 #### [DDNet](./ddnet)

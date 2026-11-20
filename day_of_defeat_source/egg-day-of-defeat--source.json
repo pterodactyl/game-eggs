@@ -1,0 +1,114 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-11-20T08:09:40+07:00",
+    "name": "Day of Defeat: Source",
+    "author": "support@pterodactyl.io",
+    "description": "Day of Defeat: Source is a team-based World War II multiplayer game powered by Valve's Source engine.",
+    "features": [
+        "steam_disk_space"
+    ],
+    "docker_images": {
+        "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+    },
+    "file_denylist": [],
+    "startup": "./srcds_run -game {{SRCDS_GAME}} -console -strictportbind -ip 0.0.0.0 -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +servercfgfile server.cfg -maxplayers {{MAX_PLAYERS}} -nohltv -norestart",
+    "config": {
+        "files": "{\r\n    \"dod/cfg/server.cfg\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"hostname\": \"hostname \\\"{{env.HOSTNAME}}\\\"\",\r\n            \"sv_password\": \"sv_password \\\"{{env.SERVER_PASSWORD}}\\\"\",\r\n            \"rcon_password\": \"rcon_password \\\"{{env.RCON_PASSWORD}}\\\"\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Connection to Steam servers successful.\"\r\n}",
+        "logs": "{}",
+        "stop": "quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\nset -euo pipefail\r\n\r\n# Server files are installed into the volume mounted at \/mnt\/server.\r\ncd \/tmp\r\nmkdir -p \/mnt\/server\/steamcmd \/mnt\/server\/steamapps\r\ncurl --fail --location --retry 5 --retry-all-errors --retry-delay 2 --silent --show-error --output steamcmd.tar.gz https:\/\/steamcdn-a.akamaihd.net\/client\/installer\/steamcmd_linux.tar.gz\r\ntar --extract --gzip --file steamcmd.tar.gz --directory \/mnt\/server\/steamcmd --no-same-owner\r\ncd \/mnt\/server\/steamcmd\r\n\r\n# SteamCMD needs a writable HOME and an existing steamapps directory.\r\nchown -R root:root \/mnt\r\nexport HOME=\/mnt\/server\r\n.\/steamcmd.sh +force_install_dir \/mnt\/server +@sSteamCmdForcePlatformType linux +login anonymous +app_update \"${SRCDS_APPID}\" validate +quit\r\n\r\n# Fail installation if SteamCMD returned without the native server payload.\r\ntest -x \/mnt\/server\/srcds_run\r\ntest -x \/mnt\/server\/srcds_linux\r\ntest -f \/mnt\/server\/dod\/gameinfo.txt\r\n\r\n# Make the Steam client libraries available at the locations expected by SRCDS.\r\nmkdir -p \/mnt\/server\/.steam\/sdk32 \/mnt\/server\/.steam\/sdk64\r\ncp -v linux32\/steamclient.so \/mnt\/server\/.steam\/sdk32\/steamclient.so\r\ncp -v linux64\/steamclient.so \/mnt\/server\/.steam\/sdk64\/steamclient.so\r\n\r\n# Seed the file parser targets without overwriting an operator's existing config.\r\nmkdir -p \/mnt\/server\/dod\/cfg\r\nif [ ! -f \/mnt\/server\/dod\/cfg\/server.cfg ]; then\r\n    cat <<'EOF' > \/mnt\/server\/dod\/cfg\/server.cfg\r\nhostname \"A Pterodactyl Hosted Day of Defeat: Source Server\"\r\nsv_password \"\"\r\nrcon_password \"\"\r\nsv_lan 0\r\nEOF\r\nfi\r\n\r\necho \"Installation completed successfully.\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "The name shown for this server in the in-game server browser.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Pterodactyl Hosted Day of Defeat: Source Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Default Map",
+            "description": "The map loaded when the server starts, for example dod_anzio or dod_avalanche.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dod_anzio",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64|regex:\/\\A[A-Za-z0-9_-]+\\z\/",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,32",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password required to join the server. Leave blank for public access.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "RCON Password",
+            "description": "Password used for remote console administration. Leave blank to disable RCON authentication.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto Update",
+            "description": "Automatically update the server through SteamCMD each time the container starts.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam App ID",
+            "description": "Internal Steam identifier used to install and update the dedicated server. Do not change.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232290",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232290",
+            "field_type": "text"
+        },
+        {
+            "name": "Game Folder",
+            "description": "Internal Source engine game folder used to launch the server. Do not change.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "dod",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:dod",
+            "field_type": "text"
+        }
+    ]
+}
