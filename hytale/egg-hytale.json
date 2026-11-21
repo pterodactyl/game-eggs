@@ -209,16 +209,6 @@
       "field_type": "text"
     },
     {
-      "name": "Transport",
-      "description": "Network transport protocol. QUIC (UDP) is default; QUICHE is an alternative QUIC backend.",
-      "env_variable": "TRANSPORT",
-      "default_value": "QUIC",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "required|string|in:QUIC,QUICHE",
-      "field_type": "text"
-    },
-    {
       "name": "Profile UUID",
       "description": "Specify a specific Hytale profile UUID for the servers session.",
       "env_variable": "HYTALE_PROFILE_UUID",
