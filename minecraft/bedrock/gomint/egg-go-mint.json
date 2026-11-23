@@ -14,11 +14,11 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
-        "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
-        "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
-        "Java 11": "ghcr.io\/ptero-eggs\/yolks:java_11",
-        "Java 8": "ghcr.io\/ptero-eggs\/yolks:java_8"
+        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21",
+        "Java 17": "ghcr.io\/pterodactyl\/yolks:java_17",
+        "Java 16": "ghcr.io\/pterodactyl\/yolks:java_16",
+        "Java 11": "ghcr.io\/pterodactyl\/yolks:java_11",
+        "Java 8": "ghcr.io\/pterodactyl\/yolks:java_8"
     },
     "file_denylist": [],
     "startup": "java --add-opens java.base\/java.nio=io.netty.common --add-exports java.base\/jdk.internal.misc=io.netty.common -p modules -m gomint.server\/io.gomint.server.Bootstrap",

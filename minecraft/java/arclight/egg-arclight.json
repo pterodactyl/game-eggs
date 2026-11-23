@@ -14,14 +14,14 @@
         "pid_limit"
     ],
     "docker_images": {
-        "Java 8": "ghcr.io\/ptero-eggs\/yolks:java_8",
-        "Java 11": "ghcr.io\/ptero-eggs\/yolks:java_11",
-        "Java 16": "ghcr.io\/ptero-eggs\/yolks:java_16",
-        "Java 17": "ghcr.io\/ptero-eggs\/yolks:java_17",
-        "Java 19": "ghcr.io\/ptero-eggs\/yolks:java_19",
-        "Java 21": "ghcr.io\/ptero-eggs\/yolks:java_21",
-        "Java 22": "ghcr.io\/ptero-eggs\/yolks:java_22",
-        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25"
+        "Java 8": "ghcr.io\/pterodactyl\/yolks:java_8",
+        "Java 11": "ghcr.io\/pterodactyl\/yolks:java_11",
+        "Java 16": "ghcr.io\/pterodactyl\/yolks:java_16",
+        "Java 17": "ghcr.io\/pterodactyl\/yolks:java_17",
+        "Java 19": "ghcr.io\/pterodactyl\/yolks:java_19",
+        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21",
+        "Java 22": "ghcr.io\/pterodactyl\/yolks:java_22",
+        "Java 25": "ghcr.io\/pterodactyl\/yolks:java_25"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}} nogui",
