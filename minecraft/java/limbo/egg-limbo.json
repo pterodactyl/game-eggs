@@ -11,7 +11,7 @@
     "features": null,
     "docker_images": {
         "Java 17": "ghcr.io\/pterodactyl\/yolks:java_17",
-        "Java 25": "ghcr.io\/ptero-eggs\/yolks:java_25"
+        "Java 25": "ghcr.io\/pterodactyl\/yolks:java_25"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
