@@ -105,6 +105,11 @@ Currently the default on pterodactyl for many reasons. First being that you don'
 High performance Fork of Paper which adds regionised multithreading to the dedicated server. designed for many players.
 Spigot Plugins are not compatible with this fork. unless they are optimised for Folia.
 
+### [Leaf](leaf)
+
+[LeafMC Website](https://leafmc.one/)
+Leaf is a performant fork of Paper focused on balancing performance, vanilla mechanics, and stability.
+
 ### [Purpur](purpur)
 
 [Purpur Website](https://purpurmc.org/)
