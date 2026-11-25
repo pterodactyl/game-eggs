@@ -63,6 +63,8 @@ Below is a categorized list of games with links to their respective server confi
 
 #### Call of Duty / COD 
 * [IW4X](./cod/iw4x)
+* [Plutonium T5](./cod/plutonium_t5)
+* [Plutonium T6](./cod/plutonium_t6)
 
 #### [Colony Survival](./colony_survival)
 
