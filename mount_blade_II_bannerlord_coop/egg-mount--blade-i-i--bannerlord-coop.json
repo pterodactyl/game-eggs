@@ -1,0 +1,162 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-08-18T19:57:06+10:00",
+    "name": "Mount & Blade II: Bannerlord Coop",
+    "author": "mark@bytesizelabs.com.au",
+    "description": "Turns Bannerlord's single-player campaign into a persistent multiplayer one for up to 32 players. Everyone shares the same world, each running their own character, party and clan.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/ptero-eggs\/yolks:wine_latest": "ghcr.io\/ptero-eggs\/yolks:wine_latest"
+    },
+    "file_denylist": [],
+    "startup": "CFG=\"\/home\/container\/.wine\/drive_c\/users\/container\/Documents\/Mount and Blade II Bannerlord\/CoopData\/DedicatedServer\/server-config.json\"; if [ \"${SERVER_PORT}\" != \"4200\" ]; then echo \"[egg] NOTE: this server's allocation is ${SERVER_PORT}, but Bannerlord Coop only listens on UDP 4200. Allocate 4200 and 4201.\"; fi; cesc(){ printf %s \"$1\" | sed -e \"s\/[&\/\\\\]\/\\\\\\\\&\/g\"; }; cbool(){ if [ \"$1\" = \"1\" ]; then printf true; else printf false; fi; }; setstr(){ [ -f \"$CFG\" ] && sed -i -E \"s\/(\\\"$1\\\"[[:space:]]*:[[:space:]]*)\\\"[^\\\"]*\\\"\/\\1\\\"$(cesc \"$2\")\\\"\/\" \"$CFG\"; }; setnum(){ [ -f \"$CFG\" ] && sed -i -E \"s\/(\\\"$1\\\"[[:space:]]*:[[:space:]]*)[0-9]+\/\\1$2\/\" \"$CFG\"; }; setbool(){ [ -f \"$CFG\" ] && sed -i -E \"s\/(\\\"$1\\\"[[:space:]]*:[[:space:]]*)[a-z]+\/\\1$(cbool \"$2\")\/\" \"$CFG\"; }; if [ -f \"$CFG\" ]; then [ -n \"${SAVE_NAME}\" ] && setstr saveName \"${SAVE_NAME}\"; [ -n \"${AUTOSAVE_MINUTES}\" ] && setnum autosaveMinutes \"${AUTOSAVE_MINUTES}\"; [ -n \"${LOG_FILE}\" ] && setbool logFile \"${LOG_FILE}\"; [ -n \"${STEAM_ENABLED}\" ] && setbool steam \"${STEAM_ENABLED}\"; setstr password \"${SERVER_PASSWORD}\"; echo \"[egg] applied panel settings to server-config.json\"; else echo \"[egg] server-config.json does not exist yet - the server creates it on this run, and panel settings apply from the next restart\"; fi; LOGDIR=\"\/home\/container\/.wine\/drive_c\/users\/container\/Documents\/Mount and Blade II Bannerlord\/CoopData\/DedicatedServer\/logs\"; mkdir -p \"$LOGDIR\"; MARKER=$(mktemp); ( while :; do L=$(find \"$LOGDIR\" -maxdepth 1 -name \"coop-server-*.log\" -newer \"$MARKER\" -printf \"%T@ %p\\n\" 2>\/dev\/null | sort -rn | head -n1 | cut -d\" \" -f2-); if [ -n \"$L\" ]; then exec tail -F -n +1 \"$L\"; fi; sleep 1; done ) & TAILPID=$!; ( while :; do grep -q ':1068[[:space:]]' \/proc\/net\/udp 2>\/dev\/null && { echo \"[egg] Bannerlord Coop dedicated server is listening on UDP 4200 - ready for connections\"; break; }; sleep 1; done ) & READYPID=$!; cd \/home\/container\/DedicatedServer && xvfb-run --auto-servernum wine BannerlordCoopServer.exe > \/home\/container\/server-stdout.log 2>&1; kill $TAILPID $READYPID 2>\/dev\/null",
+    "config": {
+        "files": "{}",
+        "startup": "{\n    \"done\": \"dedicated server is listening on UDP 4200\"\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\n# Bannerlord Coop dedicated server - installation script\n#\n# Server Files: \/mnt\/server\n# Image to install with is 'ghcr.io\/ptero-eggs\/installers:debian'\n#\n# The Coop dedicated server (BannerlordCoopServer.exe) ships INSIDE the mod's Steam\n# Workshop item, which is published under the base game's App ID (261550) rather than\n# as a free dedicated-server tool. The Steam account used must therefore OWN Mount &\n# Blade II: Bannerlord - anonymous login cannot fetch it. The item also bundles the\n# Bannerlord engine and a .NET runtime, so the free Dedicated Server tool (app\n# 1863440) is NOT needed.\n#\n# WHY NOT SteamCMD: +workshop_download_item aborts on multi-GB workshop items with\n# \"ERROR! Timeout downloading item\" or \"(Failure)\" and never finishes this one - a\n# well-known SteamCMD limitation, reproduced here over 24 consecutive resume attempts.\n# DepotDownloader (SteamRE, authors of SteamKit2) fetches the same UGC without it.\n\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo \"-----------------------------------------\"\n    echo \"A Steam account that owns Mount & Blade II: Bannerlord is required to\"\n    echo \"download the Coop Workshop item. Anonymous login will not work.\"\n    echo \"Set the Steam User \/ Steam Password variables and reinstall.\"\n    echo \"-----------------------------------------\"\n    exit 1\nfi\n\napt -y update\napt -y --no-install-recommends install curl unzip ca-certificates\n\nSTAGING=\"\/mnt\/server\/.ugc-staging\"\nDD_DIR=\"\/mnt\/server\/.depotdownloader\"\nSENTINEL_REL=\"DedicatedServer\/engine\/bin\/Win64_Shipping_Server\/TaleWorlds.Starter.DotNetCore.dll\"\n\n## Staged inside \/mnt\/server rather than \/tmp: the payload is several GB and counts\n## against the server's disk quota either way, but \/tmp is often far smaller.\nrm -rf \"${STAGING}\" \"${DD_DIR}\"\nmkdir -p \"${STAGING}\" \"${DD_DIR}\"\n\n## Fetch DepotDownloader. The linux-x64 build is self-contained, so no system .NET\n## runtime has to be installed into the image.\nDD_VERSION=\"3.4.0\"\nDD_URL=\"https:\/\/github.com\/SteamRE\/DepotDownloader\/releases\/download\/DepotDownloader_${DD_VERSION}\/DepotDownloader-linux-x64.zip\"\n\necho \"-----------------------------------------\"\necho \"Fetching DepotDownloader ${DD_VERSION}...\"\necho \"-----------------------------------------\"\ncd \"${DD_DIR}\"\nif ! curl -fsSL -o depotdownloader.zip \"${DD_URL}\"; then\n    echo \"Could not download DepotDownloader from ${DD_URL}\"\n    exit 1\nfi\nunzip -oq depotdownloader.zip -d \"${DD_DIR}\"\nchmod +x \"${DD_DIR}\/DepotDownloader\"\n\n## Download the workshop item.\n##\n## -remember-password persists the Steam session, so the Steam Guard mobile\n## confirmation is only needed on the first install for this account.\n## -validate checksums anything already on disk, which makes a re-run resume rather\n## than refetch.\necho \"-----------------------------------------\"\necho \"Downloading workshop item ${WORKSHOP_ITEM_ID} (several GB - this takes a while).\"\necho \"If the account has a Steam Guard mobile authenticator, CONFIRM THE LOGIN ON\"\necho \"YOUR PHONE now - the install waits here until you do.\"\necho \"-----------------------------------------\"\n\n\"${DD_DIR}\/DepotDownloader\" \\\n    -app \"${SRCDS_APPID}\" \\\n    -pubfile \"${WORKSHOP_ITEM_ID}\" \\\n    -username \"${STEAM_USER}\" \\\n    -password \"${STEAM_PASS}\" \\\n    -remember-password \\\n    -validate \\\n    -dir \"${STAGING}\"\nDD_EXIT=$?\n\nif [[ ${DD_EXIT} -ne 0 ]]; then\n    echo \"-----------------------------------------\"\n    echo \"DepotDownloader failed (exit ${DD_EXIT}). The server files were NOT installed.\"\n    echo \"-----------------------------------------\"\n    exit 1\nfi\n\n## A zero exit is necessary but not sufficient - confirm the file the server refuses\n## to boot without actually landed.\nif [[ ! -f \"${STAGING}\/${SENTINEL_REL}\" ]]; then\n    echo \"-----------------------------------------\"\n    echo \"DepotDownloader reported success but the payload is incomplete.\"\n    echo \"Missing: ${SENTINEL_REL}\"\n    echo \"Contents of the staging directory:\"\n    ls -la \"${STAGING}\"\n    echo \"-----------------------------------------\"\n    exit 1\nfi\n\n## Move the deployment root into place. BannerlordCoopServer.exe must sit at the root\n## of a folder containing engine\/ and server-data\/, which is how the item ships it.\necho \"-----------------------------------------\"\necho \"Installing server files...\"\necho \"-----------------------------------------\"\nrm -rf \/mnt\/server\/DedicatedServer\nmv -f \"${STAGING}\/DedicatedServer\" \/mnt\/server\/DedicatedServer\n\n## Clean up the staging area and the downloader; the payload is now in place and the\n## quota is better spent on saves and logs.\nrm -rf \"${STAGING}\" \"${DD_DIR}\"\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/ptero-eggs\/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Steam user",
+            "description": "Steam account that owns Mount & Blade II: Bannerlord. Required - anonymous login cannot download the Coop Workshop item.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam password",
+            "description": "",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+        },
+        {
+            "name": "App id",
+            "description": "Base game App ID the Coop Workshop item is registered under.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "261550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:261550",
+            "field_type": "text"
+        },
+        {
+            "name": "Workshop item id",
+            "description": "Steam Workshop item id for Bannerlord Coop.",
+            "env_variable": "WORKSHOP_ITEM_ID",
+            "default_value": "3770450698",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3770450698",
+            "field_type": "text"
+        },
+        {
+            "name": "WINEDEBUG",
+            "description": "Silences Wine's own debug/fixme output, which is otherwise very noisy. Don't change this.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "WINEARCH",
+            "description": "Forces Wine to create a 64-bit prefix. BannerlordCoopServer.exe is 64-bit; don't change this.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Winetricks",
+            "description": "Packages installed into the wine prefix on boot. BannerlordCoopServer.exe requires a .NET runtime; if the server fails to start with a missing-.NET error, add the appropriate dotnetdesktopNN package here.",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Connection password, up to 128 characters. Joining players are prompted for it; blank = no password. Applied to server-config.json at boot by a line-level edit that preserves the file's comments. The server creates that file on its first run, so settings apply from the second start onward.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Auto update",
+            "description": "Leave disabled. This egg installs the Workshop item directly, not the full game - the image's built-in app_update-on-boot only tries (and fails) to install app 261550 against the wrong platform.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Save name",
+            "description": "World\/save to host, from the 'Game Saves' folder (no .sav extension). If it does not exist, a fresh world is created from default_new_game.sav under this name. Two previous generations are kept as <name>.backup1 \/ .backup2.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "saveauto1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Autosave interval (minutes)",
+            "description": "Minutes between world autosaves. 0 disables autosaving.",
+            "env_variable": "AUTOSAVE_MINUTES",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:1440",
+            "field_type": "text"
+        },
+        {
+            "name": "Steam advertising",
+            "description": "1 = advertise on Steam (public lobby, friend joins, traffic relayed over Steam so no port forwarding is needed) when a logged-in Steam client runs on the host. 0 = direct connect on UDP 4200 only. Defaults to 0: a dedicated container normally has no Steam client running, and enabling this without one hangs the server at boot.",
+            "env_variable": "STEAM_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Write log file",
+            "description": "1 = also write everything the server prints to logs\/coop-server-*.log (one file per launch, newest 10 kept). 0 = console only.",
+            "env_variable": "LOG_FILE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        }
+    ]
+}
