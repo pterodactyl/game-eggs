@@ -13,10 +13,10 @@
         "ghcr.io\/ptero-eggs\/steamcmd:proton": "ghcr.io\/ptero-eggs\/steamcmd:proton"
     },
     "file_denylist": [],
-    "startup": "proton run .\/Astro\/Binaries\/Win64\/AstroServer-Win64-Shipping.exe",
+    "startup": "rm -f .\/Astro\/Saved\/Logs\/AstroServer.log; tail -n 0 -F .\/Astro\/Saved\/Logs\/AstroServer.log 2>\/dev\/null & proton run .\/Astro\/Binaries\/Win64\/AstroServer-Win64-Shipping.exe",
     "config": {
         "files": "{\r\n    \"Astro\/Saved\/Config\/WindowsServer\/Engine.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"url.Port\": \"{{server.build.default.port}}\",\r\n            \"[SystemSettings].net.AllowEncryption\":\"false\"\r\n        }\r\n    },\r\n    \"Astro\/Saved\/Config\/WindowsServer\/AstroServerSettings.ini\": {\r\n        \"parser\": \"ini\",\r\n        \"find\": {\r\n            \"[\/Script\/Astro.AstroServerSettings].PublicIP\": \"{{env.PUBLIC_IP}}\",\r\n            \"[\/Script\/Astro.AstroServerSettings].OwnerName\": \"{{env.OWNER_NAME}}\",\r\n            \"[\/Script\/Astro.AstroServerSettings].OwnerGuid\": \"{{env.OWNER_GUID}}\",\r\n            \"[\/Script\/Astro.AstroServerSettings].PlayerProperties\": \"(PlayerFirstJoinName=\\\"{{env.OWNER_NAME}}\\\",PlayerCategory=Admin,PlayerGuid=\\\"{{env.OWNER_GUID}}\\\",PlayerRecentJoinName=\\\"\\\")\",\r\n            \"[\/Script\/Astro.AstroServerSettings].ServerPassword\": \"{{env.SERVER_PWD}}\",\r\n            \"[\/Script\/Astro.AstroServerSettings].ServerName\": \"{{env.SERVER_NAME}}\"\r\n        }\r\n    }\r\n}",
-        "startup": "{\r\n    \"done\": \"nable to use setpriority safely\"\r\n}",
+        "startup": "{\r\n    \"done\": [\r\n        \"Engine is initialized\",\r\n        \"nable to use setpriority safely\"\r\n    ]\r\n}",
         "logs": "{}",
         "stop": "^C"
     },
@@ -99,9 +99,29 @@
             "field_type": "text"
         },
         {
-            "name": "PROTON_LOG",
-            "description": "",
+            "name": "Proton Debug Log",
+            "description": "1 = send Wine\/Proton debug output to a log file on disk (keeps console clean). 0 = print Wine\/Proton output to the console (useful when debugging crashes).",
             "env_variable": "PROTON_LOG",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] Disable Xalia",
+            "description": "Disables Proton's Xalia gamepad-UI helper, which crashes with 'Video driver not supported' on headless servers. 0 = Xalia disabled (recommended).",
+            "env_variable": "PROTON_USE_XALIA",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "[Advanced] No Xalia (GE-Proton)",
+            "description": "Same as Disable Xalia, for GE-Proton builds. 1 = Xalia disabled.",
+            "env_variable": "PROTON_NO_XALIA",
             "default_value": "1",
             "user_viewable": false,
             "user_editable": false,
