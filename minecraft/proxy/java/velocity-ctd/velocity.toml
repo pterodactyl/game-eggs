@@ -1,0 +1,632 @@
+# Config version. Do not change this.
+config-version = "2.9"
+
+# What port should the proxy be bound to? By default, we'll bind to all addresses on port 25565.
+bind = "0.0.0.0:25565"
+
+# The MOTD shown in the server list when a player adds your server. Accepts a list of lines.
+# Supports the "{players}" placeholder (documented under "motd-hover") as well as the other
+# placeholders listed under "fallback-version-ping".
+motd = [
+    "<#ff3a4c>A Velocity-CTD Server"
+]
+
+# Shown when hovering over the player count in the server list. Accepts a list of lines, and
+# supports the same placeholders as "fallback-version-ping" plus the "{players}" placeholder.
+#
+# "{players}" lists online players. By default it shows a random selection, which is the Notchian
+# (vanilla) behavior. Setting motd-hover = ["{players}"] reproduces the vanilla player tooltip.
+# It accepts optional arguments written as "{players:arg=value:arg2=value}":
+# - max:        maximum number of players to list.
+# - maxPerLine: maximum number of players listed per line.
+# - ordering:   how players are picked and ordered. One of:
+#   - RANDOM:                a random selection (Notchian behavior).
+#   - ALPHABETICAL:          sorted A-Z by name.
+#   - ALPHABETICAL_REVERSED: sorted Z-A by name.
+#   - LAST_JOINED:           most recently joined players first.
+#   - FIRST_JOINED:          longest-connected players first.
+# - empty:      text shown when no players are online.
+# - prefix:     text inserted before each player name.
+# - separator:  text inserted between player names (trimmed at the end of each line).
+# Example: "{players:max=10:maxPerLine=2:ordering=ALPHABETICAL:separator=<gray>, }"
+motd-hover = [
+    "<gray>Players online: <white>{player-count}</white>/<white>{max-players}</white></gray>",
+    "{players}"
+]
+
+# What should we display for the maximum number of players? (Velocity does not support a cap
+# on the number of players online).
+show-max-players = 500
+
+# Should we authenticate players with Mojang? By default, this is on.
+online-mode = true
+
+# Whether chat signing should be enforced. If disabled, backend servers MUST disable chat signing.
+enforce-chat-signing = true
+
+# Should tell client that proxy doesn't report chat messages? (useful for NoChatReports mod).
+prevents-chat-reports = false
+
+# If false, disables processing of header and footer translations for better performance.
+translate-header-footer = true
+
+# If true, a message is pasted in console displaying whether a user joined on an unsupported version.
+# This corresponds with the "minimum-version", "maximum-version", and "modern-forwarding-needs-new-client" values.
+log-minimum-version = false
+
+# Modify the minimum version, so the proxy blocks out users on the wrong version, rather than the backend server.
+# Modern forwarding supports 1.13, at minimum. Set this to 1.13 or above if you are using modern forwarding.
+minimum-version = "1.7.2"
+
+# Modify the maximum version, so the proxy blocks out users on the wrong version, rather than the backend server.
+# Set to "unbounded" for no maximum version (default behavior).
+maximum-version = "unbounded"
+
+# Should the proxy enforce the new public key security standard? By default, this is on.
+force-key-authentication = true
+
+# If client's ISP/AS sent from this proxy is different from the one from Mojang's
+# authentication server, the player is kicked. This disallows some VPN and proxy
+# connections but is a weak form of protection.
+prevent-client-proxy-connections = false
+
+# Should we forward IP addresses and other data to backend servers?
+# Available options:
+# - "none":        No forwarding will be done. All players will appear to be connecting
+#                  from the proxy and will have offline-mode UUIDs.
+# - "legacy":      Forward player IPs and UUIDs in a BungeeCord-compatible format. Use this
+#                  if you run servers using Minecraft 1.12 or lower.
+# - "bungeeguard": Forward player IPs and UUIDs in a format supported by the BungeeGuard
+#                  plugin. Use this if you run servers using Minecraft 1.12 or lower, and are
+#                  unable to implement network level firewalling (on a shared host).
+# - "modern":      Forward player IPs and UUIDs as part of the login process using
+#                  Velocity's native forwarding. Only applicable for Minecraft 1.13 or higher.
+player-info-forwarding-mode = "none"
+
+# If you are using modern or BungeeGuard IP forwarding, configure a file that contains a unique secret here.
+# The file is expected to be UTF-8 encoded and not empty.
+forwarding-secret-file = "forwarding.secret"
+
+# Announce whether your server supports Forge. If you run a modded server, we
+# suggest turning this on.
+#
+# If your network runs one modpack consistently, consider using ping-passthrough = "mods"
+# instead for a nicer display in the server list.
+announce-forge = false
+
+# If true, disables handling of inbound Forge handshakes.
+disable-forge = false
+
+# If enabled (default is false), when a new connection arrives with the same UUID as an
+# already-online player, the existing session is kicked and the new connection is allowed in.
+# Works in both online and offline mode. In offline mode the UUID is derived from the username,
+# so enabling this without kick-existing-players-check-ip is unsafe (any client can claim any
+# username/UUID and displace the real player). It is recommended to set kick-existing-players-check-ip
+# to true when enabling kick-existing-players in offline mode.
+kick-existing-players = false
+
+# If enabled (default is false), kick-existing-players will only kick the existing session when
+# the new connection originates from the same IP address. A duplicate UUID from a different IP
+# is denied instead of displacing the existing player. This makes kick-existing-players safe for
+# offline mode by restricting it to reconnect-after-drop scenarios.
+# It is recommended to set kick-existing-players-check-ip to true when enabling kick-existing-players
+# in offline mode.
+kick-existing-players-check-ip = false
+
+# Should Velocity pass server list ping requests to a backend server?
+# Available options:
+# - "disabled":    No pass-through will be done. The velocity.toml and server-icon.png
+#                  will determine the initial server list ping response.
+# - "mods":        Passes only the mod list from your backend server into the response.
+#                  The first server in your try list (or forced host) with a mod list will be
+#                  used. If no backend servers can be contacted, Velocity won't display any
+#                  mod information.
+# - "description": Uses the description and mod list from the backend server. The first
+#                  server in the try (or forced host) list that responds is used for the
+#                  description and mod list.
+# - "all":         Uses the backend server's response as the proxy response. The Velocity
+#                  configuration is used if no servers could be contacted.
+ping-passthrough = "disabled"
+
+# If not enabled (default is true) player IP addresses will be replaced by <ip address withheld> in logs.
+enable-player-address-logging = true
+
+# If false, disables logging for offline player connections.
+log-offline-connections = true
+
+# Enables logging of player connections and by default, still displays
+# player disconnections and initial connections.
+log-player-connections = true
+
+# Enables logging of player disconnection and by default, still displays
+# player connections and initial connections.
+log-player-disconnections = true
+
+[commands]
+# Users often prefer to outright unregister the command instead of setting
+# the command's permission to false for users, as console overrides that priviledge.
+# We particularly exclude raw /velocity {ALL}, callback, and shutdown
+# to maintain functionality or because (for example) "/velocity uptime" does not
+# overlap with any other known commands in Velocity and should never be of concern.
+#
+# If you have aliases that override any of the commands on this list, those
+# plugin-based aliases (such as one overriding "/glist") will override that
+# or any other command, regardless if the command is set to "true" below.
+#
+# The values below are if you have no overrides for stated
+# commands and wish to fully strip them from your proxy.
+
+# Velocity Command Registration
+server-enabled = true
+glist-enabled = true
+send-enabled = true
+
+# Velocity-CTD Command Registration
+alert-enabled = true
+alertraw-enabled = true
+find-enabled = true
+hub-enabled = true
+ping-enabled = true
+plist-enabled = true
+transfer-enabled = true
+
+# Whether to use the default "/server" output, or whether to override it with the "velocity.command.server.usage" key.
+override-server-command-usage = false
+
+[packet-limiter]
+# Size of the moving time window in seconds used to calculate average rates.
+# A larger window tolerates short bursts while still enforcing the configured limits over time.
+interval = 7
+# Maximum average number of packets per second a client may send. -1 disables this check.
+packets-per-second = -1
+# Maximum average number of compressed (on-wire) bytes per second a client may send. -1 disables this check.
+bytes-per-second = -1
+# Maximum average number of decompressed bytes per second a client may send.
+# Protects against compression bomb attacks where small packets expand to excessive sizes after decompression.
+# -1 disables this check.
+decompressed-bytes-per-second = 5242880
+
+[servers]
+# Configure your servers here. Each key represents the server's name, and the value
+# represents the IP address of the server to connect to.
+lobby = "127.0.0.1:30066"
+factions  = { address = "127.0.0.1:30067", forwarding-mode = "modern", minimum-version = "1.13" }
+minigames = { address = "127.0.0.1:30068", forwarding-mode = "legacy", minimum-version = "1.7.2", maximum-version = "1.21.10" }
+
+# In what order, we should try servers when a player logs in or is kicked from a server.
+try = [
+    "lobby"
+]
+
+# Sends you to the first available fallback server, the least populated
+# fallback server, or the most populated fallback server.
+# Available options:
+# - "first_available": Acts like regular Velocity and sends the player to
+#                      the first available server on the fallbacks list.
+# - "least_populated": Sends the player to the fallback server
+#                      with the least number of players.
+# - "most_populated":  Sends the player to the fallback server
+#                      with the most number of players.
+dynamic-fallbacks-filter = "first_available"
+
+# The list of aliases for the "/server" command when the queue system is enabled.
+server-aliases = [
+    "joinqueue",
+    "queue"
+]
+
+[forced-hosts]
+# Configure your forced hosts here.
+# Each entry can be specified in two ways:
+#
+# Simple format (string or list of strings) - inherits the global dynamic-fallbacks-filter,
+# and uses the forced host as fallback by default:
+#   "lobby.example.com" = "lobby"
+#   "lobby.example.com" = ["lobby1", "lobby2"]
+#
+# Table format - allows setting per-host options:
+#   "lobby.example.com" = { servers = ["lobby1", "lobby2"], dynamic-fallbacks-filter = "least_populated", forced-host-as-fallback = true }
+#
+"lobby.example.com" = [
+    "lobby"
+]
+"factions.example.com" = [
+    "factions"
+]
+# "minigames.example.com" = { servers = ["minigames-limbo", "minigames-1", "minigames-2"], dynamic-fallbacks-filter = "first_available", forced-host-as-fallback = true }
+
+[command-aliases]
+# What commands should have aliases for simpler execution that
+# do not already have a more advanced function or implementation.
+hub = [
+    "lobby",
+    "return"
+]
+
+[proxy-command-aliases]
+# Proxy command aliases create new commands that execute other commands when invoked.
+# This is similar to Bukkit's commands.yml functionality.
+#
+# Adding multiple aliases executes multiple commands.
+examplealias = [
+    "velocityctd info"
+]
+
+[advanced]
+# How large a Minecraft packet has to be before we compress it. Setting this to zero will
+# compress all packets, and setting it to -1 will disable compression entirely.
+compression-threshold = 256
+
+# How much compression should be done (from 0-9). The default is -1, which uses the
+# default level of 6.
+compression-level = -1
+
+# How fast (in milliseconds) are clients allowed to connect after the last connection? By
+# default, this is three seconds. Disable this by setting this to 0.
+login-ratelimit = 3000
+
+# Specify a custom timeout for connection timeouts here. The default is five seconds.
+connection-timeout = 5000
+
+# Specify a read timeout for connections here. The default is 25 seconds.
+read-timeout = 25000
+
+# How long (in milliseconds) to wait for a backend to complete login before giving up and moving
+# the player on through the fallback chain. Unlike read-timeout this only bounds connection
+# establishment, so it can be kept short for fast failover. The default is 6 seconds.
+login-timeout = 6000
+
+# Enables compatibility with HAProxy's PROXY protocol. If you don't know what this is for, then
+# don't enable it.
+haproxy-protocol = false
+
+# Enables TCP fast open support on the proxy. Requires the proxy to run on Linux.
+tcp-fast-open = false
+
+# Enables BungeeCord plugin messaging channel support on Velocity.
+bungee-plugin-message-channel = true
+
+# Shows ping requests to the proxy from clients.
+show-ping-requests = false
+
+# By default, Velocity will attempt to gracefully handle situations where the user unexpectedly
+# loses connection to the server without an explicit disconnect message by attempting to fall the
+# user back, except in the case of read timeouts. BungeeCord will disconnect the user instead. You
+# can disable this setting to use the BungeeCord behavior.
+failover-on-unexpected-server-disconnect = true
+
+# Declares the proxy commands to 1.13+ clients.
+announce-proxy-commands = true
+
+# Enables the logging of commands.
+log-command-executions = false
+
+# Allows players transferred from other hosts via the
+# Transfer packet (Minecraft 1.20.5) to be received.
+accepts-transfers = false
+
+# Enables support for SO_REUSEPORT. This may help the proxy scale better on multicore systems
+# with a lot of incoming connections, and provide better CPU utilization than the existing
+# strategy of having a single thread accepting connections and distributing them to worker
+# threads. Disabled by default. Requires Linux or macOS.
+enable-reuse-port = false
+
+# How fast (in milliseconds) are clients allowed to send commands after the last command
+# By default this is 50ms (20 commands per second).
+command-rate-limit = 50
+
+# Should we forward 'commands' to the backend upon being rate limited?
+# This will forward the command to the server instead of processing it on the proxy.
+# Since most server implementations have a rate limit, this will prevent the player
+# from being able to send excessive commands to the server.
+forward-commands-if-rate-limited = true
+
+# How many commands are allowed to be sent after the rate limit is hit before the player is kicked?
+# Setting this to 0 or lower will disable this feature.
+kick-after-rate-limited-commands = 0
+
+# How fast (in milliseconds) are clients allowed to send tab completions after the last tab completion.
+tab-complete-rate-limit = 10
+
+# How many tab completions are allowed to be sent after the rate limit is hit before the player is kicked?
+# Setting this to 0 or lower will disable this feature.
+kick-after-rate-limited-tab-completes = 0
+
+# Enables the execution of illegal characters in chat and only allows
+# or denies illegal characters that are executed through the proxy.
+allow-illegal-characters-in-chat = false
+
+# Modifies the server brand that displays in your debug menu.
+# Available options:
+# - "{protocol-min}":          Returns the lowest compatible version from the
+#                              minimum-version key within this configuration.
+# - "{protocol-max}":          Returns the highest compatible version from the
+#                              ProtocolVersion class within Velocity's code.
+# - "{protocol}":              Returns the lowest, highest compatible version from the
+#                              ProtocolVersion class within Velocity's code.
+#                              E.g., if a protocol shares two versions, it will output
+#                              the lowest version from the list.
+# - "{backend-brand}"          Returns the brand of the server you are connected to. E.g.,
+#                              "Paper," "Pufferfish," or "Purpur" would be valid brands.
+# - "{backend-brand-custom}":  Returns your custom proxy brand defined as "custom-brand-backend" in this
+#                              configuration to maintain brand reformatting for internal pingers. To use
+#                              this configuration option, replace "{backend-brand}" with "{backend-brand-custom}."
+# - "{proxy-brand}":           Returns the proxy brand from Velocity, which is
+#                              used to identify the name of the project or proxy.
+# - "{proxy-brand-custom}":    Returns your custom proxy brand defined as "custom-brand-proxy" in this
+#                              configuration to maintain brand reformatting from external pingers. To use
+#                              this configuration option, replace "{proxy-brand}" with "{proxy-brand-custom}."
+# - "{proxy-version}":         Returns the version of your proxy and git-hash that your
+#                              proxy is currently on. Build numbers in regular Velocity
+#                              would be shown with this specific assignment.
+# - "{proxy-vendor}":          Returns the group or association (vendor) of your proxy
+#                              that by default would display "Velocity Contributors."
+# - "{server-connected}":      Returns the name of the server that you are connected
+#                              to of your proxy with case-sensitivity."
+server-brand = "{backend-brand} ({proxy-brand})"
+
+# Replaces what is returned for both the server brand and fallback version pinger.
+custom-brand-proxy = "Velocity-CTD"
+
+# Replaces what is returned as the server brand for the user's client.
+custom-brand-backend = "Paper"
+
+# Modifies the brand and server version that displays in the multiplayer menu and status pingers.
+# Available options:
+# - "{protocol-min}":          Returns the lowest compatible version from the
+#                              minimum-version key within this configuration.
+# - "{protocol-max}":          Returns the highest compatible version from the
+#                              ProtocolVersion class within Velocity's code.
+# - "{protocol}":              Returns the lowest, highest compatible version from the
+#                              ProtocolVersion class within Velocity's code.
+#                              E.g., if a protocol shares two versions, it will output
+#                              the lowest version from the list.
+# - "{proxy-brand}":           Returns the proxy brand from Velocity's Implementation-Title,
+#                              which is used to identify the name of the project or proxy.
+# - "{proxy-brand-custom}":    Returns your custom proxy brand defined as "custom-brand-proxy" in this
+#                              configuration to maintain brand reformatting from external pingers. To use
+#                              this configuration option, replace "{proxy-brand}" with "{proxy-brand-custom}."
+# - "{proxy-version}":         Returns the version of your proxy and git-hash that your
+#                              proxy is currently on. Build numbers in regular Velocity
+#                              would be shown with this specific assignment.
+# - "{proxy-vendor}":          Returns the group or association (vendor) of your proxy
+#                              that by default would display "Velocity Contributors."
+# - "{player-count}":          Returns the total number of players connected to
+#                              the proxy or to all available proxies on Redis.
+# - "{max-players}":           Returns the total number of players that displays
+#                              to the proxy or to all available proxies on Redis.
+# These placeholders are also available in "motd" and "motd-hover". The "{players}" placeholder
+# (documented under "motd-hover") may be used here as well.
+fallback-version-ping = "{proxy-brand} {protocol-min}-{protocol-max}"
+
+# Instead of "fallback-version-ping" exclusively returning when the
+# user is on an unsupported version, it is returned regardless of their
+# version and can be used to customize the player count/max line freely.
+always-fallback-ping = false
+
+# When a player disables "Allow Server Listings" in their client options, they are shown as
+# "Anonymous Player" in the {players} sample of the server list ping. Set this to true to ignore
+# that request and always show their real username.
+ignore-anonymous-player-request = false
+
+# Whether the {players} sample of the motd, motd-hover and fallback-version-ping should draw from a
+# single shared pool. When true, a player never appears more than once across those three sections.
+# When false (default), each section samples players independently and the same player may appear in
+# more than one section.
+pool-players-across-sections = false
+
+[slash-servers]
+# Defines "/<name>" aliases for servers - here "/faction" and "/factions" would both send you to the server named
+# "factions", for example.
+factions = [
+    "faction",
+    "factions"
+]
+minigames = [
+    "minigames",
+    "arcade"
+]
+
+[query]
+# Whether to enable responding to GameSpy 4 query responses or not.
+enabled = false
+
+# If query is enabled, on what port should the query protocol listen on?
+port = 25565
+
+# This is the map name reported to the query services.
+map = "Velocity-CTD"
+
+# Whether plugins should be shown in query response by default or not.
+show-plugins = false
+
+[redis]
+# Should Redis be used to communicate between multiple Velocity proxies?
+enabled = false
+
+# What address, port, and other credentials should be used to link all Velocity functions to Redis?
+# Leave the username blank if you do not have a defined username for your Redis database.
+host = "127.0.0.1"
+port = 6379
+username = ""
+password = ""
+use-ssl = false
+
+# The ID of this proxy and is only needed for multi-proxy setups.
+# Leave blank if you do not use Redis and is left blank by
+# default to ensure you assign a qualitative proxy ID.
+#
+# Your server will not start if this is blank and Redis is on.
+proxy-id = ""
+
+[queue]
+# Whether the queue system is enabled. This will fully unregister
+# all permissions, commands, and this feature as a whole.
+enabled = false
+
+# The list of IDs of the proxy (in order of priority) that should handle and maintain the queue. only necessary in multi-proxy setup, leave blank otherwise.
+# Always attempts to use the first ID first, if the proxy isn't available, it'll use the next in the list.
+#
+# Needs to be a list of the "proxy-id"'s of the proxies connected to the network.
+master-proxy-ids = [
+    ""
+]
+
+# The list of aliases for the "/leavequeue" command. The command will not be registered if this list is empty.
+leave-queue-aliases = [
+    "leavequeue",
+    "dequeue"
+]
+
+# The list of aliases for the "/queueadmin" command. The command will not be registered if this list is empty.
+queue-admin-aliases = [
+    "queueadmin",
+    "qadmin"
+]
+
+# The list of servers that should not have the queue system enabled.
+no-queue-servers = [
+    "lobby"
+]
+
+# If the disconnect reason contains any part of this filter, it will remove the player from the queue immediately.
+# This is case-sensitive for customization purposes and for exclusivity of each message.
+banned-reason = [
+    "banned"
+]
+
+# Whether the user should be capable of entering multiple queues at once.
+allow-multi-queue = false
+
+# How long the queue system should wait before sending each user to a server (in seconds).
+send-delay = 1.0
+
+# How long should the queue wait before resuming the sending of players to servers after the backend server is back online.
+queue-delay = 0.0
+
+# How long the queue system should wait before updating or sending a new action bar, chat message, or title/subtitle.
+message-delay = 1.0
+
+# How often to ping backend servers to check if they're online.
+backend-ping-interval = 5.0
+
+# The number tries should a user be sent to a server before it removes the user from a queue.
+max-send-retries = 10
+
+# Whether players slowly gain extra "effective" priority the longer they wait in a queue,
+# so that low-priority players cannot be starved forever by higher-priority joiners.
+# Only affects the order players are sent in; the configured velocity.queue.priority.<n>
+# permission value is never changed.
+dynamic-priority = false
+
+# How many minutes a player must wait in a queue to gain +1 effective priority.
+minutes-per-priority-increase = 30
+
+# The cap on effective priority gained from waiting. Players whose configured priority is
+# already at or above this value always keep their configured priority, so staff with e.g.
+# priority 100 stay ahead of everyone aged up to 99.
+max-dynamic-priority = 99
+
+# Whether the player should be removed from their previous queue when switching servers.
+remove-player-on-server-switch = true
+
+# The server that players will be moved to when they enter ANY queue.
+# When a player queues for any server, they will be automatically sent to this server.
+# While in a queue and on this server, any server switch attempts will be blocked unless
+# the player has the velocity.queue.server-switch.bypass permission.
+# This is mutually exclusive with auto-queue-servers. Leave empty to disable.
+queue-server = ""
+
+# The server queue(s) a player is automatically entered into on their first proxy join.
+# Can be configured as a single string or a list of strings.
+# Examples:
+#   queue-on-join = "factions"
+#   queue-on-join = ["factions1", "factions2"]
+queue-on-join = []
+
+# Whether users can enter a queue that is paused.
+allow-paused-queue-joining = false
+
+# Whether users should be automatically added back to the queue of their previously connected server.
+# By default, the user is re-added to the queue and must wait their queue duration before being
+# re-sent to their previous destination.
+queue-on-shutdown = true
+
+# If true, players that are sent via the BungeeCord Messaging channels are queued if the server has queueing enabled.
+# If false, they will bypass the queue and be sent directly to the backend.
+override-bungee-messaging = true
+
+[queue.auto-queue-servers]
+# The list of servers that should auto-queue players on join.
+# When a player joins the server on the left, it will enqueue them to the server(s) to the right.
+# If allow-multi-queue is disabled and multiple servers are configured, only the first server will be chosen.
+"minigames-limbo" = [
+    "minigames1",
+    "minigames2"
+]
+
+"factions-limbo" = "factions"
+
+[playercaps]
+# This allows you to define the maximum amount of players that can be on any
+# of the defined servers below. This player cap is artifical, meaning it
+# only exists to ensure players are not removed when they reach the front
+# of the queue.
+factions = 300
+minigames = 300
+
+[server-links]
+# This allows you to implement server links into the escape menu that
+# ensures users on versions 1.21 and above can easily find relevant
+# information about your Velocity network.
+#
+# Available options:
+# - "all":              Returns the server link to all
+#                       the servers on the proxy.
+# - "{server_name}":    Returns the server link to a specific server on the proxy and
+#                       is not a placeholder. Enter a valid server in the scope.
+
+[server-links.GitHub]
+link = "https://github.com/GemstoneGG/Velocity-CTD"
+label = "<#ff3a4c>GitHub"
+server = [
+    "all"
+]
+
+[server-links.Discord]
+link = "https://discord.gg/beer"
+label = "<#09add3>Discord"
+server = [
+    "factions",
+    "minigames"
+]
+
+[proxy-addresses]
+# Proxy addresses are specified to ensure that the player
+# can be transferred using the "/transfer" command and
+# does not require Redis to be activated for use.
+# The proxy IP must be reachable by the clients (do not use the internal IP).
+
+# This allows you to specify whether you would like your players
+# to be sent to no fallback proxy, the most empty fallback proxy,
+# the least empty fallback proxy, or the first found fallback proxy.
+# Available options:
+# - "first_found": Sends the player to the first available
+#                  proxy from the "master-proxy-ids" list.
+# - "most_empty":  Sends the player to the fallback proxy
+#                  with the least number of players.
+# - "least_empty": Sends the player to the fallback proxy
+#                  with the most number of players.
+# - "none":        Fully kicks the player from the entirety
+#                  of the network and is not sent anywhere.
+dynamic-proxy-filter = "most_empty"
+
+[proxy-addresses.Proxy-1]
+proxy-id = "Proxy-1"
+ip = "203.0.113.50"
+port = 25565
+
+[proxy-addresses.Proxy-2]
+proxy-id = "Proxy-2"
+ip = "203.0.113.60"
+port = 25566

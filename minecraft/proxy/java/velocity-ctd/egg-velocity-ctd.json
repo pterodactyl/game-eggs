@@ -1,0 +1,71 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-07-10T19:22:00+02:00",
+    "name": "Velocity-CTD",
+    "author": "hello@davlooo.it",
+    "description": "Velocity-CTD is a fork of Velocity, a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+    "features": [
+        "eula",
+        "java_version",
+        "pid_limit"
+    ],
+    "docker_images": {
+        "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+        "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+        "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+        "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+        "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+        "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+    },
+    "file_denylist": [],
+    "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar {{SERVER_JARFILE}}",
+    "config": {
+        "files": "{\r\n    \"velocity.toml\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"bind = \\\"0.0.0.0:25565\\\"\": \"bind = \\\"0.0.0.0:{{server.build.default.port}}\\\"\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Done (\"\r\n}",
+        "logs": "{}",
+        "stop": "end"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\r\n# Velocity-CTD Proxy Installation Script\r\n# Server Files: /mnt/server\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n    echo -e \"Using supplied download url: ${DL_PATH}\"\r\n    DOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n    if [ -z \"${VELOCITY_CTD_VERSION}\" ] || [ \"${VELOCITY_CTD_VERSION}\" = \"latest\" ]; then\r\n        API_URL=\"https://api.github.com/repos/GemstoneGG/Velocity-CTD/releases/latest\"\r\n    else\r\n        API_URL=\"https://api.github.com/repos/GemstoneGG/Velocity-CTD/releases/tags/${VELOCITY_CTD_VERSION}\"\r\n    fi\r\n\r\n    DOWNLOAD_URL=$(curl -sL \"$API_URL\" | jq -r '.assets[]?.browser_download_url' | grep -E 'all\\.jar$' | head -n 1)\r\n\r\n    if [ -z \"$DOWNLOAD_URL\" ] || [ \"$DOWNLOAD_URL\" = \"null\" ]; then\r\n        echo -e \"Failed to find a valid Velocity-CTD release jar.\"\r\n        exit 1\r\n    fi\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -L -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f \"${SERVER_JARFILE}\" ]; then\r\n    mv \"${SERVER_JARFILE}\" \"${SERVER_JARFILE}.old\"\r\nfi\r\n\r\ncurl -L -o \"${SERVER_JARFILE}\" \"${DOWNLOAD_URL}\"\r\n\r\nif [ -f velocity.toml ]; then\r\n    echo -e \"velocity config file exists\"\r\nelse\r\n    echo -e \"downloading velocity-ctd config file\"\r\n    curl -L https://raw.githubusercontent.com/pterodactyl/game-eggs/main/minecraft/proxy/java/velocity-ctd/velocity.toml -o velocity.toml\r\nfi\r\n\r\nif [ ! -f forwarding.secret ]; then\r\n    echo -e \"creating forwarding secret file\"\r\n    touch forwarding.secret\r\n    date +%s | sha256sum | base64 | head -c 12 > forwarding.secret\r\nelse\r\n    echo -e \"velocity forwarding secret file already exists\"\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Velocity-CTD Version",
+            "description": "The Velocity-CTD release tag to download. Set to 'latest' to download the latest stable release.",
+            "env_variable": "VELOCITY_CTD_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Jar File",
+            "description": "Server Jarfile, by default this is set to 'velocity-ctd.jar'. Set it differently if you want another jar name.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "velocity-ctd.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+        },
+        {
+            "name": "Download Path",
+            "description": "A URL to use to download a server jar rather than the release detected by the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+        }
+    ]
+}
