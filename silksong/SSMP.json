@@ -1,0 +1,31 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2025-05-03T00:00:00+00:00",
+    "name": "Silksong Multiplayer (SSMP)",
+    "author": "twangymoney@gmail.com",
+    "description": "Hollow Knight: Silksong Multiplayer Server",
+    "features": null,
+    "docker_images": {
+        ".NET 9": "ghcr.io/ptero-eggs/yolks:dotnet_9"
+    },
+    "file_denylist": [],
+    "startup": ".\/SSMPServer {{SERVER_PORT}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n    \"done\": \"Server started\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\napk add --no-cache curl unzip jq\n\nmkdir -p /mnt/server\ncd /mnt/server\n\necho \"Getting latest release URL...\"\nDOWNLOAD_URL=$(curl -s https://api.github.com/repos/Extremelyd1/SSMP/releases/latest | jq -r '.assets[] | select(.name == \"SSMPServer-linux.zip\") | .browser_download_url')\n\necho \"Downloading from: ${DOWNLOAD_URL}\"\ncurl -L -o SSMPServer-linux.zip \"${DOWNLOAD_URL}\"\n\necho \"Extracting files...\"\nunzip -o SSMPServer-linux.zip\nrm SSMPServer-linux.zip\n\necho \"Listing files:\"\nls -la\n\necho \"Setting permissions...\"\nchmod +x SSMPServer\n\necho \"Installation complete!\"",
+            "container": "alpine:3.19",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": []
+}
