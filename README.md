@@ -20,7 +20,9 @@ Below is a categorized list of games with links to their respective server confi
 
 #### ARK
 * [Survival Ascended](./ark_survival_ascended)
+* [Survival Ascended (Cluster)](./ark_survival_ascended_cluster)
 * [Survival Evolved](./ark_survival_evolved)
+* [Survival Evolved (Cluster)](./ark_survival_evolved_cluster)
 
 #### Arma
 * [Arma 3](./arma/arma3)
